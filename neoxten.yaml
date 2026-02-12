@@ -1,0 +1,41 @@
+# NeoXten Automation Framework - Example Config
+# Copy and adapt for your project
+
+project:
+  type: tauri
+  root: .
+  tauri:
+    strategy: harness
+    devCommand: npm run tauri:dev
+    devCwd: ui
+    devUrl: http://localhost:1420
+
+flows:
+  - name: app_loads
+    steps:
+      - action: wait
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: ".assistant-view, .main-area"
+        timeout: 10000
+
+assistant:
+  enabled: true
+  type: in_app
+  inferenceAccounting:
+    expectedBackendInvocations: 1
+    expectedLlamaSpawns: 1
+
+gates:
+  startupMaxMs: 60000
+  spinnerMaxMs: 10000
+  noConsoleErrors: true
+  assistantLatencyP95MaxMs: 120000
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true
+  backendLog: true

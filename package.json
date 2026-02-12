@@ -1,0 +1,32 @@
+{
+  "name": "neoxten-automation-framework",
+  "version": "1.0.0",
+  "description": "Production-ready automation framework for Tauri, Next.js, and browser extension projects",
+  "type": "module",
+  "bin": {
+    "neoxten": "./dist/cli/index.js"
+  },
+  "main": "./dist/core/orchestrator.js",
+  "scripts": {
+    "postinstall": "node node_modules/playwright-core/cli.js install chromium",
+    "build": "npx tsc",
+    "dev": "tsc --watch",
+    "run": "node dist/cli/index.js run",
+    "test": "node dist/cli/index.js run --config ./neoxten.yaml"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.49.0",
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0",
+    "playwright": "^1.49.0",
+    "uuid": "^10.0.0",
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

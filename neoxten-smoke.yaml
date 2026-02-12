@@ -1,0 +1,20 @@
+# Smoke test - uses Playwright against a public URL (no project launch)
+project:
+  type: web
+  root: .
+  web:
+    url: https://example.com
+
+flows:
+  - name: smoke
+    steps:
+      - action: assert
+        type: visible
+        selector: h1
+        timeout: 10000
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 30000
