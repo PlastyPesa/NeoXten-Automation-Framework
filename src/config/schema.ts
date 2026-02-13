@@ -17,7 +17,10 @@ export const FlowSchema = z.object({
 export const TauriProjectSchema = z.object({
   binary: z.string().optional(),
   strategy: z.enum(['webdriver', 'cdp', 'harness']).default('harness'),
+  /** Full Tauri dev command (used by CDP strategy). */
   devCommand: z.string().default('npm run tauri:dev'),
+  /** Frontend-only dev command (used by harness strategy). Defaults to 'npm run dev'. */
+  harnessCommand: z.string().default('npm run dev'),
   devCwd: z.string().optional(),
   devUrl: z.string().default('http://localhost:1420'),
   cdpPort: z.number().default(9222),

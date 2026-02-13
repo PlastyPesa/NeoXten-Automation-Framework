@@ -1,3 +1,9 @@
+/**
+ * Orchestrator — session-based automation runner.
+ *
+ * Internally uses Session + PageObserver + EvidenceCollector.
+ * The public run() contract is backward-compatible: same options, same verdict.
+ */
 import { resolve } from 'path';
 import { generateRunId } from '../utils/run-id.js';
 import { buildVerdict, type Verdict } from './verdict.js';
@@ -12,6 +18,8 @@ import type { UIDriver } from '../drivers/base.js';
 import { TauriAdapter } from '../adapters/tauri.js';
 import { NextJsAdapter } from '../adapters/nextjs.js';
 import { WebAdapter } from '../adapters/web.js';
+import { PageObserver } from '../observer/index.js';
+import { EvidenceCollector } from '../evidence/collector.js';
 
 const DEFAULT_OUT_DIR = '.neoxten-out';
 
@@ -28,6 +36,10 @@ function getAdapter(config: NeoxtenConfig) {
   }
 }
 
+/* ------------------------------------------------------------------ */
+/*  Public contract (unchanged)                                        */
+/* ------------------------------------------------------------------ */
+
 export interface RunOptions {
   configPath: string;
   outDir?: string;
@@ -41,13 +53,17 @@ export interface RunResult {
   artifacts: ArtifactPaths;
 }
 
+/* ------------------------------------------------------------------ */
+/*  run()                                                              */
+/* ------------------------------------------------------------------ */
+
 export async function run(options: RunOptions): Promise<RunResult> {
   const config = loadConfig(options.configPath);
   const runId = generateRunId();
   const outDir = resolve(process.cwd(), options.outDir ?? DEFAULT_OUT_DIR);
   const artifacts = createArtifactDirs(outDir, runId);
 
-  const gates = config.gates ?? {};
+  /* Gate defaults */
   const gateDefaults: GatesConfig = {
     startupMaxMs: 30000,
     spinnerMaxMs: 5000,
@@ -59,38 +75,71 @@ export async function run(options: RunOptions): Promise<RunResult> {
     assistantReliabilityRuns: 1,
     oneSendOneInference: true,
   };
-  const mergedGates = { ...gateDefaults, ...gates };
+  const mergedGates = { ...gateDefaults, ...(config.gates ?? {}) };
 
   let driver: UIDriver | null = null;
+  let observer: PageObserver | null = null;
+  const evidence = new EvidenceCollector();
   const logExcerpts: string[] = [];
   const sourceHints: string[] = [];
 
+  /** Write evidence timeline — called before every exit path. */
+  const writeEvidence = () => {
+    try {
+      writeJson(resolve(artifacts.runDir, 'evidence-timeline.json'), evidence.summarize().timeline);
+    } catch { /* best effort */ }
+  };
+
   const addLog = (msg: string) => {
     logExcerpts.push(msg);
+    evidence.addNote(msg);
     appendLog(artifacts.consoleLog, `[${new Date().toISOString()}] ${msg}`);
   };
 
   try {
+    /* ---- Launch ---- */
     const adapter = getAdapter(config);
-    driver = adapter.createDriver(config);
+    driver = adapter.createDriver(config, options.configPath);
 
+    evidence.stageStart('launch');
     addLog(`Launching project (${config.project.type})...`);
     const launchStart = Date.now();
     await driver.launch();
     const startupMs = Date.now() - launchStart;
+    evidence.stageEnd('launch', startupMs);
     addLog(`Launched in ${startupMs}ms`);
 
+    /* ---- Attach observer ---- */
     const page = driver.getPage();
+    observer = new PageObserver(page);
+    observer.attach();
 
+    /* ---- Initial observation ---- */
+    const initialSnapshot = await observer.observe();
+    evidence.addObservation(initialSnapshot, 'initial');
+    addLog(`Initial screen: ${initialSnapshot.title || initialSnapshot.url}`);
+    if (initialSnapshot.hasSpinner) addLog('Spinner detected on initial load');
+    if (initialSnapshot.hasModal) addLog('Modal detected on initial load');
+
+    /* ---- Flows ---- */
     if (config.flows.length > 0) {
+      evidence.stageStart('flows');
       for (const flow of config.flows) {
         addLog(`Executing flow: ${flow.name}`);
         const flowResult = await executeFlow(driver, flow);
         if (!flowResult.passed) {
-          await driver.captureScreenshot(resolve(artifacts.screenshots, `step-${flowResult.failedStepIndex}-fail.png`));
+          const failScreenshot = resolve(artifacts.screenshots, `step-${flowResult.failedStepIndex}-fail.png`);
+          await driver.captureScreenshot(failScreenshot);
+          evidence.addScreenshot(failScreenshot, `flow-${flow.name}-step-${flowResult.failedStepIndex}-fail`);
+
+          /* Observe the failure state */
+          const failSnapshot = await observer.observe();
+          evidence.addObservation(failSnapshot, `flow-fail: ${flow.name}`);
+
           if (driver.captureTrace) {
             await driver.captureTrace(artifacts.trace);
           }
+
           const verdict = buildVerdict({
             verdict: 'FAIL',
             exitCode: 1,
@@ -103,7 +152,7 @@ export async function run(options: RunOptions): Promise<RunResult> {
             artifactPaths: {
               verdict: artifacts.verdict,
               trace: artifacts.trace,
-              screenshots: [resolve(artifacts.screenshots, `step-${flowResult.failedStepIndex}-fail.png`)],
+              screenshots: [failScreenshot],
               consoleLog: artifacts.consoleLog,
             },
             logExcerpts: [...logExcerpts, flowResult.error ?? 'Flow step failed'],
@@ -111,18 +160,22 @@ export async function run(options: RunOptions): Promise<RunResult> {
             reproducibleCommand: `neoxten run --config ${options.configPath}`,
           });
           writeJson(artifacts.verdict, verdict);
+          writeEvidence();
           await driver.close();
           return { verdict, artifacts };
         }
       }
+      evidence.stageEnd('flows', Date.now() - launchStart);
       addLog('All flows passed');
     }
 
+    /* ---- Assistant testing ---- */
     let assistantMetrics: { p95Ms?: number; latencySamples: number[] } | null = null;
     let inferenceAccounting: Verdict['inferenceAccounting'];
     const accounting = config.assistant?.inferenceAccounting;
 
     if (config.assistant?.enabled && config.project.type === 'tauri') {
+      evidence.stageStart('assistant-in-app');
       addLog('Running assistant in-app test...');
       const result = await testAssistantInApp(page, 'Hello', {
         inputSelector: '[data-testid="assistant-input"], textarea.message-input',
@@ -149,6 +202,7 @@ export async function run(options: RunOptions): Promise<RunResult> {
           callCounts: parsed.callCounts,
         };
       }
+      evidence.stageEnd('assistant-in-app', result.latencyMs ?? 0);
     }
 
     if (config.assistant?.enabled && config.assistant.type === 'http' && config.assistant.endpoint) {
@@ -156,7 +210,7 @@ export async function run(options: RunOptions): Promise<RunResult> {
       const metrics = await testAssistantHttp(
         config.assistant.tests ?? [],
         config.assistant.endpoint,
-        config.assistant.inferenceAccounting
+        config.assistant.inferenceAccounting,
       );
       assistantMetrics = metrics;
       writeJson(artifacts.assistantMetrics, metrics);
@@ -164,7 +218,13 @@ export async function run(options: RunOptions): Promise<RunResult> {
       writeJson(artifacts.assistantMetrics, assistantMetrics);
     }
 
-    const consoleErrors = driver.getConsoleErrors();
+    /* ---- Gates ---- */
+    evidence.stageStart('gates');
+    const consoleErrors = observer.getConsoleErrors();
+    if (consoleErrors.length > 0) {
+      consoleErrors.forEach((e) => evidence.addConsoleError(e));
+    }
+
     const gateContext: GateContext = {
       startupMs,
       consoleErrors: consoleErrors.length,
@@ -180,6 +240,9 @@ export async function run(options: RunOptions): Promise<RunResult> {
     };
 
     const gateResults = evaluateGates(mergedGates, gateContext);
+    gateResults.forEach((g) => evidence.addGateResult(g.name, g.passed, g.measured, g.threshold));
+    evidence.stageEnd('gates', 0);
+
     const failedGate = gateResults.find((g) => !g.passed);
 
     if (failedGate) {
@@ -189,7 +252,10 @@ export async function run(options: RunOptions): Promise<RunResult> {
         measured[g.name] = g.measured;
         thresholds[g.name] = g.threshold;
       });
-      await driver.captureScreenshot(resolve(artifacts.screenshots, 'gate-fail.png'));
+      const gateFailScreenshot = resolve(artifacts.screenshots, 'gate-fail.png');
+      await driver.captureScreenshot(gateFailScreenshot);
+      evidence.addScreenshot(gateFailScreenshot, 'gate-fail');
+
       if (driver.captureTrace) await driver.captureTrace(artifacts.trace);
       const verdict = buildVerdict({
         verdict: 'FAIL',
@@ -203,7 +269,7 @@ export async function run(options: RunOptions): Promise<RunResult> {
         artifactPaths: {
           verdict: artifacts.verdict,
           trace: artifacts.trace,
-          screenshots: [resolve(artifacts.screenshots, 'gate-fail.png')],
+          screenshots: [gateFailScreenshot],
           consoleLog: artifacts.consoleLog,
           assistantMetrics: artifacts.assistantMetrics,
         },
@@ -213,12 +279,16 @@ export async function run(options: RunOptions): Promise<RunResult> {
         inferenceAccounting,
       });
       writeJson(artifacts.verdict, verdict);
+      writeEvidence();
       await driver.close();
       return { verdict, artifacts };
     }
 
+    /* ---- Success ---- */
+    const finalScreenshot = resolve(artifacts.screenshots, 'final.png');
     if (config.artifacts?.screenshotFinal) {
-      await driver.captureScreenshot(resolve(artifacts.screenshots, 'final.png'));
+      await driver.captureScreenshot(finalScreenshot);
+      evidence.addScreenshot(finalScreenshot, 'final');
     }
     if (driver.captureTrace) {
       try {
@@ -234,30 +304,46 @@ export async function run(options: RunOptions): Promise<RunResult> {
       verdict: 'PASS',
       exitCode: 0,
       runId,
-        failingStage: null,
-        failingFlow: null,
-        failingStep: 0,
-        measured: { startup_ms: startupMs },
-        thresholds: { startup_ms: mergedGates.startupMaxMs ?? 30000 },
-        artifactPaths: {
-          verdict: artifacts.verdict,
-          trace: artifacts.trace,
-          screenshots: [resolve(artifacts.screenshots, 'final.png')],
-          consoleLog: artifacts.consoleLog,
-          assistantMetrics: artifacts.assistantMetrics,
-          performance: artifacts.performance,
-        },
-        logExcerpts,
-        sourceHints,
-        reproducibleCommand: `neoxten run --config ${options.configPath}`,
-        inferenceAccounting,
+      failingStage: null,
+      failingFlow: null,
+      failingStep: 0,
+      measured: { startup_ms: startupMs },
+      thresholds: { startup_ms: mergedGates.startupMaxMs ?? 30000 },
+      artifactPaths: {
+        verdict: artifacts.verdict,
+        trace: artifacts.trace,
+        screenshots: [finalScreenshot],
+        consoleLog: artifacts.consoleLog,
+        assistantMetrics: artifacts.assistantMetrics,
+        performance: artifacts.performance,
+      },
+      logExcerpts,
+      sourceHints,
+      reproducibleCommand: `neoxten run --config ${options.configPath}`,
+      inferenceAccounting,
     });
     writeJson(artifacts.verdict, verdict);
+    writeEvidence();
     await driver.close();
     return { verdict, artifacts };
   } catch (e) {
     const err = e instanceof Error ? e : new Error(String(e));
     addLog(`Infrastructure failure: ${err.message}`);
+
+    /* Best-effort: capture crash screenshot + console state */
+    const crashScreenshots: string[] = [];
+    if (driver) {
+      try {
+        const crashPath = resolve(artifacts.screenshots, 'crash.png');
+        await driver.captureScreenshot(crashPath);
+        evidence.addScreenshot(crashPath, 'crash');
+        crashScreenshots.push(crashPath);
+      } catch { /* page may be gone */ }
+    }
+    if (observer) {
+      observer.getConsoleErrors().forEach((ce) => evidence.addConsoleError(ce));
+    }
+
     const verdict = buildVerdict({
       verdict: 'FAIL',
       exitCode: 2,
@@ -268,8 +354,15 @@ export async function run(options: RunOptions): Promise<RunResult> {
       logExcerpts,
       sourceHints,
       reproducibleCommand: `neoxten run --config ${options.configPath}`,
+      artifactPaths: {
+        verdict: artifacts.verdict,
+        consoleLog: artifacts.consoleLog,
+        trace: artifacts.trace,
+        screenshots: crashScreenshots.length > 0 ? crashScreenshots : artifacts.screenshots,
+      },
     });
     writeJson(artifacts.verdict, verdict);
+    writeEvidence();
     if (driver) await driver.close().catch(() => {});
     return { verdict, artifacts };
   }

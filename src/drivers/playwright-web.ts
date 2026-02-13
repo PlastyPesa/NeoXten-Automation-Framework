@@ -10,11 +10,11 @@ export interface PlaywrightWebOptions {
 }
 
 export class PlaywrightWebDriver implements UIDriver {
-  private browser: Browser | null = null;
-  private context: BrowserContext | null = null;
-  private page: Page | null = null;
-  private consoleLogs: Array<{ type: string; text: string }> = [];
-  private options: PlaywrightWebOptions;
+  protected browser: Browser | null = null;
+  protected context: BrowserContext | null = null;
+  protected page: Page | null = null;
+  protected consoleLogs: Array<{ type: string; text: string }> = [];
+  protected options: PlaywrightWebOptions;
 
   constructor(options: PlaywrightWebOptions) {
     this.options = {

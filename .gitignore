@@ -1,5 +1,34 @@
+# Dependencies
 node_modules/
+
+# Build output
 dist/
+
+# Runtime artifacts
 .neoxten-out/
+
+# Logs
 *.log
+
+# OS files
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor state
+.vscode/
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Temporary test configs
+*.tmp.yaml
+*.tmp.json
+
+# Environment / secrets (should never exist here)
+.env
+.env.*
+credentials.json
+*.pem
+*.key

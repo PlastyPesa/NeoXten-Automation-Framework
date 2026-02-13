@@ -1,7 +1,7 @@
 {
   "name": "neoxten-automation-framework",
-  "version": "1.0.0",
-  "description": "Production-ready automation framework for Tauri, Next.js, and browser extension projects",
+  "version": "2.0.0",
+  "description": "Session-based execution environment for automated UI testing, observation, and evidence production",
   "type": "module",
   "bin": {
     "neoxten": "./dist/cli/index.js"
@@ -12,7 +12,9 @@
     "build": "npx tsc",
     "dev": "tsc --watch",
     "run": "node dist/cli/index.js run",
-    "test": "node dist/cli/index.js run --config ./neoxten.yaml"
+    "test": "node dist/cli/index.js run --config ./neoxten.yaml",
+    "test:enoent": "node dist/__tests__/spawn-enoent.test.js",
+    "test:paths": "node dist/__tests__/path-resolution.test.js"
   },
   "dependencies": {
     "@playwright/test": "^1.49.0",
