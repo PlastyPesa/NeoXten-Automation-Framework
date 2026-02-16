@@ -1,0 +1,76 @@
+# NeoXten Automation — NeoXten Website + Nemyo Page Smoke Test
+
+project:
+  type: nextjs
+  root: ../neoxten-website
+  nextjs:
+    devCommand: npm run dev
+    devUrl: http://localhost:3000
+
+flows:
+  - name: home_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 15000
+
+  - name: nemyo_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/nemyo
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 10000
+
+  - name: nemyo_privacy
+    steps:
+      - action: navigate
+        url: http://localhost:3000/nemyo/privacy
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 10000
+
+  - name: nemyo_terms
+    steps:
+      - action: navigate
+        url: http://localhost:3000/nemyo/terms
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 10000
+
+  - name: nemyo_refund
+    steps:
+      - action: navigate
+        url: http://localhost:3000/nemyo/refund
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 10000
+
+  - name: neoxtemus_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/neoxtemus
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 10000
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 30000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

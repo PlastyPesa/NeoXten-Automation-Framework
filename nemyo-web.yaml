@@ -1,0 +1,68 @@
+# NeoXten Automation — Nemyo Web Dashboard Smoke Test
+# Tests the Next.js dashboard launches and key pages render
+
+project:
+  type: nextjs
+  root: ../kidguard-web
+  nextjs:
+    devCommand: npm run dev
+    devUrl: http://localhost:3000
+
+flows:
+  - name: landing_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+      - action: assert
+        type: visible
+        selector: "h1, [data-testid='hero']"
+        timeout: 15000
+
+  - name: login_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/login
+      - action: assert
+        type: visible
+        selector: "input[type='email'], form"
+        timeout: 10000
+
+  - name: pricing_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/pricing
+      - action: assert
+        type: visible
+        selector: "h1, [data-testid='pricing']"
+        timeout: 10000
+
+  - name: privacy_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/privacy
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 10000
+
+  - name: terms_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/terms
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 10000
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 30000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true
