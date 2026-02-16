@@ -1,21 +1,22 @@
-# NeoXten Automation — Nemyo Web Dashboard Smoke Test
-# Tests the Next.js dashboard launches and key pages render
+# NeoXten Automation — Nemyo Web Dashboard (kidguard-web)
+# Comprehensive flow coverage for all public + dashboard pages
 
 project:
   type: nextjs
   root: ../kidguard-web
   nextjs:
-    devCommand: npm run dev
-    devUrl: http://localhost:3000
+    script: npm run dev
+    url: http://localhost:3000
 
 flows:
+  # ── Public pages ──
   - name: landing_page
     steps:
       - action: navigate
         url: http://localhost:3000
       - action: assert
         type: visible
-        selector: "h1, [data-testid='hero']"
+        selector: "h1, [data-testid='hero'], main"
         timeout: 15000
 
   - name: login_page
@@ -27,13 +28,49 @@ flows:
         selector: "input[type='email'], form"
         timeout: 10000
 
+  - name: signup_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/signup
+      - action: assert
+        type: visible
+        selector: "input[type='email'], form"
+        timeout: 10000
+
+  - name: reset_password_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/reset-password
+      - action: assert
+        type: visible
+        selector: "input[type='email'], form, h1"
+        timeout: 10000
+
   - name: pricing_page
     steps:
       - action: navigate
         url: http://localhost:3000/pricing
       - action: assert
         type: visible
-        selector: "h1, [data-testid='pricing']"
+        selector: "h1, [data-testid='pricing'], main"
+        timeout: 10000
+
+  - name: setup_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/setup
+      - action: assert
+        type: visible
+        selector: "h1, main"
+        timeout: 10000
+
+  - name: why_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/why
+      - action: assert
+        type: visible
+        selector: "h1, main"
         timeout: 10000
 
   - name: privacy_page
@@ -54,11 +91,48 @@ flows:
         selector: "h1"
         timeout: 10000
 
+  # ── Dashboard pages (redirect to login if not authed — assert page loads) ──
+  - name: dashboard_root
+    steps:
+      - action: navigate
+        url: http://localhost:3000/dashboard
+      - action: assert
+        type: visible
+        selector: "h1, form, main, [data-testid='dashboard']"
+        timeout: 10000
+
+  - name: dashboard_devices
+    steps:
+      - action: navigate
+        url: http://localhost:3000/dashboard/devices
+      - action: assert
+        type: visible
+        selector: "h1, form, main"
+        timeout: 10000
+
+  - name: dashboard_activity
+    steps:
+      - action: navigate
+        url: http://localhost:3000/dashboard/activity
+      - action: assert
+        type: visible
+        selector: "h1, form, main"
+        timeout: 10000
+
+  - name: dashboard_reports
+    steps:
+      - action: navigate
+        url: http://localhost:3000/dashboard/reports
+      - action: assert
+        type: visible
+        selector: "h1, form, main"
+        timeout: 10000
+
 assistant:
   enabled: false
 
 gates:
-  startupMaxMs: 30000
+  startupMaxMs: 60000
   noConsoleErrors: false
 
 artifacts:

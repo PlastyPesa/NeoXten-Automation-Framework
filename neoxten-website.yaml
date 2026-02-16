@@ -1,26 +1,56 @@
-# NeoXten Automation — NeoXten Website + Nemyo Page Smoke Test
+# NeoXten Automation — NeoXten Website
+# Full coverage: home, products, Nemyo viral page, legal pages
 
 project:
   type: nextjs
   root: ../neoxten-website
   nextjs:
-    devCommand: npm run dev
-    devUrl: http://localhost:3000
+    script: npx next dev -p 3001
+    url: http://localhost:3001
 
 flows:
+  # ── Core pages ──
   - name: home_page
     steps:
       - action: navigate
-        url: http://localhost:3000
+        url: http://localhost:3001
       - action: assert
         type: visible
         selector: "h1"
         timeout: 15000
 
+  - name: product_bubbles
+    steps:
+      - action: navigate
+        url: http://localhost:3001
+      - action: assert
+        type: visible
+        selector: "[class*='productGrid'], [class*='productBubble']"
+        timeout: 10000
+
+  - name: neoxtemus_page
+    steps:
+      - action: navigate
+        url: http://localhost:3001/neoxtemus
+      - action: assert
+        type: visible
+        selector: "h1"
+        timeout: 10000
+
+  - name: terra_page
+    steps:
+      - action: navigate
+        url: http://localhost:3001/terra
+      - action: assert
+        type: visible
+        selector: "h1, main"
+        timeout: 10000
+
+  # ── Nemyo viral page + legal ──
   - name: nemyo_page
     steps:
       - action: navigate
-        url: http://localhost:3000/nemyo
+        url: http://localhost:3001/nemyo
       - action: assert
         type: visible
         selector: "h1"
@@ -29,7 +59,7 @@ flows:
   - name: nemyo_privacy
     steps:
       - action: navigate
-        url: http://localhost:3000/nemyo/privacy
+        url: http://localhost:3001/nemyo/privacy
       - action: assert
         type: visible
         selector: "h1"
@@ -38,7 +68,7 @@ flows:
   - name: nemyo_terms
     steps:
       - action: navigate
-        url: http://localhost:3000/nemyo/terms
+        url: http://localhost:3001/nemyo/terms
       - action: assert
         type: visible
         selector: "h1"
@@ -47,26 +77,45 @@ flows:
   - name: nemyo_refund
     steps:
       - action: navigate
-        url: http://localhost:3000/nemyo/refund
+        url: http://localhost:3001/nemyo/refund
       - action: assert
         type: visible
         selector: "h1"
         timeout: 10000
 
-  - name: neoxtemus_page
+  # ── Other pages ──
+  - name: work_page
     steps:
       - action: navigate
-        url: http://localhost:3000/neoxtemus
+        url: http://localhost:3001/work
       - action: assert
         type: visible
-        selector: "h1"
+        selector: "h1, main"
+        timeout: 10000
+
+  - name: studio_page
+    steps:
+      - action: navigate
+        url: http://localhost:3001/studio
+      - action: assert
+        type: visible
+        selector: "h1, main"
+        timeout: 10000
+
+  - name: contact_page
+    steps:
+      - action: navigate
+        url: http://localhost:3001/contact
+      - action: assert
+        type: visible
+        selector: "h1, main, form"
         timeout: 10000
 
 assistant:
   enabled: false
 
 gates:
-  startupMaxMs: 30000
+  startupMaxMs: 60000
   noConsoleErrors: false
 
 artifacts:

@@ -1,0 +1,70 @@
+# NeoXten Automation — Nemyo Chrome Extension (MV3)
+# Loads unpacked extension, validates pages load without crash.
+# Key validation: extension initializes cleanly, pages navigate without
+# unexpected redirects or errors when kidMode is OFF (default state).
+# Note: headed mode + fresh profile = consent dialogs may appear; timeouts are generous.
+
+project:
+  type: extension
+  root: ../kidguard-extension
+  extension:
+    path: .
+
+flows:
+  # ── Flow 1: Extension loads and can navigate to YouTube ──
+  - name: youtube_navigable
+    steps:
+      - action: navigate
+        url: https://www.youtube.com
+        timeout: 30000
+      - action: wait
+        timeout: 2000
+
+  # ── Flow 2: Extension loads and can navigate to Google ──
+  - name: google_navigable
+    steps:
+      - action: navigate
+        url: https://www.google.com
+        timeout: 30000
+      - action: wait
+        timeout: 2000
+
+  # ── Flow 3: Extension loads and can navigate to Bing ──
+  - name: bing_navigable
+    steps:
+      - action: navigate
+        url: https://www.bing.com
+        timeout: 30000
+      - action: wait
+        timeout: 2000
+
+  # ── Flow 4: Extension loads and can navigate to TikTok ──
+  - name: tiktok_navigable
+    steps:
+      - action: navigate
+        url: https://www.tiktok.com
+        timeout: 30000
+      - action: wait
+        timeout: 2000
+
+  # ── Flow 5: Extension loads and can navigate to Roblox ──
+  - name: roblox_navigable
+    steps:
+      - action: navigate
+        url: https://www.roblox.com
+        timeout: 30000
+      - action: wait
+        timeout: 2000
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 45000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

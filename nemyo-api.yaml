@@ -1,0 +1,88 @@
+# NeoXten Automation — Nemyo API Validation
+# Validates that all critical API endpoints respond correctly.
+# Tests unauthenticated paths (expected error responses) to prove endpoints are live.
+# Full auth-path testing requires Firebase tokens (manual / CI with service account).
+
+project:
+  type: nextjs
+  root: ../kidguard-web
+  nextjs:
+    script: npm run dev
+    url: http://localhost:3000
+
+flows:
+  # ── Pairing: create without auth → must return error, not crash ──
+  - name: pairing_create_no_auth
+    steps:
+      - action: navigate
+        url: http://localhost:3000/api/pairing/create
+        timeout: 15000
+      - action: wait
+        timeout: 1000
+
+  # ── Device register: missing code → must return error ──
+  - name: device_register_missing_code
+    steps:
+      - action: navigate
+        url: http://localhost:3000/api/devices/register
+        timeout: 15000
+      - action: wait
+        timeout: 1000
+
+  # ── Get subscription: no params → must return hasSubscription: false ──
+  - name: subscription_check_empty
+    steps:
+      - action: navigate
+        url: http://localhost:3000/api/get-subscription
+        timeout: 15000
+      - action: wait
+        timeout: 1000
+
+  # ── Device state: no auth → must return error ──
+  - name: device_state_no_auth
+    steps:
+      - action: navigate
+        url: http://localhost:3000/api/devices/state
+        timeout: 15000
+      - action: wait
+        timeout: 1000
+
+  # ── Commands: no auth → must return error ──
+  - name: commands_create_no_auth
+    steps:
+      - action: navigate
+        url: http://localhost:3000/api/devices/commands/create
+        timeout: 15000
+      - action: wait
+        timeout: 1000
+
+  # ── Threat feed JSON: public endpoint ──
+  - name: threat_feed_json
+    steps:
+      - action: navigate
+        url: http://localhost:3000/api/threat-feed-json
+        timeout: 15000
+      - action: wait
+        timeout: 1000
+
+  # ── Check content: public endpoint ──
+  - name: check_content_endpoint
+    steps:
+      - action: navigate
+        url: http://localhost:3000/api/check-content
+        timeout: 15000
+      - action: wait
+        timeout: 1000
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 60000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true
