@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Event (one line of events.ndjson)",
+  "description": "Shape of each NDJSON event record",
+  "type": "object",
+  "required": ["ts", "type"],
+  "properties": {
+    "ts": { "type": "string", "format": "date-time" },
+    "type": { "type": "string" },
+    "label": { "type": "string" },
+    "data": { "type": "object" }
+  },
+  "additionalProperties": true
+}

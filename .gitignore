@@ -6,6 +6,9 @@ dist/
 
 # Runtime artifacts
 .neoxten-out/
+.neoxten/
+ops/
+sample-pack.zip
 
 # Logs
 *.log

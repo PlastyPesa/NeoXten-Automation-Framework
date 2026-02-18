@@ -4,7 +4,8 @@
   "description": "Session-based execution environment for automated UI testing, observation, and evidence production",
   "type": "module",
   "bin": {
-    "neoxten": "./dist/cli/index.js"
+    "neoxten": "./dist/cli/index.js",
+    "nx": "./dist/cli/index.js"
   },
   "main": "./dist/core/orchestrator.js",
   "scripts": {
@@ -15,10 +16,15 @@
     "gate": "node dist/cli/index.js gate --preset nemyo",
     "test": "node dist/cli/index.js run --config ./neoxten.yaml",
     "test:enoent": "node dist/__tests__/spawn-enoent.test.js",
-    "test:paths": "node dist/__tests__/path-resolution.test.js"
+    "test:paths": "node dist/__tests__/path-resolution.test.js",
+    "gen-sample-pack": "node dist/tools/gen-sample-pack.js",
+    "test:packs": "node dist/__tests__/packs-ingest.test.js",
+    "exe:build": "echo EXE build not configured"
   },
   "dependencies": {
     "@playwright/test": "^1.49.0",
+    "adm-zip": "^0.5.16",
+    "chokidar": "^5.0.0",
     "commander": "^12.1.0",
     "js-yaml": "^4.1.0",
     "playwright": "^1.49.0",
