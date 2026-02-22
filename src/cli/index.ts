@@ -8,6 +8,11 @@ import { initCommand } from './commands/init.js';
 import { doctorCommand } from './commands/doctor.js';
 import { packsIngestCommand, packsWatchCommand, packsValidateCommand } from './commands/packs.js';
 import { bugsListCommand, bugsOpenCommand, bugsCloseCommand } from './commands/bugs.js';
+import {
+  factoryRunCommand, factoryInspectCommand, factoryHistoryCommand,
+  consequencesExportCommand, consequencesImportCommand, consequencesStatusCommand,
+  manifestExportCommand,
+} from './commands/factory.js';
 
 program
   .name('nx')
@@ -82,5 +87,44 @@ bugs
   .description('Move case to _closed; write status.json (--note optional)')
   .option('-n, --note <text>', 'Note to store in status.json')
   .action((caseId: string, opts: { note?: string }) => bugsCloseCommand(caseId, process.cwd(), opts));
+
+/* ---- Factory: run | inspect | history ---- */
+const factory = program.command('factory').description('AI Shipping Factory — deterministic build pipeline');
+factory
+  .command('run')
+  .description('Start a Factory run from a spec YAML')
+  .requiredOption('-s, --spec <path>', 'Path to spec YAML file')
+  .action((opts: { spec: string }) => factoryRunCommand(opts).catch((e) => { console.error(e); process.exit(2); }));
+factory
+  .command('inspect <runId>')
+  .description('Print run summary (status, gates, duration, artifacts)')
+  .action((runId: string) => factoryInspectCommand(runId).catch((e) => { console.error(e); process.exit(2); }));
+factory
+  .command('history')
+  .description('List all past Factory runs')
+  .action(() => factoryHistoryCommand().catch((e) => { console.error(e); process.exit(2); }));
+
+/* ---- Factory: consequences export | import | status ---- */
+const consequences = factory.command('consequences').description('Consequence memory management');
+consequences
+  .command('export')
+  .description('Export consequence memory to NDJSON file')
+  .requiredOption('-o, --out <path>', 'Output file path')
+  .action((opts: { out: string }) => consequencesExportCommand(opts).catch((e) => { console.error(e); process.exit(2); }));
+consequences
+  .command('import <file>')
+  .description('Import consequence memory from NDJSON file')
+  .action((file: string) => consequencesImportCommand(file).catch((e) => { console.error(e); process.exit(2); }));
+consequences
+  .command('status')
+  .description('Show consequence memory status and integrity')
+  .action(() => consequencesStatusCommand().catch((e) => { console.error(e); process.exit(2); }));
+
+/* ---- Factory: manifest export ---- */
+factory
+  .command('manifest <runId>')
+  .description('Export run manifest to a file')
+  .option('-o, --out <path>', 'Output file path (default: manifests/RUN-<runId>.json)')
+  .action((runId: string, opts: { out?: string }) => manifestExportCommand(runId, opts).catch((e) => { console.error(e); process.exit(2); }));
 
 program.parse();

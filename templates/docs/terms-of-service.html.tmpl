@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — {{product.name}}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 720px; margin: 0 auto; padding: 2rem; color: #1a1a1a; line-height: 1.7; }
+    h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.25rem; margin-top: 2rem; }
+    .meta { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+    a { color: #0066cc; }
+  </style>
+</head>
+<body>
+  <h1>Terms of Service</h1>
+  <p class="meta">{{product.name}} &mdash; Effective {{date}}</p>
+
+  <h2>1. Acceptance of Terms</h2>
+  <p>By using {{product.name}}, you agree to these terms. If you do not agree, do not use the service.</p>
+
+  <h2>2. Description of Service</h2>
+  <p>{{product.description}}</p>
+
+  <h2>3. User Obligations</h2>
+  <p>You agree to use {{product.name}} lawfully and in accordance with these terms. You must not misuse the service or attempt to access it through unauthorized means.</p>
+
+  <h2>4. Intellectual Property</h2>
+  <p>All content, features, and functionality of {{product.name}} are owned by {{product.legalEntity}} and are protected by applicable intellectual property laws.</p>
+
+  <h2>5. Limitation of Liability</h2>
+  <p>{{product.name}} is provided "as is" without warranties of any kind. To the fullest extent permitted by law, we shall not be liable for any indirect, incidental, or consequential damages.</p>
+
+  <h2>6. Termination</h2>
+  <p>We may suspend or terminate your access at any time for violation of these terms.</p>
+
+  <h2>7. Governing Law</h2>
+  <p>These terms are governed by the laws of {{product.jurisdiction}}.</p>
+
+  <h2>8. Changes to Terms</h2>
+  <p>We reserve the right to modify these terms. Continued use after changes constitutes acceptance.</p>
+
+  <h2>9. Contact</h2>
+  <p>For questions about these terms, contact us at <a href="mailto:{{product.contactEmail}}">{{product.contactEmail}}</a>.</p>
+</body>
+</html>

@@ -1,0 +1,79 @@
+# Factory Core Configuration
+# Shared via Git. No secrets here — secrets go in .env (gitignored).
+# Machine-specific paths are resolved from environment variables.
+
+schema_version: "2026.1"
+
+# --- Inference Runtime ---
+# The Factory uses llama.cpp (llama-server) for local LLM inference.
+# Binary and model paths are set per machine in .env.
+inference:
+  runtime: "llama-server"
+  # Resolved from LLAMA_SERVER_PATH env var (set in .env per machine)
+  server_port: 8092
+  startup_timeout_ms: 60000
+
+# --- Worker-to-Model Assignments ---
+# Workers that need LLM reasoning reference a role.
+# Each role specifies which model to load and inference parameters.
+roles:
+  planner:
+    model: "qwen2.5-7b"
+    max_tokens: 8192
+    temperature: 0.1
+
+  builder:
+    model: "qwen2.5-7b"
+    max_tokens: 16384
+    temperature: 0.2
+
+  chat_intent:
+    model: "phi-3-mini"
+    max_tokens: 512
+    temperature: 0.0
+
+  spec_derivation:
+    model: "qwen2.5-7b"
+    max_tokens: 8192
+    temperature: 0.1
+
+# --- Available Local Models ---
+# Referenced by name in roles above.
+# Filenames resolved under MODEL_DIR (set in .env per machine).
+models:
+  qwen2.5-7b:
+    filename: "Qwen2.5-7B-Instruct-Q4_K_M.gguf"
+    context_length: 32768
+    gpu_layers: -1
+
+  mistral-nemo-2407:
+    filename: "Mistral-Nemo-Instruct-2407-Q4_K_M.gguf"
+    context_length: 131072
+    gpu_layers: -1
+
+  phi-3-mini:
+    filename: "Phi-3-mini-4k-instruct-q4.gguf"
+    context_length: 4096
+    gpu_layers: -1
+
+# --- Remote API Fallback ---
+# Used only if local model inference fails or model file is absent.
+# Requires LLM_API_KEY and LLM_API_PROVIDER in .env.
+remote_fallback:
+  enabled: true
+  provider: "${LLM_API_PROVIDER}"
+  model: "${LLM_API_MODEL}"
+
+# --- Pipeline Defaults ---
+pipeline:
+  worker_timeout_ms: 300000
+  builder_max_retries: 2
+  parallel_builders: 2
+
+# --- External Tool Paths ---
+# Override in .env if not in PATH.
+tools:
+  imagemagick: "magick"
+  apksigner: "apksigner"
+  jarsigner: "jarsigner"
+  gradle: "./gradlew"

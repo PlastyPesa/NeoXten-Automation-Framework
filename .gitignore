@@ -3,12 +3,17 @@ node_modules/
 
 # Build output
 dist/
+target/
 
-# Runtime artifacts
+# Runtime artifacts (NeoXten existing)
 .neoxten-out/
 .neoxten/
-ops/
 sample-pack.zip
+
+# Factory runtime (local per machine)
+ops/factory/runs/
+ops/factory/consequence-memory.ndjson
+ops/bugs/
 
 # Logs
 *.log
@@ -32,6 +37,16 @@ Desktop.ini
 # Environment / secrets (should never exist here)
 .env
 .env.*
+!.env.example
 credentials.json
 *.pem
 *.key
+*.keystore
+
+# Tauri build output
+src-tauri/target/
+src-tauri/gen/
+
+# UI build output
+ui/dist/
+ui/node_modules/

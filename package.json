@@ -19,6 +19,18 @@
     "test:paths": "node dist/__tests__/path-resolution.test.js",
     "gen-sample-pack": "node dist/tools/gen-sample-pack.js",
     "test:packs": "node dist/__tests__/packs-ingest.test.js",
+    "test:evidence-chain": "node dist/factory/__tests__/evidence-chain.test.js",
+    "test:spec-schema": "node dist/factory/__tests__/spec-schema.test.js",
+    "test:run-state": "node dist/factory/__tests__/run-state.test.js",
+    "test:worker-contract": "node dist/factory/__tests__/worker-contract.test.js",
+    "test:gate-registry": "node dist/factory/__tests__/gate-registry.test.js",
+    "test:pipeline-config": "node dist/factory/__tests__/pipeline-config.test.js",
+    "test:master": "node dist/factory/__tests__/master.test.js",
+    "test:consequence-memory": "node dist/factory/__tests__/consequence-memory.test.js",
+    "test:workers": "node dist/factory/__tests__/workers.test.js",
+    "test:manifest-cli": "node dist/factory/__tests__/manifest-cli.test.js",
+    "test:store-pipelines": "node dist/factory/__tests__/store-pipelines.test.js",
+    "test:system-validation": "node dist/factory/__tests__/system-validation.test.js",
     "exe:build": "echo EXE build not configured"
   },
   "dependencies": {
