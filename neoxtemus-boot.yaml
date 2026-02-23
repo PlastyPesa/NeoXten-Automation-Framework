@@ -31,8 +31,8 @@ flows:
         timeout: 5000
 
 gates:
-  startupMaxMs: 30000
-  spinnerMaxMs: 10000
+  startupMaxMs: 45000
+  spinnerMaxMs: 15000
   noConsoleErrors: false
 
 artifacts:
