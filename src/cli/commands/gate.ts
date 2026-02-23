@@ -44,6 +44,12 @@ const NEMYO_STEPS: GateStep[] = [
     outSubDir: 'nemyo-web',
   },
   {
+    name: 'Nemyo Subscription Flow',
+    type: 'yaml',
+    config: 'nemyo-subscription.yaml',
+    outSubDir: 'nemyo-subscription',
+  },
+  {
     name: 'NeoXten Website',
     type: 'yaml',
     config: 'neoxten-website.yaml',

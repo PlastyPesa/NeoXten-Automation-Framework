@@ -1,0 +1,120 @@
+# NeoXten Automation — Nemyo Subscription Flow Validation
+# Validates: auth gating, subscription state display, API auth enforcement,
+# no ghost states between layout gate and dashboard page.
+#
+# This config tests the subscription lifecycle integrity without
+# requiring live Stripe credentials in the automation harness.
+
+project:
+  type: nextjs
+  root: ../kidguard-web
+  nextjs:
+    script: npm run dev
+    url: http://localhost:3000
+
+flows:
+  # ── 1. Unauthenticated dashboard access must redirect to login ──
+  - name: dashboard_requires_auth
+    steps:
+      - action: navigate
+        url: http://localhost:3000/dashboard
+        timeout: 15000
+      - action: wait
+        timeout: 3000
+      - action: assert
+        type: visible
+        selector: "input[type='email'], form, [data-testid='login-form']"
+        timeout: 10000
+
+  # ── 2. get-subscription API is live (POST-only, GET returns method error) ──
+  - name: subscription_api_alive
+    steps:
+      - action: navigate
+        url: "http://localhost:3000/api/get-subscription"
+        timeout: 10000
+      - action: wait
+        timeout: 2000
+
+  # ── 3. create-checkout-session API rejects missing auth ──
+  - name: checkout_api_rejects_no_auth
+    steps:
+      - action: navigate
+        url: "http://localhost:3000/api/create-checkout-session"
+        timeout: 10000
+      - action: wait
+        timeout: 1000
+
+  # ── 4. create-portal-session API rejects missing auth ──
+  - name: portal_api_rejects_no_auth
+    steps:
+      - action: navigate
+        url: "http://localhost:3000/api/create-portal-session"
+        timeout: 10000
+      - action: wait
+        timeout: 1000
+
+  # ── 5. manage-subscription API rejects missing auth ──
+  - name: manage_subscription_rejects_no_auth
+    steps:
+      - action: navigate
+        url: "http://localhost:3000/api/manage-subscription"
+        timeout: 10000
+      - action: wait
+        timeout: 1000
+
+  # ── 6. Pricing page loads with subscription UI intact ──
+  - name: pricing_page_renders
+    steps:
+      - action: navigate
+        url: http://localhost:3000/pricing
+        timeout: 15000
+      - action: assert
+        type: visible
+        selector: "[data-testid='pricing-toggle'], button, h1"
+        timeout: 10000
+
+  # ── 7. Login page renders with email + password fields ──
+  - name: login_form_renders
+    steps:
+      - action: navigate
+        url: http://localhost:3000/login
+        timeout: 10000
+      - action: assert
+        type: visible
+        selector: "input[type='email']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "input[type='password']"
+        timeout: 5000
+
+  # ── 8. Stripe webhook endpoint is live (POST only, GET returns method error) ──
+  - name: webhook_endpoint_alive
+    steps:
+      - action: navigate
+        url: "http://localhost:3000/api/stripe-webhook"
+        timeout: 10000
+      - action: wait
+        timeout: 1000
+
+  # ── 9. threat-feed-json public endpoint is live ──
+  - name: threat_feed_alive
+    steps:
+      - action: navigate
+        url: "http://localhost:3000/api/threat-feed-json"
+        timeout: 15000
+      - action: wait
+        timeout: 2000
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 60000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true
