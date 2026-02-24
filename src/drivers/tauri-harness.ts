@@ -26,8 +26,10 @@ export class TauriHarnessDriver extends PlaywrightWebDriver {
   private reusingServer = false;
 
   constructor(options: TauriHarnessOptions) {
+    const url = new URL(options.devUrl);
+    url.searchParams.set('automation', '1');
     super({
-      url: options.devUrl,
+      url: url.toString(),
       headless: true,
     });
     this.harnessOptions = {
