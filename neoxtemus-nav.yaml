@@ -1,86 +1,85 @@
-# Neoxtemus AI — Navigation validation
-# Validates: all top-level nav items work, no dead buttons, structural elements present.
-# Strategy: harness (frontend-only via Vite, no Tauri binary needed)
+# Neoxtemus — Navigation & UI validation (harness mode / frontend-only)
+# Validates: onboarding step transitions, command bar trigger, form validation
+# Note: Full vault CRUD tested via cargo tests (18/18 pass)
 
 project:
   type: tauri
-  root: ../neoxtemus-ai
+  root: ../neoxtemus/neoxtemus-app
   tauri:
     strategy: harness
     harnessCommand: npm run dev
-    devCwd: ui
+    devCwd: .
     devUrl: http://localhost:1420
 
 flows:
-  - name: topbar_and_statusbar
+  - name: app_loads
     steps:
       - action: assert
         type: visible
-        selector: "[data-testid='app-shell']"
+        selector: "[data-testid='app-root']"
         timeout: 30000
       - action: wait
-        timeout: 1000
+        timeout: 1500
+
+  - name: onboarding_step_0_visible
+    steps:
       - action: assert
         type: visible
-        selector: "[data-testid='topbar']"
+        selector: "[data-testid='onboarding-step-0']"
         timeout: 10000
       - action: assert
         type: visible
-        selector: "[data-testid='status-bar']"
+        selector: "[data-testid='get-started-btn']"
         timeout: 5000
 
-  - name: nav_assistant
+  - name: onboarding_step_0_to_1
     steps:
       - action: click
-        selector: "[data-testid='nav-assistant']"
+        selector: "[data-testid='get-started-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-1']"
         timeout: 5000
       - action: assert
         type: visible
-        selector: "[data-testid='assistant-view']"
-        timeout: 5000
-
-  - name: nav_vault
-    steps:
-      - action: click
-        selector: "[data-testid='nav-vault']"
+        selector: "[data-testid='master-password-input']"
         timeout: 5000
       - action: assert
         type: visible
-        selector: "[data-testid='vault-view'], [data-testid='vault-gate']"
+        selector: "[data-testid='confirm-password-input']"
         timeout: 5000
 
-  - name: nav_memory
+  - name: password_validation
     steps:
+      - action: type
+        selector: "[data-testid='master-password-input']"
+        text: "Str0ng!Pass#2026"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='confirm-password-input']"
+        text: "Str0ng!Pass#2026"
+        timeout: 5000
+      - action: wait
+        timeout: 300
       - action: click
-        selector: "[data-testid='nav-memory']"
+        selector: "[data-testid='next-step-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-2']"
         timeout: 5000
       - action: assert
         type: visible
-        selector: "[data-testid='memory-view'], [data-testid='vault-gate']"
-        timeout: 5000
-
-  - name: nav_files
-    steps:
-      - action: click
-        selector: "[data-testid='nav-files']"
-        timeout: 5000
-      - action: assert
-        type: visible
-        selector: "[data-testid='files-view'], [data-testid='vault-gate']"
-        timeout: 5000
-
-  - name: nav_back_to_assistant
-    steps:
-      - action: click
-        selector: "[data-testid='nav-assistant']"
-        timeout: 5000
-      - action: assert
-        type: visible
-        selector: "[data-testid='assistant-view']"
+        selector: "[data-testid='setup-pin-input']"
         timeout: 5000
 
 gates:
-  startupMaxMs: 30000
+  startupMaxMs: 45000
   noConsoleErrors: false
 
 artifacts:

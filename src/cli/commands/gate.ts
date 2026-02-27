@@ -95,20 +95,20 @@ const NEOXTEMUS_STEPS: GateStep[] = [
     outSubDir: 'neoxtemus-nav',
   },
   {
-    name: 'Neoxtemus Assistant UI',
+    name: 'Neoxtemus Vault Operations',
     type: 'yaml',
-    config: 'neoxtemus-assistant.yaml',
-    outSubDir: 'neoxtemus-assistant',
+    config: 'neoxtemus-vault-test.yaml',
+    outSubDir: 'neoxtemus-vault',
   },
   {
     name: 'Neoxtemus Rust Tests',
     type: 'cargo',
-    cwd: '../neoxtemus-ai',
+    cwd: '../neoxtemus/neoxtemus-app/src-tauri',
   },
   {
     name: 'Artifact Policy',
     type: 'policy',
-    policyRoot: '../neoxtemus-ai',
+    policyRoot: '../neoxtemus/neoxtemus-app',
   },
 ];
 
