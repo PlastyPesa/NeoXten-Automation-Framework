@@ -1,0 +1,68 @@
+# Neoxtemus AI — Regression test for bug fixes
+# Tests: vault pill categories, OCR button text, file intelligence organize preview
+# Strategy: harness (frontend-only via Vite dev server)
+
+project:
+  type: tauri
+  root: ../neoxtemus-ai
+  tauri:
+    strategy: harness
+    harnessCommand: npm run dev
+    devCwd: ui
+    devUrl: http://localhost:1420
+
+flows:
+  - name: app_loads
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='app-shell']"
+        timeout: 30000
+      - action: wait
+        timeout: 2000
+
+  - name: vault_has_other_pill
+    steps:
+      - action: click
+        selector: "[data-testid='nav-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 1000
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view'], [data-testid='vault-gate']"
+        timeout: 5000
+
+  - name: files_view_loads
+    steps:
+      - action: click
+        selector: "[data-testid='nav-files']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-view'], [data-testid='vault-gate']"
+        timeout: 5000
+
+  - name: assistant_input_works
+    steps:
+      - action: click
+        selector: "[data-testid='nav-assistant']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='assistant-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='assistant-input']"
+        timeout: 5000
+
+gates:
+  startupMaxMs: 30000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

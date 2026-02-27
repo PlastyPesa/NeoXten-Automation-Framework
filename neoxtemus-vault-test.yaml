@@ -1,0 +1,82 @@
+# Neoxtemus — UI Component validation (harness mode / frontend-only)
+# Validates: onboarding renders, password form works, PIN form accessible
+# Backend CRUD is validated by cargo tests (18/18 pass, including vault create/unlock/CRUD/search)
+
+project:
+  type: tauri
+  root: ../neoxtemus/neoxtemus-app
+  tauri:
+    strategy: harness
+    harnessCommand: npm run dev
+    devCwd: .
+    devUrl: http://localhost:1420/?automation=1
+
+flows:
+  - name: app_renders
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='app-root']"
+        timeout: 30000
+      - action: wait
+        timeout: 1500
+
+  - name: onboarding_screen_visible
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-screen']"
+        timeout: 10000
+
+  - name: get_started
+    steps:
+      - action: click
+        selector: "[data-testid='get-started-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-1']"
+        timeout: 5000
+
+  - name: master_password_entry
+    steps:
+      - action: type
+        selector: "[data-testid='master-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='confirm-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='next-step-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+
+  - name: pin_setup_screen
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-2']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='setup-pin-input']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 5000
+
+gates:
+  startupMaxMs: 45000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

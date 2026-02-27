@@ -1,38 +1,32 @@
-# Neoxtemus AI — Boot validation
-# Validates: cold start completes, spinner disappears, a gate screen or main app appears.
-# Strategy: harness (frontend-only via Vite, no Tauri binary needed)
+# Neoxtemus — Boot validation
+# Validates: cold start, app root visible, initial screen renders (onboarding or unlock)
 
 project:
   type: tauri
-  root: ../neoxtemus-ai
+  root: ../neoxtemus/neoxtemus-app
   tauri:
     strategy: harness
     harnessCommand: npm run dev
-    devCwd: ui
-    devUrl: http://localhost:1420
+    devCwd: .
+    devUrl: http://localhost:1420/?automation=1
 
 flows:
   - name: boot_completes
     steps:
       - action: assert
         type: visible
-        selector: "[data-testid='app-shell']"
+        selector: "[data-testid='app-root']"
         timeout: 30000
-      - action: assert
-        type: timeout
-        selector: "[data-testid='boot-spinner']"
-        timeout: 10000
 
-  - name: gate_screen_visible
+  - name: initial_screen_visible
     steps:
       - action: assert
         type: visible
-        selector: "[data-testid='onboarding'], [data-testid='license-gate'], [data-testid='main-area']"
-        timeout: 5000
+        selector: "[data-testid='onboarding-screen'], [data-testid='unlock-screen']"
+        timeout: 10000
 
 gates:
   startupMaxMs: 45000
-  spinnerMaxMs: 15000
   noConsoleErrors: false
 
 artifacts:
