@@ -37,6 +37,22 @@ export const ExtensionProjectSchema = z.object({
   manifest: z.string().default('manifest.json'),
 });
 
+/** Android app testing (emulator + APK, optional CDP to WebView). */
+export const AndroidProjectSchema = z.object({
+  /** Path to APK (relative to config dir or absolute). */
+  apkPath: z.string(),
+  /** AVD name (e.g. Medium_Phone). If set, emulator is started before install. */
+  avd: z.string().optional(),
+  /** CDP port for WebView debugging. App must enable WebView.setWebContentsDebuggingEnabled(true). */
+  cdpPort: z.number().default(9222),
+  /** App package (e.g. com.neoxtemus.app). Required for launch. */
+  package: z.string(),
+  /** Main activity (e.g. .MainActivity). Required for launch. */
+  activity: z.string(),
+  /** Max ms to wait for emulator boot (if avd set). */
+  emulatorBootTimeoutMs: z.number().default(120000),
+});
+
 export const AssistantTestSchema = z.object({
   name: z.string(),
   prompt: z.string(),
@@ -102,6 +118,11 @@ export const ProjectConfigSchema = z.discriminatedUnion('type', [
     type: z.literal('extension'),
     root: z.string().default('.'),
     extension: ExtensionProjectSchema.optional(),
+  }),
+  z.object({
+    type: z.literal('android'),
+    root: z.string().default('.'),
+    android: AndroidProjectSchema,
   }),
 ]);
 

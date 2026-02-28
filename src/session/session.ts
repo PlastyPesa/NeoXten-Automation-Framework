@@ -20,6 +20,8 @@ import type { NeoxtenConfig } from '../config/schema.js';
 import { TauriAdapter } from '../adapters/tauri.js';
 import { NextJsAdapter } from '../adapters/nextjs.js';
 import { WebAdapter } from '../adapters/web.js';
+import { ExtensionAdapter } from '../adapters/extension.js';
+import { AndroidAdapter } from '../adapters/android.js';
 import { generateRunId } from '../utils/run-id.js';
 
 /* ------------------------------------------------------------------ */
@@ -311,6 +313,10 @@ export class Session {
         return new TauriAdapter();
       case 'nextjs':
         return new NextJsAdapter();
+      case 'extension':
+        return new ExtensionAdapter();
+      case 'android':
+        return new AndroidAdapter();
       default:
         throw new Error(`Unsupported project type: ${(config.project as { type: string }).type}`);
     }

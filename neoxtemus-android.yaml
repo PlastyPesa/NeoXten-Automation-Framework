@@ -1,0 +1,121 @@
+# Neoxtemus — Android app full journey (emulator + APK, CDP to WebView)
+# Run after building APK: npm run tauri android build -- --apk (from neoxtemus-app).
+# Run: node dist/cli/index.js run --config neoxtemus-android.yaml
+#
+# Requires: Android SDK, an AVD (e.g. Medium_Phone). App WebView must enable debugging
+# (WebView.setWebContentsDebuggingEnabled(true)) for CDP to connect. If CDP connect fails,
+# the app may need that enabled in dev/debug builds.
+
+project:
+  type: android
+  root: .
+  android:
+    apkPath: ../neoxtemus/neoxtemus-app/src-tauri/gen/android/app/build/outputs/apk/universal/release/app-release.apk
+    avd: Medium_Phone
+    cdpPort: 9222
+    package: com.neoxtemus.app
+    activity: .MainActivity
+    emulatorBootTimeoutMs: 120000
+
+flows:
+  - name: flow1_app_renders
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='app-root']"
+        timeout: 30000
+      - action: wait
+        timeout: 1500
+
+  - name: flow1_onboarding_visible
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-screen']"
+        timeout: 10000
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-0']"
+        timeout: 5000
+
+  - name: flow1_get_started
+    steps:
+      - action: click
+        selector: "[data-testid='get-started-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-1']"
+        timeout: 5000
+
+  - name: flow1_master_password
+    steps:
+      - action: type
+        selector: "[data-testid='master-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='confirm-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='next-step-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+
+  - name: flow1_pin_step_and_create_vault
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-2']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 10000
+      - action: wait
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 15000
+
+  - name: flow2_nav_to_files
+    steps:
+      - action: click
+        selector: "[data-testid='dock-files']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-view']"
+        timeout: 5000
+
+  - name: flow2_nav_back_to_vault
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+
+gates:
+  startupMaxMs: 180000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

@@ -1,0 +1,335 @@
+# Neoxtemus — Full user journey (harness mode / frontend-only)
+# Pre–Play Console style: first launch, vault creation, nav, vault CRUD, settings export, files, command bar, lock/unlock.
+# Run: node dist/cli/index.js run --config neoxtemus-full-journey.yaml
+# No changes to neoxtemus-boot.yaml, neoxtemus-nav.yaml, neoxtemus-vault-test.yaml, or gate.ts.
+#
+# For full journey (create vault, lock/unlock) use CDP against the real Windows app:
+#   node dist/cli/index.js run --config neoxtemus-full-journey-cdp.yaml
+
+project:
+  type: tauri
+  root: ../neoxtemus/neoxtemus-app
+  tauri:
+    strategy: harness
+    harnessCommand: npm run dev
+    devCwd: .
+    devUrl: http://localhost:1420/?automation=1
+
+flows:
+  # --- Flow 1: First launch & vault creation ---
+  - name: flow1_app_renders
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='app-root']"
+        timeout: 30000
+      - action: wait
+        timeout: 1500
+
+  - name: flow1_onboarding_visible
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-screen']"
+        timeout: 10000
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-0']"
+        timeout: 5000
+
+  - name: flow1_get_started
+    steps:
+      - action: click
+        selector: "[data-testid='get-started-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-1']"
+        timeout: 5000
+
+  - name: flow1_master_password
+    steps:
+      - action: type
+        selector: "[data-testid='master-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='confirm-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='next-step-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+
+  - name: flow1_pin_step_and_create_vault
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-2']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 10000
+      - action: wait
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 15000
+
+  # --- Flow 2: Main navigation (Vault → Files → Health → Settings → Vault) ---
+  - name: flow2_nav_to_files
+    steps:
+      - action: click
+        selector: "[data-testid='dock-files']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-view']"
+        timeout: 5000
+
+  - name: flow2_files_tabs
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='tab-overview']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='tab-stored-files']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid='stored-files-content']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='tab-duplicates']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid='duplicates-content']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='tab-import']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid='import-content']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='tab-overview']"
+        timeout: 5000
+
+  - name: flow2_nav_to_health
+    steps:
+      - action: click
+        selector: "[data-testid='dock-health']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='health-view']"
+        timeout: 5000
+
+  - name: flow2_nav_to_settings
+    steps:
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
+
+  - name: flow2_nav_back_to_vault
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+
+  # --- Flow 3: Vault — add entry ---
+  - name: flow3_add_entry
+    steps:
+      - action: click
+        selector: "[data-testid='add-entry-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='add-entry-modal']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='add-name']"
+        text: "Journey Test Entry"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='add-value']"
+        text: "SecretValue123"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='add-submit']"
+        timeout: 5000
+      - action: wait
+        timeout: 1500
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='entries-list']"
+        timeout: 5000
+
+  # --- Flow 4: Settings — Export button and click (no file dialog assertion) ---
+  - name: flow4_settings_export
+    steps:
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='export-btn']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='export-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 2000
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
+
+  # --- Flow 5: Files — view and tabs (no real file upload) ---
+  - name: flow5_files_ui
+    steps:
+      - action: click
+        selector: "[data-testid='dock-files']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-tabs']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='file-upload-btn']"
+        timeout: 5000
+
+  # --- Flow 6: Command bar — open, assert input, close ---
+  - name: flow6_command_bar
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: click
+        selector: "[data-testid='command-trigger']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='command-input']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='command-input']"
+        text: "vault"
+        timeout: 5000
+      - action: wait
+        timeout: 800
+      - action: assert
+        type: visible
+        selector: "[data-testid='command-results'], [data-testid='command-empty']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='command-overlay']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+
+  # --- Flow 7: Lock then unlock with password ---
+  - name: flow7_lock_unlock
+    steps:
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='lock-now-btn']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='lock-now-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 1000
+      - action: assert
+        type: visible
+        selector: "[data-testid='unlock-screen']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='password-input']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='unlock-button']"
+        timeout: 10000
+      - action: wait
+        timeout: 2000
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 10000
+
+gates:
+  startupMaxMs: 45000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

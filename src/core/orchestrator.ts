@@ -19,6 +19,7 @@ import { TauriAdapter } from '../adapters/tauri.js';
 import { NextJsAdapter } from '../adapters/nextjs.js';
 import { WebAdapter } from '../adapters/web.js';
 import { ExtensionAdapter } from '../adapters/extension.js';
+import { AndroidAdapter } from '../adapters/android.js';
 import { PageObserver } from '../observer/index.js';
 import { EvidenceCollector } from '../evidence/collector.js';
 
@@ -34,6 +35,8 @@ function getAdapter(config: NeoxtenConfig) {
       return new NextJsAdapter();
     case 'extension':
       return new ExtensionAdapter();
+    case 'android':
+      return new AndroidAdapter();
     default:
       throw new Error(`Unsupported project type: ${(config.project as { type: string }).type}`);
   }

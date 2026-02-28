@@ -14,6 +14,8 @@
     "dev": "tsc --watch",
     "run": "node dist/cli/index.js run",
     "gate": "node dist/cli/index.js gate --preset nemyo",
+    "gate:neoxtemus": "node dist/cli/index.js gate --preset neoxtemus",
+    "neoxtemus:test-then-build": "node scripts/neoxtemus-test-then-build.js",
     "test": "node dist/cli/index.js run --config ./neoxten.yaml",
     "test:enoent": "node dist/__tests__/spawn-enoent.test.js",
     "test:paths": "node dist/__tests__/path-resolution.test.js",
