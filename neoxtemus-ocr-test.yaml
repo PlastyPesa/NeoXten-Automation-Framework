@@ -1,0 +1,124 @@
+# Neoxtemus — OCR file upload regression (CDP = real Tauri for ocr_extract_text)
+# Requires: setInputFiles action + ocr-file-input testid in ImageExtractor.svelte
+# Run from NeoXten-Automation-Framework; fixtures/ocr-test.png relative to cwd
+preRun: node scripts/clean-neoxtemus-state.js
+
+project:
+  type: tauri
+  root: ../neoxtemus/neoxtemus-app
+  tauri:
+    strategy: cdp
+    devCommand: "npm run tauri dev"
+    devCwd: .
+    devUrl: http://localhost:1420
+    cdpPort: 9222
+    startupTimeoutMs: 120000
+
+flows:
+  - name: boot_and_onboard_with_pin
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='app-root']"
+        timeout: 30000
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-screen']"
+        timeout: 10000
+      - action: click
+        selector: "[data-testid='get-started-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: type
+        selector: "[data-testid='master-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='confirm-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='next-step-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-2']"
+        timeout: 8000
+      - action: type
+        selector: "[data-testid='setup-pin-0']"
+        text: "1"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='setup-pin-1']"
+        text: "2"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='setup-pin-2']"
+        text: "3"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='setup-pin-3']"
+        text: "4"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='setup-pin-4']"
+        text: "5"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='setup-pin-5']"
+        text: "6"
+        timeout: 2000
+      - action: click
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 15000
+      - action: wait
+        timeout: 20000
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-view']"
+        timeout: 25000
+
+  - name: ocr_file_upload_extract
+    steps:
+      - action: click
+        selector: "[data-testid='dock-ocr']"
+        timeout: 8000
+      - action: wait
+        timeout: 800
+      - action: assert
+        type: visible
+        selector: "[data-testid='ocr-extractor']"
+        timeout: 8000
+      - action: setInputFiles
+        selector: "[data-testid='ocr-file-input']"
+        files: ["fixtures/ocr-test.png"]
+        timeout: 8000
+      - action: wait
+        timeout: 12000
+      - action: assert
+        type: visible
+        selector: "[data-testid='ocr-extractor']"
+        timeout: 8000
+      - action: click
+        selector: "[data-testid='ocr-raw-toggle']"
+        timeout: 5000
+      - action: wait
+        timeout: 800
+      - action: assert
+        type: contains
+        selector: "[data-testid='ocr-raw-section']"
+        text: "123456"
+        timeout: 8000
+
+gates:
+  startupMaxMs: 90000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

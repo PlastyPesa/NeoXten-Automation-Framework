@@ -6,12 +6,13 @@
 # (WebView.setWebContentsDebuggingEnabled(true)) for CDP to connect. If CDP connect fails,
 # the app may need that enabled in dev/debug builds.
 
+preRun: node scripts/clean-neoxtemus-android.js
+
 project:
   type: android
   root: .
   android:
-    apkPath: ../neoxtemus/neoxtemus-app/src-tauri/gen/android/app/build/outputs/apk/universal/release/app-release.apk
-    avd: Medium_Phone
+    apkPath: ../neoxtemus/neoxtemus-app/src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
     cdpPort: 9222
     package: com.neoxtemus.app
     activity: .MainActivity
@@ -85,6 +86,23 @@ flows:
         type: visible
         selector: "[data-testid='vault-view']"
         timeout: 15000
+
+  - name: flow_background_lock
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 10000
+      - action: sendToBackground
+      - action: wait
+        timeout: 2000
+      - action: bringToForeground
+      - action: wait
+        timeout: 3000
+      - action: assert
+        type: visible
+        selector: "[data-testid='unlock-screen']"
+        timeout: 10000
 
   - name: flow2_nav_to_files
     steps:

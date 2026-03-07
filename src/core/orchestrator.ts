@@ -4,7 +4,7 @@
  * Internally uses Session + PageObserver + EvidenceCollector.
  * The public run() contract is backward-compatible: same options, same verdict.
  */
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
 import { generateRunId } from '../utils/run-id.js';
 import { buildVerdict, type Verdict } from './verdict.js';
 import { createArtifactDirs, writeJson, appendLog, type ArtifactPaths } from './artifact-manager.js';
@@ -22,6 +22,7 @@ import { ExtensionAdapter } from '../adapters/extension.js';
 import { AndroidAdapter } from '../adapters/android.js';
 import { PageObserver } from '../observer/index.js';
 import { EvidenceCollector } from '../evidence/collector.js';
+import { execSync } from 'child_process';
 
 const DEFAULT_OUT_DIR = '.neoxten-out';
 
@@ -103,6 +104,13 @@ export async function run(options: RunOptions): Promise<RunResult> {
   };
 
   try {
+    /* ---- Pre-run (e.g. clean vault state) ---- */
+    if (config.preRun) {
+      const configDir = dirname(resolve(options.configPath));
+      addLog(`Pre-run: ${config.preRun}`);
+      execSync(config.preRun, { cwd: configDir, stdio: 'inherit' });
+    }
+
     /* ---- Launch ---- */
     const adapter = getAdapter(config);
     driver = adapter.createDriver(config, options.configPath);

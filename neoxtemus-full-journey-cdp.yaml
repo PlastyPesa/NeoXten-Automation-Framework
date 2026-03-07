@@ -171,7 +171,7 @@ flows:
         selector: "[data-testid='vault-view']"
         timeout: 5000
 
-  # --- Flow 3: Vault — add entry ---
+  # --- Flow 3: Vault — add entry (template-based UI) ---
   - name: flow3_add_entry
     steps:
       - action: click
@@ -181,27 +181,56 @@ flows:
         type: visible
         selector: "[data-testid='add-entry-modal']"
         timeout: 5000
+
+      # Verify bottom template is reachable in the scrollable picker
+      - action: evaluate
+        expression: |
+          async () => {
+            const el = document.querySelector('[data-testid="template-crypto_wallet"]');
+            if (!el) throw new Error('template-crypto_wallet not found');
+            el.scrollIntoView({ block: 'center' });
+          }
+      - action: assert
+        type: visible
+        selector: "[data-testid='template-crypto_wallet']"
+        timeout: 5000
+
+      # Use Login template for deterministic entry creation
+      - action: evaluate
+        expression: |
+          async () => {
+            const el = document.querySelector('[data-testid="template-login"]');
+            if (!el) throw new Error('template-login not found');
+            el.scrollIntoView({ block: 'center' });
+            el.click();
+          }
+
+      - action: assert
+        type: visible
+        selector: "[data-testid='add-name']"
+        timeout: 5000
       - action: type
         selector: "[data-testid='add-name']"
         text: "Journey Test Entry"
         timeout: 5000
       - action: type
-        selector: "[data-testid='add-value']"
+        selector: "[data-testid='field-password']"
         text: "SecretValue123"
         timeout: 5000
-      - action: click
-        selector: "[data-testid='add-submit']"
-        timeout: 5000
+      - action: evaluate
+        expression: |
+          async () => {
+            const btn = document.querySelector('[data-testid="add-submit"]');
+            if (!btn) throw new Error('add-submit not found');
+            btn.click();
+          }
       - action: wait
         timeout: 1500
       - action: assert
-        type: visible
+        type: contains
         selector: "[data-testid='vault-view']"
-        timeout: 5000
-      - action: assert
-        type: visible
-        selector: "[data-testid='entries-list']"
-        timeout: 5000
+        text: "Journey Test Entry"
+        timeout: 10000
 
   # --- Flow 4: Settings — Export ---
   - name: flow4_settings_export

@@ -101,6 +101,18 @@ const NEOXTEMUS_STEPS: GateStep[] = [
     outSubDir: 'neoxtemus-vault',
   },
   {
+    name: 'Neoxtemus OCR',
+    type: 'yaml',
+    config: 'neoxtemus-ocr-test.yaml',
+    outSubDir: 'neoxtemus-ocr',
+  },
+  {
+    name: 'Neoxtemus Export Roundtrip',
+    type: 'yaml',
+    config: 'neoxtemus-export-roundtrip.yaml',
+    outSubDir: 'neoxtemus-export-roundtrip',
+  },
+  {
     name: 'Neoxtemus Rust Tests',
     type: 'cargo',
     cwd: '../neoxtemus/neoxtemus-app/src-tauri',
@@ -310,6 +322,17 @@ export async function gateCommand(opts: {
       }
     } else if (step.type === 'cargo') {
       try {
+        if (process.platform === 'win32') {
+          try {
+            execSync('taskkill /F /IM neoxtemus.exe', { stdio: 'ignore', timeout: 5000 });
+          } catch {}
+          try {
+            execSync('taskkill /F /IM neoxtemus-app.exe', { stdio: 'ignore', timeout: 5000 });
+          } catch {}
+          try {
+            execSync('taskkill /F /IM cargo-tauri.exe', { stdio: 'ignore', timeout: 5000 });
+          } catch {}
+        }
         const cwd = resolve(frameworkRoot, step.cwd ?? '.');
         const output = execSync('cargo test --workspace', {
           cwd,

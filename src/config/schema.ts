@@ -1,12 +1,16 @@
 import { z } from 'zod';
 
 export const FlowStepSchema = z.object({
-  action: z.enum(['click', 'type', 'navigate', 'wait', 'assert']),
+  action: z.enum(['click', 'type', 'navigate', 'wait', 'assert', 'setInputFiles', 'evaluate', 'sendToBackground', 'bringToForeground']),
   selector: z.string().optional(),
   text: z.string().optional(),
   url: z.string().optional(),
   type: z.enum(['visible', 'contains', 'timeout']).optional(),
   timeout: z.number().optional(),
+  /** File paths for setInputFiles (relative to cwd or absolute) */
+  files: z.array(z.string()).optional(),
+  /** JS expression for evaluate (run in page context) */
+  expression: z.string().optional(),
 });
 
 export const FlowSchema = z.object({
@@ -24,6 +28,8 @@ export const TauriProjectSchema = z.object({
   devCwd: z.string().optional(),
   devUrl: z.string().default('http://localhost:1420'),
   cdpPort: z.number().default(9222),
+  /** Max ms to wait for CDP to be available (default 60000). */
+  startupTimeoutMs: z.number().optional(),
 });
 
 export const NextJsProjectSchema = z.object({
@@ -134,6 +140,8 @@ export const NeoxtenConfigSchema = z.object({
   assistant: AssistantConfigSchema.optional(),
   gates: GatesSchema.optional(),
   artifacts: ArtifactsSchema.optional(),
+  /** Command to run before launch (e.g. node scripts/clean-neoxtemus-state.js). Runs with cwd = config dir. */
+  preRun: z.string().optional(),
 });
 
 export type NeoxtenConfig = z.infer<typeof NeoxtenConfigSchema>;

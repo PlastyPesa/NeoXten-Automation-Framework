@@ -33,8 +33,8 @@ export class TauriCDPDriver extends PlaywrightWebDriver {
       headless: true,
     });
     this.cdpOptions = {
-      startupTimeoutMs: 60000,
       ...options,
+      startupTimeoutMs: options.startupTimeoutMs ?? 60000,
     };
   }
 
@@ -158,7 +158,10 @@ export class TauriCDPDriver extends PlaywrightWebDriver {
   }
 
   override async close(): Promise<void> {
-    await super.close();
-    this.cleanup();
+    try {
+      await super.close();
+    } finally {
+      this.cleanup();
+    }
   }
 }

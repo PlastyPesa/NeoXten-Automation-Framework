@@ -1,8 +1,7 @@
-# Neoxtemus — Vault create + PIN lock/unlock (CDP = real Tauri app)
-# Validates: onboarding, 6-digit PIN, vault create, main view, lock, PIN unlock (Bug 1 coverage).
-# Gate uses this config; requires clean vault state for repeat runs.
-# Run: node dist/cli/index.js run --config neoxtemus-vault-test.yaml
-preRun: node scripts/clean-neoxtemus-state.js
+# Neoxtemus — Full vault create + PIN lock/unlock (CDP = real Tauri app)
+# Run: node dist/cli/index.js run --config neoxtemus-vault-full.yaml
+# Requires: Clean vault state (delete vault.enc + vault_pin.enc from app data dir if re-running)
+# Uses same flows as vault-test through master_password_entry, then create + lock + PIN unlock.
 
 project:
   type: tauri
@@ -101,84 +100,11 @@ flows:
         selector: "[data-testid='create-vault-btn']"
         timeout: 15000
       - action: wait
-        timeout: 20000
+        timeout: 5000
       - action: assert
         type: visible
         selector: "[data-testid='overview-view']"
-        timeout: 25000
-
-  - name: add_entry_and_verify_template_picker
-    steps:
-      - action: click
-        selector: "[data-testid='overview-view-keys']"
-        timeout: 5000
-      - action: wait
-        timeout: 600
-      - action: assert
-        type: visible
-        selector: "[data-testid='vault-view']"
-        timeout: 10000
-
-      - action: click
-        selector: "[data-testid='add-entry-btn']"
-        timeout: 5000
-
-      - action: assert
-        type: visible
-        selector: "[data-testid='add-entry-modal']"
-        timeout: 5000
-
-      # Verify bottom template card is reachable in the modal
-      - action: evaluate
-        expression: |
-          (() => {
-            const el = document.querySelector('[data-testid="template-crypto_wallet"]');
-            if (!el) throw new Error('template-crypto_wallet not found');
-            el.scrollIntoView({ block: 'center' });
-          })()
-      - action: assert
-        type: visible
-        selector: "[data-testid='template-crypto_wallet']"
-        timeout: 5000
-
-      # Create a deterministic entry using Login template
-      - action: evaluate
-        expression: |
-          (() => {
-            const el = document.querySelector('[data-testid="template-login"]');
-            if (!el) throw new Error('template-login not found');
-            el.scrollIntoView({ block: 'center' });
-            el.click();
-          })()
-      - action: wait
-        timeout: 600
-
-      - action: assert
-        type: visible
-        selector: "[data-testid='add-name']"
-        timeout: 5000
-      - action: type
-        selector: "[data-testid='add-name']"
-        text: "Vault Test Entry"
-        timeout: 5000
-      - action: type
-        selector: "[data-testid='field-password']"
-        text: "VaultSecret123"
-        timeout: 5000
-      - action: evaluate
-        expression: |
-          (() => {
-            const btn = document.querySelector('[data-testid="add-submit"]');
-            if (!btn) throw new Error('add-submit not found');
-            btn.click();
-          })()
-      - action: wait
-        timeout: 1500
-      - action: assert
-        type: contains
-        selector: "[data-testid='vault-view']"
-        text: "Vault Test Entry"
-        timeout: 10000
+        timeout: 15000
 
   - name: lock_and_unlock_with_pin
     steps:
@@ -228,15 +154,17 @@ flows:
         selector: "[data-testid='pin-input-5']"
         text: "6"
         timeout: 2000
-
-      # PIN auto-submits on 6th digit; no unlock-button in PIN mode
-      # After unlock we return to Settings (where we locked from)
       - action: wait
-        timeout: 5000
+        timeout: 800
+      - action: click
+        selector: "[data-testid='unlock-button']"
+        timeout: 8000
+      - action: wait
+        timeout: 2000
       - action: assert
         type: visible
-        selector: "[data-testid='settings-view']"
-        timeout: 20000
+        selector: "[data-testid='overview-view']"
+        timeout: 15000
 
 gates:
   startupMaxMs: 90000

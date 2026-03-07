@@ -126,6 +126,13 @@ export class ExtensionDriver implements UIDriver {
           }
           return { success: false, error: `Unknown assert type: ${step.type}` };
         }
+        case 'setInputFiles': {
+          if (!step.selector) return { success: false, error: 'Missing selector for setInputFiles' };
+          const files = step.files ?? [];
+          if (files.length === 0) return { success: false, error: 'Missing files for setInputFiles' };
+          await page.locator(step.selector).first().setInputFiles(files, { timeout });
+          return { success: true };
+        }
         default:
           return { success: false, error: `Unknown action: ${step.action}` };
       }

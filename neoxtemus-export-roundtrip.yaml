@@ -1,7 +1,6 @@
-# Neoxtemus — Vault create + PIN lock/unlock (CDP = real Tauri app)
-# Validates: onboarding, 6-digit PIN, vault create, main view, lock, PIN unlock (Bug 1 coverage).
-# Gate uses this config; requires clean vault state for repeat runs.
-# Run: node dist/cli/index.js run --config neoxtemus-vault-test.yaml
+# Neoxtemus — Export round-trip automation
+# Clean state → onboard with PIN → export to known path → verify file → restore via UI → assert usable
+# Run: node dist/cli/index.js run --config neoxtemus-export-roundtrip.yaml
 preRun: node scripts/clean-neoxtemus-state.js
 
 project:
@@ -9,42 +8,26 @@ project:
   root: ../neoxtemus/neoxtemus-app
   tauri:
     strategy: cdp
-    devCommand: "npm run tauri dev"
+    devCommand: npm run tauri dev
     devCwd: .
     devUrl: http://localhost:1420
     cdpPort: 9222
+    startupTimeoutMs: 120000
 
 flows:
-  - name: app_renders
+  - name: boot_and_onboard_with_pin
     steps:
       - action: assert
         type: visible
         selector: "[data-testid='app-root']"
         timeout: 30000
-      - action: wait
-        timeout: 1500
-
-  - name: onboarding_screen_visible
-    steps:
       - action: assert
         type: visible
         selector: "[data-testid='onboarding-screen']"
         timeout: 10000
-
-  - name: get_started
-    steps:
       - action: click
         selector: "[data-testid='get-started-btn']"
         timeout: 5000
-      - action: wait
-        timeout: 600
-      - action: assert
-        type: visible
-        selector: "[data-testid='onboarding-step-1']"
-        timeout: 5000
-
-  - name: master_password_entry
-    steps:
       - action: type
         selector: "[data-testid='master-password-input']"
         text: "TestMaster!2026#Secure"
@@ -56,50 +39,31 @@ flows:
       - action: click
         selector: "[data-testid='next-step-btn']"
         timeout: 5000
-      - action: wait
-        timeout: 600
-
-  - name: create_vault_with_pin
-    steps:
-      - action: assert
-        type: visible
-        selector: "[data-testid='onboarding-step-2']"
-        timeout: 5000
-      - action: assert
-        type: visible
-        selector: "[data-testid='setup-pin-input']"
-        timeout: 5000
       - action: type
         selector: "[data-testid='setup-pin-0']"
         text: "1"
-        timeout: 2000
       - action: type
         selector: "[data-testid='setup-pin-1']"
         text: "2"
-        timeout: 2000
       - action: type
         selector: "[data-testid='setup-pin-2']"
         text: "3"
-        timeout: 2000
       - action: type
         selector: "[data-testid='setup-pin-3']"
         text: "4"
-        timeout: 2000
       - action: type
         selector: "[data-testid='setup-pin-4']"
         text: "5"
-        timeout: 2000
       - action: type
         selector: "[data-testid='setup-pin-5']"
         text: "6"
-        timeout: 2000
       - action: assert
         type: visible
         selector: "[data-testid='create-vault-btn']"
         timeout: 5000
       - action: click
         selector: "[data-testid='create-vault-btn']"
-        timeout: 15000
+        timeout: 20000
       - action: wait
         timeout: 20000
       - action: assert
@@ -107,7 +71,7 @@ flows:
         selector: "[data-testid='overview-view']"
         timeout: 25000
 
-  - name: add_entry_and_verify_template_picker
+  - name: add_known_entry_before_export
     steps:
       - action: click
         selector: "[data-testid='overview-view-keys']"
@@ -118,128 +82,129 @@ flows:
         type: visible
         selector: "[data-testid='vault-view']"
         timeout: 10000
-
       - action: click
         selector: "[data-testid='add-entry-btn']"
         timeout: 5000
-
       - action: assert
         type: visible
         selector: "[data-testid='add-entry-modal']"
         timeout: 5000
-
-      # Verify bottom template card is reachable in the modal
-      - action: evaluate
-        expression: |
-          (() => {
-            const el = document.querySelector('[data-testid="template-crypto_wallet"]');
-            if (!el) throw new Error('template-crypto_wallet not found');
-            el.scrollIntoView({ block: 'center' });
-          })()
-      - action: assert
-        type: visible
-        selector: "[data-testid='template-crypto_wallet']"
-        timeout: 5000
-
-      # Create a deterministic entry using Login template
       - action: evaluate
         expression: |
           (() => {
             const el = document.querySelector('[data-testid="template-login"]');
-            if (!el) throw new Error('template-login not found');
-            el.scrollIntoView({ block: 'center' });
-            el.click();
+            if (el) { el.scrollIntoView({ block: 'center' }); el.click(); }
           })()
       - action: wait
-        timeout: 600
-
-      - action: assert
-        type: visible
-        selector: "[data-testid='add-name']"
-        timeout: 5000
+        timeout: 400
       - action: type
         selector: "[data-testid='add-name']"
-        text: "Vault Test Entry"
+        text: "RoundTrip Test Entry"
         timeout: 5000
       - action: type
         selector: "[data-testid='field-password']"
-        text: "VaultSecret123"
+        text: "rt-secret-123456"
         timeout: 5000
       - action: evaluate
         expression: |
-          (() => {
-            const btn = document.querySelector('[data-testid="add-submit"]');
-            if (!btn) throw new Error('add-submit not found');
-            btn.click();
-          })()
+          (() => { document.querySelector('[data-testid="add-submit"]')?.click(); })()
       - action: wait
         timeout: 1500
       - action: assert
         type: contains
         selector: "[data-testid='vault-view']"
-        text: "Vault Test Entry"
+        text: "RoundTrip Test Entry"
         timeout: 10000
 
-  - name: lock_and_unlock_with_pin
+  - name: export_backup_to_known_path
     steps:
+      - action: wait
+        timeout: 1000
       - action: click
         selector: "[data-testid='dock-settings']"
-        timeout: 5000
-      - action: wait
-        timeout: 600
-      - action: assert
-        type: visible
-        selector: "[data-testid='lock-now-btn']"
-        timeout: 5000
-      - action: click
-        selector: "[data-testid='lock-now-btn']"
-        timeout: 5000
-      - action: wait
-        timeout: 1200
-      - action: assert
-        type: visible
-        selector: "[data-testid='unlock-screen']"
-        timeout: 8000
-      - action: assert
-        type: visible
-        selector: "[data-testid='pin-section']"
-        timeout: 8000
-      - action: type
-        selector: "[data-testid='pin-input-0']"
-        text: "1"
-        timeout: 2000
-      - action: type
-        selector: "[data-testid='pin-input-1']"
-        text: "2"
-        timeout: 2000
-      - action: type
-        selector: "[data-testid='pin-input-2']"
-        text: "3"
-        timeout: 2000
-      - action: type
-        selector: "[data-testid='pin-input-3']"
-        text: "4"
-        timeout: 2000
-      - action: type
-        selector: "[data-testid='pin-input-4']"
-        text: "5"
-        timeout: 2000
-      - action: type
-        selector: "[data-testid='pin-input-5']"
-        text: "6"
-        timeout: 2000
-
-      # PIN auto-submits on 6th digit; no unlock-button in PIN mode
-      # After unlock we return to Settings (where we locked from)
-      - action: wait
         timeout: 5000
       - action: assert
         type: visible
         selector: "[data-testid='settings-view']"
-        timeout: 20000
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const p = "C:/Users/Bobby/Documents/NeoXten-Automation-Framework/fixtures/tmp/roundtrip-backup.nex";
+            await window.__NEOXTEMUS_EXPORT_TO_PATH__(p);
+          })()
+      - action: wait
+        timeout: 1500
+
+  - name: restore_backup_via_ui
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='restore-btn']"
+        timeout: 5000
+      - action: setInputFiles
+        selector: "[data-testid='restore-file-input']"
+        files:
+          - "C:/Users/Bobby/Documents/NeoXten-Automation-Framework/fixtures/tmp/roundtrip-backup.nex"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='restore-modal']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='restore-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='restore-confirm-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='unlock-screen']"
+        timeout: 10000
+
+  - name: unlock_and_assert_usable
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='unlock-screen']"
+        timeout: 8000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const btn = document.querySelector('[data-testid="switch-to-password"]');
+            if (btn) btn.click();
+          })()
+      - action: wait
+        timeout: 800
+      - action: type
+        selector: "[data-testid='password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='unlock-button']"
+        timeout: 10000
+      - action: wait
+        timeout: 3000
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view'], [data-testid='overview-view'], [data-testid='vault-view']"
+        timeout: 15000
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: contains
+        selector: "[data-testid='vault-view']"
+        text: "RoundTrip Test Entry"
+        timeout: 10000
 
 gates:
-  startupMaxMs: 90000
+  startupMaxMs: 120000
   noConsoleErrors: false
 
 artifacts:

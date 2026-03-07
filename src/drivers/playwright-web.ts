@@ -95,6 +95,19 @@ export class PlaywrightWebDriver implements UIDriver {
           }
           return { success: false, error: `Unknown assert type: ${step.type}` };
         }
+        case 'setInputFiles': {
+          if (!step.selector) return { success: false, error: 'Missing selector for setInputFiles' };
+          const files = step.files ?? [];
+          if (files.length === 0) return { success: false, error: 'Missing files for setInputFiles' };
+          await page.locator(step.selector).first().setInputFiles(files, { timeout });
+          return { success: true };
+        }
+        case 'evaluate': {
+          const expression = (step as { expression?: string }).expression;
+          if (!expression) return { success: false, error: 'evaluate step requires expression' };
+          await page.evaluate(expression);
+          return { success: true };
+        }
         default:
           return { success: false, error: `Unknown action: ${step.action}` };
       }

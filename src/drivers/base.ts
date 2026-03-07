@@ -5,6 +5,8 @@ export interface StepResult {
   success: boolean;
   error?: string;
   screenshotPath?: string;
+  /** Test state from getTestState (broadcast -> filesDir/test_state.json) */
+  testState?: Record<string, unknown>;
 }
 
 export interface UIDriver {

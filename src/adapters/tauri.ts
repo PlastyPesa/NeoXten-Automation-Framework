@@ -47,6 +47,7 @@ export class TauriAdapter implements ProjectAdapter {
         devCwd: devCwd ?? resolve(root, 'ui'),
         devUrl,
         cdpPort: tauri.cdpPort ?? 9222,
+        startupTimeoutMs: tauri.startupTimeoutMs,
       });
     }
 
