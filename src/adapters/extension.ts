@@ -20,6 +20,7 @@ export class ExtensionAdapter implements ProjectAdapter {
     return new ExtensionDriver({
       extensionPath: extPath,
       headless: false, // Extensions require headed mode
+      ...(ext?.storageSeed && { storageSeed: ext.storageSeed }),
     });
   }
 }

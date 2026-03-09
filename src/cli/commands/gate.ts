@@ -16,12 +16,15 @@ import { run } from '../../core/orchestrator.js';
 
 interface GateStep {
   name: string;
-  type: 'yaml' | 'flutter' | 'cargo' | 'policy';
+  type: 'yaml' | 'flutter' | 'flutter_integration' | 'cargo' | 'policy';
   config?: string;
   outSubDir?: string;
   testPath?: string;
+  testTarget?: string;
+  driverPath?: string;
   cwd?: string;
   policyRoot?: string;
+  deviceId?: string;
 }
 
 interface GateStepResult {
@@ -62,6 +65,12 @@ const NEMYO_STEPS: GateStep[] = [
     outSubDir: 'nemyo-extension',
   },
   {
+    name: 'Nemyo Extension KidMode OFF',
+    type: 'yaml',
+    config: 'nemyo-extension-kidmode-off.yaml',
+    outSubDir: 'nemyo-extension-kidmode-off',
+  },
+  {
     name: 'Nemyo API Endpoints',
     type: 'yaml',
     config: 'nemyo-api.yaml',
@@ -78,6 +87,20 @@ const NEMYO_STEPS: GateStep[] = [
     type: 'flutter',
     testPath: 'test/widget_test.dart',
     cwd: '../kidguard-mobile-app',
+  },
+  {
+    name: 'Child App Integration Tests',
+    type: 'flutter_integration',
+    testTarget: 'integration_test/app_test.dart',
+    cwd: '../kidguard_child_app',
+    outSubDir: 'nemyo-child-integration',
+  },
+  {
+    name: 'Parent App Integration Tests',
+    type: 'flutter_integration',
+    testTarget: 'integration_test/app_test.dart',
+    cwd: '../kidguard-mobile-app',
+    outSubDir: 'nemyo-parent-integration',
   },
 ];
 
@@ -226,6 +249,7 @@ function generateReport(
 export async function gateCommand(opts: {
   preset?: string;
   outDir?: string;
+  skipIntegration?: boolean;
 }): Promise<void> {
   const preset = opts.preset ?? 'nemyo';
   const presetConfig = PRESET_MAP[preset];
@@ -245,6 +269,21 @@ export async function gateCommand(opts: {
   for (const step of steps) {
     const stepStart = Date.now();
     console.log(`  [${results.length + 1}/${steps.length}] ${step.name}...`);
+
+    const skipIntegration = opts.skipIntegration || process.env.NEMYO_SKIP_INTEGRATION === '1' || process.env.NEMYO_SKIP_INTEGRATION === 'true';
+    if (step.type === 'flutter_integration' && skipIntegration) {
+      results.push({
+        name: step.name,
+        verdict: 'PASS',
+        runId: null,
+        durationMs: 0,
+        flowCount: 0,
+        artifactDir: null,
+        error: null,
+      });
+        console.log(`           SKIP (--skip-integration or NEMYO_SKIP_INTEGRATION)`);
+      continue;
+    }
 
     if (step.type === 'yaml' && step.config) {
       try {
@@ -292,6 +331,45 @@ export async function gateCommand(opts: {
           cwd,
           encoding: 'utf-8',
           timeout: 180000,
+          stdio: ['ignore', 'pipe', 'pipe'],
+        });
+
+        const testCount = (output.match(/\+(\d+)/g) ?? []).length;
+
+        results.push({
+          name: step.name,
+          verdict: 'PASS',
+          runId: null,
+          durationMs: Date.now() - stepStart,
+          flowCount: testCount,
+          artifactDir: null,
+          error: null,
+        });
+        console.log(`           PASS`);
+      } catch (e) {
+        const err = e instanceof Error ? (e as { stderr?: string }).stderr ?? e.message : String(e);
+        results.push({
+          name: step.name,
+          verdict: 'FAIL',
+          runId: null,
+          durationMs: Date.now() - stepStart,
+          flowCount: 0,
+          artifactDir: null,
+          error: typeof err === 'string' ? err.slice(0, 500) : String(err),
+        });
+        console.log(`           FAIL`);
+      }
+    } else if (step.type === 'flutter_integration') {
+      try {
+        const cwd = resolve(frameworkRoot, step.cwd ?? '.');
+        const target = step.testTarget ?? 'integration_test/app_test.dart';
+        const deviceId = step.deviceId ?? process.env.NEMYO_FLUTTER_DEVICE_ID ?? '';
+        const deviceArg = deviceId ? ` -d ${deviceId}` : '';
+        const cmd = `flutter test ${target}${deviceArg}`;
+        const output = execSync(cmd, {
+          cwd,
+          encoding: 'utf-8',
+          timeout: 300000,
           stdio: ['ignore', 'pipe', 'pipe'],
         });
 

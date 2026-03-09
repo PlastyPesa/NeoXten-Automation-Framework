@@ -26,7 +26,37 @@ flows:
         selector: "input[type='email'], form, [data-testid='login-form']"
         timeout: 10000
 
-  # ── 2. get-subscription API is live (POST-only, GET returns method error) ──
+  # ── 2. get-subscription POST without auth returns 401 ──
+  - name: get_subscription_returns_unauthorized
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('http://localhost:3000/api/get-subscription', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+            const j = await r.json();
+            if (r.status !== 401) throw new Error('Expected 401, got ' + r.status);
+            if (typeof j.hasSubscription !== 'undefined' && j.hasSubscription !== false && !j.error) throw new Error('Expected hasSubscription false or error, got: ' + JSON.stringify(j));
+          })()
+
+  # ── 3. create-checkout-session POST without auth returns 401 ──
+  - name: create_checkout_session_rejects_no_auth
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('http://localhost:3000/api/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+            const j = await r.json();
+            if (r.status !== 401) throw new Error('Expected 401, got ' + r.status);
+            if (!j.error) throw new Error('Expected error field, got: ' + JSON.stringify(j));
+          })()
+
+  # ── 4. subscription_api_alive (legacy) ──
   - name: subscription_api_alive
     steps:
       - action: navigate

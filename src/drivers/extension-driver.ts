@@ -133,6 +133,12 @@ export class ExtensionDriver implements UIDriver {
           await page.locator(step.selector).first().setInputFiles(files, { timeout });
           return { success: true };
         }
+        case 'evaluate': {
+          const expression = (step as { expression?: string }).expression;
+          if (!expression) return { success: false, error: 'evaluate step requires expression' };
+          await page.evaluate(expression);
+          return { success: true };
+        }
         default:
           return { success: false, error: `Unknown action: ${step.action}` };
       }

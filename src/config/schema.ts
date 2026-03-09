@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const FlowStepSchema = z.object({
-  action: z.enum(['click', 'type', 'navigate', 'wait', 'assert', 'setInputFiles', 'evaluate', 'sendToBackground', 'bringToForeground']),
+  action: z.enum(['click', 'type', 'navigate', 'wait', 'assert', 'setInputFiles', 'evaluate', 'sendToBackground', 'bringToForeground', 'getTestState']),
   selector: z.string().optional(),
   text: z.string().optional(),
   url: z.string().optional(),
@@ -41,6 +41,8 @@ export const NextJsProjectSchema = z.object({
 export const ExtensionProjectSchema = z.object({
   path: z.string(),
   manifest: z.string().default('manifest.json'),
+  /** Pre-seed chrome.storage.local before flows (e.g. { nemyo_state_v1: { kidMode: true, ageBand: '6_8' } }) */
+  storageSeed: z.record(z.string(), z.unknown()).optional(),
 });
 
 /** Android app testing (emulator + APK, optional CDP to WebView). */

@@ -9,6 +9,10 @@ project:
   root: ../kidguard-extension
   extension:
     path: .
+    storageSeed:
+      nemyo_state_v1:
+        kidMode: true
+        ageBand: "6_8"
 
 flows:
   # ── Flow 1: Extension loads and can navigate to YouTube ──
@@ -55,6 +59,24 @@ flows:
         timeout: 30000
       - action: wait
         timeout: 2000
+
+  # ── Flow 6: KidMode ON + unsafe query → redirect to calm search ──
+  - name: kidmode_on_redirect_unsafe_query
+    steps:
+      - action: navigate
+        url: "https://www.youtube.com/results?search_query=street+fight"
+        timeout: 30000
+      - action: wait
+        timeout: 6000
+      - action: evaluate
+        expression: |
+          (() => {
+            const href = window.location.href;
+            if (!href.includes('search_query=')) throw new Error('Expected search_query in URL, got: ' + href);
+            const params = new URLSearchParams(new URL(href).search);
+            const q = (params.get('search_query') || '').toLowerCase();
+            if (!q.includes('calm') && !q.includes('gentle')) throw new Error('Expected calm/gentle redirect, got query: ' + q);
+          })()
 
 assistant:
   enabled: false

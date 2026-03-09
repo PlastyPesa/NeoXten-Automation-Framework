@@ -46,6 +46,7 @@ program
   .description('Run a validation gate (presets: nemyo, neoxtemus)')
   .option('-p, --preset <name>', 'Gate preset to run (nemyo | neoxtemus)', 'nemyo')
   .option('-o, --out-dir <path>', 'Output directory for artifacts', '.neoxten-out')
+  .option('--skip-integration', 'Skip flutter_integration steps (use when no device connected)')
   .action((opts) => gateCommand(opts).catch((e) => { console.error(e); process.exit(2); }));
 
 /* ---- Evidence Pack: init ---- */
