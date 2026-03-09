@@ -1,7 +1,7 @@
-# Neoxtemus — Export round-trip automation
-# Clean state → onboard with PIN → export to known path → verify file → restore via UI → assert usable
+# Neoxtemus — Export coverage & round-trip automation
+# Clean state → onboard with PIN → exercise all export variants → restore via UI → assert usable
 # Run: node dist/cli/index.js run --config neoxtemus-export-roundtrip.yaml
-preRun: node scripts/clean-neoxtemus-state.js
+preRun: node scripts/clean-neoxtemus-state.js && node -e "require('fs').mkdirSync('fixtures/tmp',{recursive:true})"
 
 project:
   type: tauri
@@ -202,6 +202,119 @@ flows:
         selector: "[data-testid='vault-view']"
         text: "RoundTrip Test Entry"
         timeout: 10000
+
+  # --- Export variant: settings export buttons present & enabled ---
+  - name: verify_export_buttons_present
+    steps:
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='export-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='generate-emergency-kit-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='export-audit-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='restore-btn']"
+        timeout: 5000
+
+  # --- Export variant: audit log (programmatic, bypasses native dialog) ---
+  - name: export_audit_log_programmatic
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const csv = await window.__NEOXTEMUS_EXPORT_AUDIT__();
+            if (typeof csv !== 'string' || csv.length === 0)
+              throw new Error('Audit export returned empty');
+          })()
+      - action: wait
+        timeout: 500
+
+  # --- Export variant: single entry export (programmatic) ---
+  - name: export_single_entry_programmatic
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const state = window.__NEOXTEMUS_TEST_STATE__();
+            if (!state || !state.vaultStatus || state.vaultStatus.entry_count === 0)
+              throw new Error('No entries to export');
+            const entriesEl = document.querySelector('[data-testid="entries-list"]');
+            const firstEntry = entriesEl?.querySelector('[data-testid^="entry-"]');
+            if (!firstEntry) throw new Error('No entry element found');
+            const id = firstEntry.getAttribute('data-testid').replace('entry-', '');
+            const b64 = await window.__NEOXTEMUS_EXPORT_ENTRY__(id);
+            if (typeof b64 !== 'string' || b64.length === 0)
+              throw new Error('Entry export returned empty');
+          })()
+      - action: wait
+        timeout: 500
+
+  # --- Export variant: entry export button accessible via UI ---
+  - name: verify_entry_export_button
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const entriesEl = document.querySelector('[data-testid="entries-list"]');
+            const firstMore = entriesEl?.querySelector('[data-testid^="more-"]');
+            if (firstMore) firstMore.click();
+          })()
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid^='entry-export-']"
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => { document.body.click(); })()
+      - action: wait
+        timeout: 300
+
+  # --- Export variant: emergency kit generation (desktop: opens in new tab) ---
+  - name: export_emergency_kit
+    steps:
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='generate-emergency-kit-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 8000
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
 
 gates:
   startupMaxMs: 120000

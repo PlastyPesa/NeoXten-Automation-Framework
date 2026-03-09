@@ -135,21 +135,25 @@ export class AndroidCDPDriver extends PlaywrightWebDriver {
     await run(adb, ['install', '-r', apkPath], 120000);
     await run(adb, ['shell', 'am', 'start', '-n', `${pkg}/${activity}`], 10000);
 
-    await new Promise((r) => setTimeout(r, 6000));
-
-    // WebView uses localabstract socket, not TCP. Forward to webview_devtools_remote_<pid>.
-    const pidOut = await runOut(adb, ['shell', 'pidof', pkg], 5000).catch(() => '');
-    const pid = pidOut.split(/\s+/)[0]?.trim();
-    if (!pid) {
-      throw new Error(`App ${pkg} not running. pidof returned: ${pidOut || '(empty)'}`);
+    // Poll for PID instead of hardcoded sleep — app may start fast or slow.
+    let pid = '';
+    for (let i = 0; i < 30; i++) {
+      const pidOut = await runOut(adb, ['shell', 'pidof', pkg], 5000).catch(() => '');
+      pid = pidOut.split(/\s+/)[0]?.trim() ?? '';
+      if (pid) break;
+      await new Promise((r) => setTimeout(r, 1000));
     }
+    if (!pid) {
+      throw new Error(`App ${pkg} not running after 30s. Ensure the APK installs and launches correctly.`);
+    }
+
+    // Forward CDP port to WebView devtools socket.
     await run(adb, ['forward', `tcp:${cdpPort}`, `localabstract:webview_devtools_remote_${pid}`], 5000);
 
-    // Ensure app is foregrounded before CDP connect (WebView target can be stale when backgrounded).
+    // Ensure app is foregrounded before CDP connect.
     await run(adb, ['shell', 'am', 'start', '-n', `${pkg}/${activity}`], 5000);
-    await new Promise((r) => setTimeout(r, 1500));
 
-    await waitForDevtoolsReady(cdpPort, 30000);
+    await waitForDevtoolsReady(cdpPort, 60000);
 
     let lastErr: unknown;
     let browser: Browser | undefined;
@@ -193,6 +197,19 @@ export class AndroidCDPDriver extends PlaywrightWebDriver {
     });
 
     await ctx.tracing.start({ screenshots: true, snapshots: true }).catch(() => {});
+
+    // Wait for app readiness — poll __NEOXTEMUS_TEST_STATE__().ready
+    for (let i = 0; i < 30; i++) {
+      try {
+        const state = await page.evaluate(() => {
+          return typeof (window as any).__NEOXTEMUS_TEST_STATE__ === 'function'
+            ? (window as any).__NEOXTEMUS_TEST_STATE__()
+            : null;
+        });
+        if (state && (state as any).ready) break;
+      } catch { /* page may not be ready yet */ }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
   }
 
   override async executeStep(step: FlowStep): Promise<StepResult> {
@@ -209,6 +226,20 @@ export class AndroidCDPDriver extends PlaywrightWebDriver {
       try {
         await run('adb', ['shell', 'am', 'start', '-n', `${pkg}/${activity}`], 10000);
         return { success: true };
+      } catch (e) {
+        return { success: false, error: e instanceof Error ? e.message : String(e) };
+      }
+    }
+    if (step.action === 'getTestState') {
+      try {
+        const page = this.getPage();
+        const state = await page.evaluate(() => {
+          return typeof (window as any).__NEOXTEMUS_TEST_STATE__ === 'function'
+            ? (window as any).__NEOXTEMUS_TEST_STATE__()
+            : null;
+        });
+        if (!state) return { success: false, error: '__NEOXTEMUS_TEST_STATE__ not available' };
+        return { success: true, testState: state as Record<string, unknown> };
       } catch (e) {
         return { success: false, error: e instanceof Error ? e.message : String(e) };
       }

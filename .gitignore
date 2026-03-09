@@ -33,6 +33,7 @@ Desktop.ini
 # Temporary test configs
 *.tmp.yaml
 *.tmp.json
+*.bak
 
 # Environment / secrets (should never exist here)
 .env
