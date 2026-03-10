@@ -240,24 +240,24 @@ flows:
             }
           })()
 
-  # ── 12. Schools placeholder page ──
+  # ── 12. Schools management page ──
   - name: admin_schools_page
     steps:
       - action: navigate
         url: http://localhost:3000/admin/schools
         timeout: 15000
       - action: wait
-        timeout: 3000
+        timeout: 5000
       - action: evaluate
         expression: |
           (() => {
             const body = (document.body.innerText || '').toLowerCase();
-            if (!body.includes('coming soon') && !body.includes('schools')) {
+            if (!body.includes('schools management') && !body.includes('schools')) {
               throw new Error('Schools page did not render: ' + body.substring(0, 200));
             }
           })()
 
-  # ── 13. Admin pages render sidebar nav ──
+  # ── 13. Admin pages render sidebar nav (updated with new items) ──
   - name: admin_sidebar_navigation
     steps:
       - action: navigate
@@ -269,9 +269,87 @@ flows:
         expression: |
           (() => {
             const body = document.body.innerText || '';
-            const navItems = ['Users', 'Revenue', 'Activity', 'Threats', 'Configuration'];
+            const navItems = ['Users', 'Revenue', 'Activity', 'Reports', 'Threats', 'Notifications', 'A/B Testing', 'Schools'];
             const found = navItems.filter(n => body.includes(n));
-            if (found.length < 4) {
+            if (found.length < 6) {
               throw new Error('Expected sidebar navigation items, found: ' + found.join(', '));
+            }
+          })()
+
+  # ── 14. Notifications page loads ──
+  - name: admin_notifications_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/notifications
+        timeout: 15000
+      - action: wait
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('notifications')) {
+              throw new Error('Notifications page did not render: ' + body.substring(0, 200));
+            }
+            if (!body.includes('compose') && !body.includes('send')) {
+              throw new Error('Compose form missing: ' + body.substring(0, 200));
+            }
+          })()
+
+  # ── 15. A/B Testing page loads ──
+  - name: admin_ab_testing_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/ab-testing
+        timeout: 15000
+      - action: wait
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('a/b testing')) {
+              throw new Error('A/B Testing page did not render: ' + body.substring(0, 200));
+            }
+          })()
+
+  # ── 16. Reports page loads ──
+  - name: admin_reports_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/reports
+        timeout: 15000
+      - action: wait
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('weekly reports') && !body.includes('reports')) {
+              throw new Error('Reports page did not render: ' + body.substring(0, 200));
+            }
+          })()
+
+  # ── 17. Notifications API rejects non-admin ──
+  - name: admin_notifications_api_rejects
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const res = await fetch('/api/admin/notifications');
+            if (res.status !== 401) {
+              throw new Error('Expected 401, got ' + res.status);
+            }
+          })()
+
+  # ── 18. Schools API rejects non-admin ──
+  - name: admin_schools_api_rejects
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const res = await fetch('/api/admin/schools');
+            if (res.status !== 401) {
+              throw new Error('Expected 401, got ' + res.status);
             }
           })()
