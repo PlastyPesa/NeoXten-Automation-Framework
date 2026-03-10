@@ -74,6 +74,34 @@ flows:
       - action: wait
         timeout: 1000
 
+  # ── Device ack: missing params returns friendly response ──
+  - name: device_ack_missing_params
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('http://localhost:3000/api/devices/ack', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+            const j = await r.json();
+            if (r.status !== 200) throw new Error('Expected 200, got ' + r.status);
+            if (j.ok !== false) throw new Error('Expected ok:false for missing params, got: ' + JSON.stringify(j));
+          })()
+
+  # ── Manage subscription: no auth returns 401 ──
+  - name: manage_subscription_no_auth
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('http://localhost:3000/api/manage-subscription', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+            if (r.status !== 401) throw new Error('Expected 401, got ' + r.status);
+          })()
+
 assistant:
   enabled: false
 
