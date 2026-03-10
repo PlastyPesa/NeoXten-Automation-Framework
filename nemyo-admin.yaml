@@ -1,0 +1,277 @@
+project:
+  type: nextjs
+  root: ../kidguard-web
+  nextjs:
+    script: npm run dev
+    url: http://localhost:3000
+
+flows:
+  # ── 1. Admin page loads and shows auth gate ──
+  - name: admin_page_loads
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin
+        timeout: 15000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (body.includes('Admin Access Required') || body.includes('Checking admin access') || body.includes('Dashboard')) {
+              return true;
+            }
+            throw new Error('Admin page did not render expected content: ' + body.substring(0, 200));
+          })()
+
+  # ── 2. Login as admin and verify redirect to /admin ──
+  - name: admin_login_redirect
+    steps:
+      - action: navigate
+        url: http://localhost:3000/login
+        timeout: 15000
+      - action: assert
+        type: visible
+        selector: "input#email"
+        timeout: 10000
+      - action: type
+        selector: "input#email"
+        text: "bogdanmircea11987@gmail.com"
+      - action: type
+        selector: "input#password"
+        text: "NemyoTest2026!"
+      - action: click
+        selector: "button[type='submit']"
+        timeout: 5000
+      - action: wait
+        timeout: 6000
+      - action: evaluate
+        expression: |
+          (() => {
+            const href = window.location.href;
+            if (!href.includes('/admin')) {
+              throw new Error('Expected redirect to /admin for admin user, got: ' + href);
+            }
+          })()
+
+  # ── 3. Admin dashboard shows stats cards ──
+  - name: admin_dashboard_stats
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            if (!loginData.idToken) throw new Error('Failed to get Firebase token');
+            return loginData.idToken;
+          })()
+      - action: navigate
+        url: http://localhost:3000/admin
+        timeout: 15000
+      - action: wait
+        timeout: 8000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            const checks = ['total users', 'active subs', 'mrr', 'devices', 'events'];
+            const found = checks.filter(c => body.includes(c));
+            if (found.length < 3) {
+              throw new Error('Expected dashboard stat cards, found only: ' + found.join(', ') + '. Page: ' + body.substring(0, 400));
+            }
+          })()
+
+  # ── 4. Revenue API returns data for admin ──
+  - name: admin_revenue_api
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            if (!loginData.idToken) throw new Error('Failed to get Firebase token');
+
+            const r = await fetch('/api/admin/revenue', {
+              headers: { 'Authorization': 'Bearer ' + loginData.idToken }
+            });
+            if (r.status !== 200) throw new Error('Revenue API returned ' + r.status);
+            const data = await r.json();
+            if (typeof data.mrr === 'undefined') throw new Error('Missing mrr in response: ' + JSON.stringify(data));
+            if (typeof data.activeCount === 'undefined') throw new Error('Missing activeCount');
+          })()
+
+  # ── 5. Revenue API rejects non-admin ──
+  - name: admin_revenue_api_forbidden
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('/api/admin/revenue');
+            if (r.status !== 401) throw new Error('Expected 401 for unauthenticated, got ' + r.status);
+          })()
+
+  # ── 6. User detail API works for admin ──
+  - name: admin_user_detail_api
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            if (!loginData.idToken) throw new Error('Failed to get Firebase token');
+
+            const r = await fetch('/api/admin/users/' + loginData.localId, {
+              headers: { 'Authorization': 'Bearer ' + loginData.idToken }
+            });
+            if (r.status !== 200) throw new Error('User detail API returned ' + r.status);
+            const data = await r.json();
+            if (!data.userId) throw new Error('Missing userId in response');
+          })()
+
+  # ── 7. Devices page loads ──
+  - name: admin_devices_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/devices
+        timeout: 15000
+      - action: wait
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('device management')) {
+              throw new Error('Devices page did not render: ' + body.substring(0, 200));
+            }
+          })()
+
+  # ── 8. Extension analytics page loads ──
+  - name: admin_extension_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/extension
+        timeout: 15000
+      - action: wait
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('extension analytics')) {
+              throw new Error('Extension page did not render: ' + body.substring(0, 200));
+            }
+          })()
+
+  # ── 9. Content manager page loads ──
+  - name: admin_content_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/content
+        timeout: 15000
+      - action: wait
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('content') && !body.includes('redirect manager')) {
+              throw new Error('Content page did not render: ' + body.substring(0, 200));
+            }
+          })()
+
+  # ── 10. Audit log page loads ──
+  - name: admin_audit_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/audit
+        timeout: 15000
+      - action: wait
+        timeout: 4000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('audit log')) {
+              throw new Error('Audit page did not render: ' + body.substring(0, 200));
+            }
+          })()
+
+  # ── 11. Health page loads and runs checks ──
+  - name: admin_health_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/health
+        timeout: 15000
+      - action: wait
+        timeout: 8000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('system health')) {
+              throw new Error('Health page did not render: ' + body.substring(0, 200));
+            }
+            if (!body.includes('firestore') && !body.includes('firebase')) {
+              throw new Error('Health checks did not run: ' + body.substring(0, 300));
+            }
+          })()
+
+  # ── 12. Schools placeholder page ──
+  - name: admin_schools_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin/schools
+        timeout: 15000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('coming soon') && !body.includes('schools')) {
+              throw new Error('Schools page did not render: ' + body.substring(0, 200));
+            }
+          })()
+
+  # ── 13. Admin pages render sidebar nav ──
+  - name: admin_sidebar_navigation
+    steps:
+      - action: navigate
+        url: http://localhost:3000/admin
+        timeout: 15000
+      - action: wait
+        timeout: 4000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            const navItems = ['Users', 'Revenue', 'Activity', 'Threats', 'Configuration'];
+            const found = navItems.filter(n => body.includes(n));
+            if (found.length < 4) {
+              throw new Error('Expected sidebar navigation items, found: ' + found.join(', '));
+            }
+          })()
