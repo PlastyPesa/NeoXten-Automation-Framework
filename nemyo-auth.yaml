@@ -1,0 +1,255 @@
+# NeoXten Automation — Nemyo Authenticated Flows
+# Tests real login, dashboard gating, subscription state, authenticated API calls,
+# pricing/checkout entry, and pairing-related API responses.
+# Uses test account: bogdanmircea11987@gmail.com / NemyoTest2026!
+
+project:
+  type: nextjs
+  root: ../kidguard-web
+  nextjs:
+    script: npm run dev
+    url: http://localhost:3000
+
+flows:
+  # ── 1. Login via web UI ──
+  - name: login_with_credentials
+    steps:
+      - action: navigate
+        url: http://localhost:3000/login
+        timeout: 15000
+      - action: assert
+        type: visible
+        selector: "input#email"
+        timeout: 10000
+      - action: type
+        selector: "input#email"
+        text: "bogdanmircea11987@gmail.com"
+      - action: type
+        selector: "input#password"
+        text: "NemyoTest2026!"
+      - action: click
+        selector: "button[type='submit']"
+        timeout: 5000
+      - action: wait
+        timeout: 6000
+      - action: evaluate
+        expression: |
+          (() => {
+            const href = window.location.href;
+            if (!href.includes('/dashboard') && !href.includes('/pricing')) {
+              throw new Error('Expected redirect to /dashboard or /pricing after login, got: ' + href);
+            }
+          })()
+
+  # ── 2. Dashboard shows subscription-required for unsubscribed user ──
+  - name: dashboard_subscription_gate
+    steps:
+      - action: navigate
+        url: http://localhost:3000/dashboard
+        timeout: 15000
+      - action: wait
+        timeout: 6000
+      - action: evaluate
+        expression: |
+          (() => {
+            const text = document.body.innerText;
+            if (!text.includes('Subscription Required') && !text.includes('Dashboard')) {
+              throw new Error('Expected Subscription Required or Dashboard content, got: ' + text.slice(0, 200));
+            }
+          })()
+
+  # ── 3. Authenticated get-subscription API via REST token ──
+  - name: auth_get_subscription
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            if (!loginData.idToken) throw new Error('Failed to get Firebase token');
+            const token = loginData.idToken;
+
+            const r = await fetch('/api/get-subscription', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify({ parentId: loginData.localId, email: loginData.email })
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('Expected 200, got ' + r.status + ': ' + JSON.stringify(data));
+            if (typeof data.hasSubscription === 'undefined') throw new Error('Missing hasSubscription: ' + JSON.stringify(data));
+          })()
+
+  # ── 4. Authenticated checkout session (monthly) ──
+  - name: auth_checkout_monthly
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            const token = loginData.idToken;
+            if (!token) throw new Error('No token');
+
+            const r = await fetch('/api/create-checkout-session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify({ planType: 'family_monthly' })
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('Expected 200, got ' + r.status + ': ' + JSON.stringify(data));
+            if (!data.url || !data.url.includes('checkout.stripe.com')) throw new Error('Expected Stripe URL: ' + JSON.stringify(data));
+          })()
+
+  # ── 5. Authenticated checkout session (yearly) ──
+  - name: auth_checkout_yearly
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            const token = loginData.idToken;
+            if (!token) throw new Error('No token');
+
+            const r = await fetch('/api/create-checkout-session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify({ planType: 'family_yearly' })
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('Expected 200, got ' + r.status + ': ' + JSON.stringify(data));
+            if (!data.url || !data.url.includes('checkout.stripe.com')) throw new Error('Expected Stripe URL: ' + JSON.stringify(data));
+          })()
+
+  # ── 6. Pairing requires subscription ──
+  - name: auth_pairing_requires_subscription
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            const token = loginData.idToken;
+            if (!token) throw new Error('No token');
+
+            const r = await fetch('/api/pairing/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: '{}'
+            });
+            const data = await r.json();
+            if (data.ok === true) throw new Error('Expected rejection (no sub), got ok:true');
+            if (!data.error || data.error !== 'no_subscription') throw new Error('Expected no_subscription, got: ' + JSON.stringify(data));
+          })()
+
+  # ── 7. manage-subscription no Stripe customer → 404 ──
+  - name: auth_manage_no_customer
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            const token = loginData.idToken;
+            if (!token) throw new Error('No token');
+
+            const r = await fetch('/api/manage-subscription', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: '{}'
+            });
+            if (r.status !== 404) throw new Error('Expected 404, got ' + r.status);
+          })()
+
+  # ── 8. Invalid planType must NOT leak env var names ──
+  - name: auth_invalid_plan_no_leak
+    steps:
+      - action: navigate
+        url: http://localhost:3000
+        timeout: 15000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const loginRes = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBS0_PViXr9nAjJRDM6lw_Bhvn6fcs16xI', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'NemyoTest2026!', returnSecureToken: true })
+            });
+            const loginData = await loginRes.json();
+            const token = loginData.idToken;
+            if (!token) throw new Error('No token');
+
+            const r = await fetch('/api/create-checkout-session', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+              body: JSON.stringify({ planType: 'does_not_exist' })
+            });
+            if (r.status < 400) throw new Error('Expected error status, got ' + r.status);
+            const data = await r.json();
+            if (data.error && data.error.includes('STRIPE_PRICE_ID')) throw new Error('Error leaks env var names: ' + data.error);
+          })()
+
+  # ── 9. Pricing page with auth context ──
+  - name: auth_pricing_page
+    steps:
+      - action: navigate
+        url: http://localhost:3000/pricing
+        timeout: 15000
+      - action: assert
+        type: visible
+        selector: "h1, button"
+        timeout: 10000
+      - action: evaluate
+        expression: |
+          (() => {
+            const text = document.body.innerText;
+            if (!text.includes('4.99')) throw new Error('Missing monthly price');
+          })()
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 60000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true
