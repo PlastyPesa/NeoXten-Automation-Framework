@@ -1,0 +1,106 @@
+# NeoXten Automation — PlastyPesa Admin Dashboard
+# Tests that admin dashboard pages load correctly.
+# Requires: cd plastypesa-admin-dashboard/lib/frontend && npm run dev
+
+project:
+  type: nextjs
+  root: ../plastypesa-admin-dashboard/lib/frontend
+  nextjs:
+    script: npm run dev
+    url: http://localhost:8080
+
+flows:
+  # ── Public pages ──
+  - name: landing_page_loads
+    steps:
+      - action: navigate
+        url: http://localhost:8080/
+        timeout: 15000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('recycle') && !body.includes('plastypesa') && !body.includes('plasty')) {
+              throw new Error('Landing page did not render PlastyPesa content: ' + body.substring(0, 300));
+            }
+          })()
+
+  - name: login_page_loads
+    steps:
+      - action: navigate
+        url: http://localhost:8080/login
+        timeout: 15000
+      - action: wait
+        timeout: 3000
+      - action: assert
+        type: visible
+        selector: "input, form"
+        timeout: 10000
+
+  - name: collector_signup_loads
+    steps:
+      - action: navigate
+        url: http://localhost:8080/collector-signup
+        timeout: 15000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('collector') && !body.includes('store') && !body.includes('sign')) {
+              throw new Error('Collector signup page did not render: ' + body.substring(0, 300));
+            }
+          })()
+
+  - name: privacy_policy_loads
+    steps:
+      - action: navigate
+        url: http://localhost:8080/privacy-policy
+        timeout: 15000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = (document.body.innerText || '').toLowerCase();
+            if (!body.includes('privacy') && !body.includes('policy')) {
+              throw new Error('Privacy policy page did not render: ' + body.substring(0, 300));
+            }
+          })()
+
+  # ── Protected pages (should redirect to login or show auth gate) ──
+  - name: dashboard_requires_auth
+    steps:
+      - action: navigate
+        url: http://localhost:8080/dashboard
+        timeout: 15000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => {
+            const href = window.location.href;
+            const body = (document.body.innerText || '').toLowerCase();
+            const isLoginPage = href.includes('/login') || href.endsWith('/');
+            const hasLoginForm = body.includes('sign in') || body.includes('login') || body.includes('email');
+            const hasDashboard = body.includes('plastic collected') || body.includes('dashboard');
+            if (hasDashboard) {
+              throw new Error('Dashboard loaded without auth — should redirect to login');
+            }
+          })()
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 60000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

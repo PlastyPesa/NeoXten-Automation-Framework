@@ -1,0 +1,104 @@
+# NeoXten Automation — PlastyPesa Backend API
+# Tests that critical API endpoints enforce authentication.
+# Uses the admin dashboard Vite dev server as browser context,
+# then makes fetch() calls to the production API Gateway.
+# NOTE: These tests verify auth enforcement only — no write operations.
+
+project:
+  type: nextjs
+  root: ../plastypesa-admin-dashboard/lib/frontend
+  nextjs:
+    script: npm run dev
+    url: http://localhost:8080
+
+flows:
+  # ── Feature routes must require auth (Phase 1 security fix) ──
+  - name: feature_presigned_url_requires_auth
+    steps:
+      - action: navigate
+        url: http://localhost:8080/
+        timeout: 20000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/feature/generate-presigned-url', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({})
+            });
+            if (r.status === 200) throw new Error('SECURITY: presigned-url endpoint returned 200 without auth — must require authentication');
+            if (r.status !== 403 && r.status !== 401) throw new Error('Expected 401 or 403 for unauthenticated request, got ' + r.status);
+          })()
+
+  - name: feature_reward_calc_requires_auth
+    steps:
+      - action: navigate
+        url: http://localhost:8080/
+        timeout: 15000
+      - action: wait
+        timeout: 2000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/feature/calculate-reward-points', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({})
+            });
+            if (r.status === 200) throw new Error('SECURITY: calculate-reward-points endpoint returned 200 without auth — must require authentication');
+            if (r.status !== 403 && r.status !== 401) throw new Error('Expected 401 or 403 for unauthenticated request, got ' + r.status);
+          })()
+
+  # ── Auth endpoint responds (not dead) ──
+  - name: auth_login_endpoint_responds
+    steps:
+      - action: navigate
+        url: http://localhost:8080/
+        timeout: 15000
+      - action: wait
+        timeout: 2000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'test@test.com', otp: '000000' })
+            });
+            if (r.status === 404) throw new Error('Auth login endpoint returned 404 — endpoint not found');
+            if (r.status >= 500) throw new Error('Auth login endpoint returned ' + r.status + ' — server error');
+          })()
+
+  # ── Protected endpoints require auth ──
+  - name: user_profile_requires_auth
+    steps:
+      - action: navigate
+        url: http://localhost:8080/
+        timeout: 15000
+      - action: wait
+        timeout: 2000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/user/my-profile', {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            if (r.status === 200) throw new Error('SECURITY: my-profile returned 200 without auth');
+            if (r.status !== 403 && r.status !== 401) throw new Error('Expected 401 or 403 for unauthenticated request, got ' + r.status);
+          })()
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 60000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: false
+  consoleLog: true
