@@ -74,7 +74,8 @@ async function run() {
     }
   });
 
-  // Admin login should respond (not 404).
+  // Admin login should respond (not 404). 500 is expected for invalid credentials
+  // due to pre-existing bug: catch block hardcodes status(500) instead of using error.status.
   await test('admin_login_endpoint_exists', async () => {
     const r = await fetch(`${API_BASE}/auth/admin-login`, {
       method: 'POST',
