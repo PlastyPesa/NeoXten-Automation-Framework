@@ -1,0 +1,137 @@
+# NeoXten Automation — PlastyPesa E2E API Tests
+# Tests critical user flows: login, profile, ads, reward-history
+
+project:
+  type: nextjs
+  root: ../plastypesa-admin-dashboard/lib/frontend
+  nextjs:
+    script: npm run dev
+    url: http://localhost:8081
+
+flows:
+  # ── Login with email+password ──
+  - name: login_with_email_password
+    steps:
+      - action: navigate
+        url: http://localhost:8081/
+        timeout: 20000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'MaryJay11987.' })
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('Login failed with status ' + r.status + ': ' + JSON.stringify(data));
+            if (data.type !== 'success') throw new Error('Login response not success: ' + JSON.stringify(data));
+            if (!data.token) throw new Error('No token in login response');
+            window.__plastyToken = data.token;
+            window.__plastyUserId = data.user?._id;
+          })()
+
+  # ── Get user profile (points must show) ──
+  - name: get_user_profile_with_points
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token — login test must run first');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/user/my-profile', {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('Profile fetch failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Profile response not success: ' + JSON.stringify(data));
+            const user = data.data;
+            if (!user.weeklyStats) throw new Error('Missing weeklyStats in profile');
+            if (!user.lifetimeStats) throw new Error('Missing lifetimeStats in profile');
+            if (typeof user.lifetimeStats.totalPoints !== 'number') throw new Error('lifetimeStats.totalPoints is not a number');
+            if (user.lifetimeStats.totalPoints < 0) throw new Error('lifetimeStats.totalPoints is negative');
+          })()
+
+  # ── Ads watch count endpoint works ──
+  - name: ads_watch_count_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const today = new Date().toISOString().split('T')[0];
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/ads/watch/count?date=' + today, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('Ads count failed: ' + r.status + ' ' + JSON.stringify(data));
+            if (data.type !== 'success') throw new Error('Ads count not success: ' + JSON.stringify(data));
+            if (typeof data.data.perAdPoints !== 'number' || data.data.perAdPoints <= 0) throw new Error('perAdPoints invalid: ' + data.data.perAdPoints);
+            if (typeof data.data.maxPerDay !== 'number' || data.data.maxPerDay <= 0) throw new Error('maxPerDay invalid: ' + data.data.maxPerDay);
+            if (typeof data.data.remaining !== 'number') throw new Error('remaining invalid');
+            if (typeof data.data.count !== 'number') throw new Error('count invalid');
+          })()
+
+  # ── Ads watch count requires auth ──
+  - name: ads_watch_count_requires_auth
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/ads/watch/count?date=2026-03-15', {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            if (r.status === 200) throw new Error('SECURITY: ads/watch/count returned 200 without auth');
+            if (r.status !== 403 && r.status !== 401) throw new Error('Expected 401 or 403, got ' + r.status);
+          })()
+
+  # ── Reward history endpoint works ──
+  - name: reward_history_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/transaction/reward-history?type=lifetime&page=1&limit=10', {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('Reward history failed: ' + r.status + ' ' + JSON.stringify(data));
+            if (data.type !== 'success') throw new Error('Reward history not success: ' + JSON.stringify(data));
+            if (!data.data) throw new Error('No data in reward history response');
+            if (!data.data.summary) throw new Error('No summary in reward history');
+            if (typeof data.data.summary.totalPoints !== 'number') throw new Error('totalPoints is not a number');
+            if (!data.data.pagination) throw new Error('No pagination in reward history');
+          })()
+
+  # ── Reward history requires auth ──
+  - name: reward_history_requires_auth
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/transaction/reward-history?type=lifetime&page=1&limit=10', {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            if (r.status === 200) throw new Error('SECURITY: reward-history returned 200 without auth');
+            if (r.status !== 403 && r.status !== 401) throw new Error('Expected 401 or 403, got ' + r.status);
+          })()
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 60000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: false
+  consoleLog: true

@@ -9,14 +9,14 @@ project:
   root: ../plastypesa-admin-dashboard/lib/frontend
   nextjs:
     script: npm run dev
-    url: http://localhost:8080
+    url: http://localhost:8081
 
 flows:
   # ── Feature routes must require auth (Phase 1 security fix) ──
   - name: feature_presigned_url_requires_auth
     steps:
       - action: navigate
-        url: http://localhost:8080/
+        url: http://localhost:8081/
         timeout: 20000
       - action: wait
         timeout: 3000
@@ -35,7 +35,7 @@ flows:
   - name: feature_reward_calc_requires_auth
     steps:
       - action: navigate
-        url: http://localhost:8080/
+        url: http://localhost:8081/
         timeout: 15000
       - action: wait
         timeout: 2000
@@ -55,7 +55,7 @@ flows:
   - name: auth_login_endpoint_responds
     steps:
       - action: navigate
-        url: http://localhost:8080/
+        url: http://localhost:8081/
         timeout: 15000
       - action: wait
         timeout: 2000
@@ -71,11 +71,34 @@ flows:
             if (r.status >= 500) throw new Error('Auth login endpoint returned ' + r.status + ' — server error');
           })()
 
+  # ── Forgot password endpoint responds (user route exists) ──
+  - name: auth_forgot_password_endpoint_responds
+    steps:
+      - action: navigate
+        url: http://localhost:8081/
+        timeout: 15000
+      - action: wait
+        timeout: 2000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/auth/forgot-password', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'test@test.com', password: 'test123', otp: '000000' })
+            });
+            const body = await r.json();
+            if (r.status >= 500) throw new Error('User forgot-password endpoint returned ' + r.status + ' — server error');
+            if (body.message && body.message.includes('No account found')) return;
+            if (body.message && body.message.includes('OTP')) return;
+            if (r.status === 404 && !body.type) throw new Error('User forgot-password endpoint route missing — API Gateway 404');
+          })()
+
   # ── Protected endpoints require auth ──
   - name: user_profile_requires_auth
     steps:
       - action: navigate
-        url: http://localhost:8080/
+        url: http://localhost:8081/
         timeout: 15000
       - action: wait
         timeout: 2000

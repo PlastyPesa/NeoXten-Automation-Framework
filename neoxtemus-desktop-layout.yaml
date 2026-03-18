@@ -1,0 +1,343 @@
+# Neoxtemus — Desktop layout parity assertions (CDP = real Tauri Windows app)
+# Verifies layout correctness for desktop-specific issues that were found during parity review:
+# - ViewHeader not overlapping TitleBar/CommandBar trigger zone
+# - Scroll containers working correctly
+# - Modal overlays covering full viewport
+# - Sticky headers positioned correctly
+# - No content clipped behind fixed elements
+# Run: node dist/cli/index.js run --config neoxtemus-desktop-layout.yaml
+preRun: node scripts/clean-neoxtemus-state.js
+
+project:
+  type: tauri
+  root: ../neoxtemus/neoxtemus-app
+  tauri:
+    strategy: cdp
+    devCommand: "npm run tauri dev"
+    devCwd: .
+    devUrl: http://localhost:1420
+    cdpPort: 9222
+    startupTimeoutMs: 120000
+
+flows:
+  # ─── Setup: onboard + create vault ──────────────────────────────
+  - name: onboard
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='app-root']"
+        timeout: 30000
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-screen']"
+        timeout: 10000
+      - action: click
+        selector: "[data-testid='get-started-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: type
+        selector: "[data-testid='master-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='confirm-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='next-step-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: type
+        selector: "[data-testid='setup-pin-0']"
+        text: "1"
+      - action: type
+        selector: "[data-testid='setup-pin-1']"
+        text: "2"
+      - action: type
+        selector: "[data-testid='setup-pin-2']"
+        text: "3"
+      - action: type
+        selector: "[data-testid='setup-pin-3']"
+        text: "4"
+      - action: type
+        selector: "[data-testid='setup-pin-4']"
+        text: "5"
+      - action: type
+        selector: "[data-testid='setup-pin-5']"
+        text: "6"
+      - action: click
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 20000
+      - action: wait
+        timeout: 20000
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-view']"
+        timeout: 25000
+
+  # ─── Layout: TitleBar is fixed at top ───────────────────────────
+  - name: layout_titlebar
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const tb = document.querySelector('.titlebar');
+            if (!tb) throw new Error('TitleBar not found (expected on desktop)');
+            const style = window.getComputedStyle(tb);
+            if (style.position !== 'fixed')
+              throw new Error('TitleBar position: expected "fixed", got "' + style.position + '"');
+            const rect = tb.getBoundingClientRect();
+            if (rect.top !== 0)
+              throw new Error('TitleBar top: expected 0, got ' + rect.top);
+            if (rect.height < 28 || rect.height > 40)
+              throw new Error('TitleBar height: expected 28-40px, got ' + rect.height);
+          })()
+
+  # ─── Layout: Overview header not clipped behind TitleBar ────────
+  - name: layout_overview_header
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-view']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const titlebar = document.querySelector('.titlebar');
+            const header = document.querySelector('[data-testid="overview-view"] .view-header, [data-testid="overview-view"] header');
+            if (!header) throw new Error('Overview header not found');
+            const tbBottom = titlebar ? titlebar.getBoundingClientRect().bottom : 0;
+            const headerTop = header.getBoundingClientRect().top;
+            if (headerTop < tbBottom)
+              throw new Error('Overview header overlaps TitleBar: header.top=' + headerTop + ' < titlebar.bottom=' + tbBottom);
+          })()
+
+  # ─── Layout: Vault view header below TitleBar ──────────────────
+  - name: layout_vault_header
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const titlebar = document.querySelector('.titlebar');
+            const header = document.querySelector('[data-testid="vault-view"] .view-header, [data-testid="vault-view"] header');
+            if (!header) throw new Error('Vault header not found');
+            const tbBottom = titlebar ? titlebar.getBoundingClientRect().bottom : 0;
+            const headerTop = header.getBoundingClientRect().top;
+            if (headerTop < tbBottom)
+              throw new Error('Vault header overlaps TitleBar: header.top=' + headerTop + ' < titlebar.bottom=' + tbBottom);
+          })()
+
+  # ─── Layout: OCR extractor header below TitleBar ────────────────
+  - name: layout_ocr_header
+    steps:
+      - action: click
+        selector: "[data-testid='dock-ocr']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='ocr-extractor']"
+        timeout: 8000
+      - action: evaluate
+        expression: |
+          (() => {
+            const titlebar = document.querySelector('.titlebar');
+            const header = document.querySelector('[data-testid="ocr-extractor"] .view-header, [data-testid="ocr-extractor"] header');
+            if (!header) throw new Error('OCR header not found');
+            const tbBottom = titlebar ? titlebar.getBoundingClientRect().bottom : 0;
+            const headerTop = header.getBoundingClientRect().top;
+            if (headerTop < tbBottom)
+              throw new Error('OCR header overlaps TitleBar: header.top=' + headerTop + ' < titlebar.bottom=' + tbBottom);
+          })()
+
+  # ─── Layout: Settings header below TitleBar ─────────────────────
+  - name: layout_settings_header
+    steps:
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const titlebar = document.querySelector('.titlebar');
+            const header = document.querySelector('[data-testid="settings-view"] .view-header, [data-testid="settings-view"] header');
+            if (!header) throw new Error('Settings header not found');
+            const tbBottom = titlebar ? titlebar.getBoundingClientRect().bottom : 0;
+            const headerTop = header.getBoundingClientRect().top;
+            if (headerTop < tbBottom)
+              throw new Error('Settings header overlaps TitleBar: header.top=' + headerTop + ' < titlebar.bottom=' + tbBottom);
+          })()
+
+  # ─── Layout: Health header below TitleBar ───────────────────────
+  - name: layout_health_header
+    steps:
+      - action: click
+        selector: "[data-testid='dock-health']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='health-view']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const titlebar = document.querySelector('.titlebar');
+            const header = document.querySelector('[data-testid="health-view"] .view-header, [data-testid="health-view"] header');
+            if (!header) throw new Error('Health header not found');
+            const tbBottom = titlebar ? titlebar.getBoundingClientRect().bottom : 0;
+            const headerTop = header.getBoundingClientRect().top;
+            if (headerTop < tbBottom)
+              throw new Error('Health header overlaps TitleBar: header.top=' + headerTop + ' < titlebar.bottom=' + tbBottom);
+          })()
+
+  # ─── Layout: Files header below TitleBar ────────────────────────
+  - name: layout_files_header
+    steps:
+      - action: click
+        selector: "[data-testid='dock-files']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-view']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const titlebar = document.querySelector('.titlebar');
+            const header = document.querySelector('[data-testid="files-view"] .view-header, [data-testid="files-view"] header');
+            if (!header) throw new Error('Files header not found');
+            const tbBottom = titlebar ? titlebar.getBoundingClientRect().bottom : 0;
+            const headerTop = header.getBoundingClientRect().top;
+            if (headerTop < tbBottom)
+              throw new Error('Files header overlaps TitleBar: header.top=' + headerTop + ' < titlebar.bottom=' + tbBottom);
+          })()
+
+  # ─── Layout: FloatingDock visible and at bottom ─────────────────
+  - name: layout_floating_dock
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='floating-dock']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const dock = document.querySelector('[data-testid="floating-dock"]');
+            if (!dock) throw new Error('FloatingDock not found');
+            const rect = dock.getBoundingClientRect();
+            const vh = window.innerHeight;
+            if (rect.bottom > vh + 2)
+              throw new Error('Dock extends below viewport: rect.bottom=' + rect.bottom + ' > vh=' + vh);
+            if (rect.top < vh * 0.7)
+              throw new Error('Dock too high: rect.top=' + rect.top + ' (viewport height=' + vh + ')');
+          })()
+
+  # ─── Layout: Command trigger not behind TitleBar ────────────────
+  - name: layout_command_trigger
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const trigger = document.querySelector('[data-testid="command-trigger"]');
+            if (!trigger) throw new Error('Command trigger not found');
+            const titlebar = document.querySelector('.titlebar');
+            const tbBottom = titlebar ? titlebar.getBoundingClientRect().bottom : 0;
+            const triggerRect = trigger.getBoundingClientRect();
+            if (triggerRect.top < tbBottom)
+              throw new Error('Command trigger overlaps TitleBar: trigger.top=' + triggerRect.top + ' < titlebar.bottom=' + tbBottom);
+          })()
+
+  # ─── Layout: Modal covers viewport correctly ───────────────────
+  - name: layout_modal_overlay
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: click
+        selector: "[data-testid='add-entry-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='add-entry-modal']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const overlay = document.querySelector('.modal-overlay');
+            if (!overlay) throw new Error('Modal overlay not found');
+            const rect = overlay.getBoundingClientRect();
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            if (rect.width < vw - 2 || rect.height < vh - 2)
+              throw new Error('Modal overlay does not cover viewport: ' + rect.width + 'x' + rect.height + ' vs ' + vw + 'x' + vh);
+          })()
+      - action: click
+        selector: "[data-testid='add-entry-close']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: hidden
+        selector: "[data-testid='add-entry-modal']"
+        timeout: 5000
+
+  # ─── Layout: CommandBar overlay covers viewport ─────────────────
+  - name: layout_command_overlay
+    steps:
+      - action: click
+        selector: "[data-testid='command-trigger']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='command-overlay']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const overlay = document.querySelector('[data-testid="command-overlay"]');
+            if (!overlay) throw new Error('Command overlay not found');
+            const rect = overlay.getBoundingClientRect();
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            if (rect.width < vw - 2 || rect.height < vh - 2)
+              throw new Error('Command overlay does not cover viewport: ' + rect.width + 'x' + rect.height + ' vs ' + vw + 'x' + vh);
+          })()
+      - action: click
+        selector: "[data-testid='command-overlay']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+
+gates:
+  startupMaxMs: 120000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

@@ -1,0 +1,383 @@
+# Neoxtemus — Vault interactions regression (CDP = real Tauri Windows app)
+# Focused test for vault entry interactions: reveal, copy, search, edit, more menu, delete.
+# These are the most common user actions and were not previously covered by automation.
+# Run: node dist/cli/index.js run --config neoxtemus-vault-interactions.yaml
+preRun: node scripts/clean-neoxtemus-state.js
+
+project:
+  type: tauri
+  root: ../neoxtemus/neoxtemus-app
+  tauri:
+    strategy: cdp
+    devCommand: "npm run tauri dev"
+    devCwd: .
+    devUrl: http://localhost:1420
+    cdpPort: 9222
+    startupTimeoutMs: 120000
+
+flows:
+  # ─── Setup: onboard + create vault ──────────────────────────────
+  - name: onboard_and_create_vault
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='app-root']"
+        timeout: 30000
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-screen']"
+        timeout: 10000
+      - action: click
+        selector: "[data-testid='get-started-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: type
+        selector: "[data-testid='master-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='confirm-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='next-step-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: type
+        selector: "[data-testid='setup-pin-0']"
+        text: "1"
+      - action: type
+        selector: "[data-testid='setup-pin-1']"
+        text: "2"
+      - action: type
+        selector: "[data-testid='setup-pin-2']"
+        text: "3"
+      - action: type
+        selector: "[data-testid='setup-pin-3']"
+        text: "4"
+      - action: type
+        selector: "[data-testid='setup-pin-4']"
+        text: "5"
+      - action: type
+        selector: "[data-testid='setup-pin-5']"
+        text: "6"
+      - action: click
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 20000
+      - action: wait
+        timeout: 20000
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-view']"
+        timeout: 25000
+
+  # ─── Navigate to vault ──────────────────────────────────────────
+  - name: navigate_to_vault
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-empty']"
+        timeout: 5000
+
+  # ─── Add first entry (Login) ────────────────────────────────────
+  - name: add_login_entry
+    steps:
+      - action: click
+        selector: "[data-testid='add-entry-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='add-entry-modal']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const el = document.querySelector('[data-testid="template-login"]');
+            if (!el) throw new Error('template-login not found');
+            el.scrollIntoView({ block: 'center' });
+            el.click();
+          })()
+      - action: wait
+        timeout: 400
+      - action: type
+        selector: "[data-testid='add-name']"
+        text: "Test Login Alpha"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='field-username']"
+        text: "alpha@test.com"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='field-password']"
+        text: "AlphaSecret!999"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='field-url']"
+        text: "https://alpha.example.com"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => { document.querySelector('[data-testid="add-submit"]')?.click(); })()
+      - action: wait
+        timeout: 1500
+      - action: assert
+        type: contains
+        selector: "[data-testid='vault-view']"
+        text: "Test Login Alpha"
+        timeout: 10000
+
+  # ─── Add second entry (Secure Note) ─────────────────────────────
+  - name: add_note_entry
+    steps:
+      - action: click
+        selector: "[data-testid='add-entry-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='add-entry-modal']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const el = document.querySelector('[data-testid="template-secure_note"]');
+            if (!el) throw new Error('template-secure_note not found');
+            el.scrollIntoView({ block: 'center' });
+            el.click();
+          })()
+      - action: wait
+        timeout: 400
+      - action: type
+        selector: "[data-testid='add-name']"
+        text: "Test Note Beta"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='field-content']"
+        text: "This is a secret note for testing"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => { document.querySelector('[data-testid="add-submit"]')?.click(); })()
+      - action: wait
+        timeout: 1500
+      - action: assert
+        type: contains
+        selector: "[data-testid='vault-view']"
+        text: "Test Note Beta"
+        timeout: 10000
+
+  # ─── Reveal first entry ─────────────────────────────────────────
+  - name: reveal_entry
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const btns = document.querySelectorAll('[data-testid^="reveal-"]');
+            if (btns.length === 0) throw new Error('No reveal buttons found');
+            btns[0].click();
+          })()
+      - action: wait
+        timeout: 1500
+      - action: assert
+        type: visible
+        selector: ".entry-value.revealed"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const btns = document.querySelectorAll('[data-testid^="reveal-"]');
+            const first = btns[0];
+            if (!first || !first.textContent?.includes('Hide'))
+              throw new Error('Reveal button should show "Hide" text');
+          })()
+      - action: evaluate
+        expression: |
+          (() => {
+            const btns = document.querySelectorAll('[data-testid^="reveal-"]');
+            btns[0].click();
+          })()
+      - action: wait
+        timeout: 500
+      - action: assert
+        type: hidden
+        selector: ".entry-value.revealed"
+        timeout: 5000
+
+  # ─── Copy entry ─────────────────────────────────────────────────
+  - name: copy_entry
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid^="copy-"]');
+            if (!btn) throw new Error('No copy button found');
+            btn.click();
+          })()
+      - action: wait
+        timeout: 800
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid^="copy-"]');
+            if (!btn) throw new Error('No copy button found');
+            if (!btn.classList.contains('copied') && !btn.textContent?.includes('Copied'))
+              throw new Error('Copy button did not transition to Copied state');
+          })()
+      - action: wait
+        timeout: 2500
+
+  # ─── Search entries ─────────────────────────────────────────────
+  - name: search_entries
+    steps:
+      - action: type
+        selector: "[data-testid='vault-search-input']"
+        text: "Alpha"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: contains
+        selector: "[data-testid='entries-list']"
+        text: "Test Login Alpha"
+        timeout: 5000
+      - action: assert
+        type: not-contains
+        selector: "[data-testid='entries-list']"
+        text: "Test Note Beta"
+        timeout: 3000
+      - action: type
+        selector: "[data-testid='vault-search-input']"
+        text: "Beta"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: contains
+        selector: "[data-testid='entries-list']"
+        text: "Test Note Beta"
+        timeout: 5000
+      - action: assert
+        type: not-contains
+        selector: "[data-testid='entries-list']"
+        text: "Test Login Alpha"
+        timeout: 3000
+      - action: type
+        selector: "[data-testid='vault-search-input']"
+        text: ""
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: count
+        selector: "[data-testid^='entry-']"
+        count: 2
+        timeout: 5000
+
+  # ─── Category filter ────────────────────────────────────────────
+  - name: category_filter
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='category-pills']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='category-all']"
+        timeout: 5000
+
+  # ─── More menu → export button visible ──────────────────────────
+  - name: more_menu_actions
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid^="more-"]');
+            if (!btn) throw new Error('No more button found');
+            btn.click();
+          })()
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid^='entry-export-']"
+        timeout: 3000
+      - action: assert
+        type: visible
+        selector: ".dropdown-item.danger"
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => { document.body.click(); })()
+      - action: wait
+        timeout: 300
+
+  # ─── Delete an entry ────────────────────────────────────────────
+  - name: delete_entry
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const btns = document.querySelectorAll('[data-testid^="more-"]');
+            const last = btns[btns.length - 1];
+            if (!last) throw new Error('No more button found');
+            last.click();
+          })()
+      - action: wait
+        timeout: 400
+      - action: evaluate
+        expression: |
+          (() => {
+            const items = document.querySelectorAll('.dropdown-item.danger');
+            const deleteBtn = items[items.length - 1];
+            if (!deleteBtn) throw new Error('No delete button found');
+            deleteBtn.click();
+          })()
+      - action: wait
+        timeout: 400
+      - action: evaluate
+        expression: |
+          (() => {
+            const confirms = document.querySelectorAll('.dropdown-item.danger.confirm');
+            const confirmBtn = confirms[confirms.length - 1];
+            if (!confirmBtn) throw new Error('No confirm delete button found');
+            confirmBtn.click();
+          })()
+      - action: wait
+        timeout: 1000
+      - action: assert
+        type: count
+        selector: "[data-testid^='entry-']"
+        count: 1
+        timeout: 5000
+
+  # ─── Final vault state check ────────────────────────────────────
+  - name: final_vault_state
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const state = window.__NEOXTEMUS_TEST_STATE__();
+            if (!state) throw new Error('Test state not available');
+            if (state.vaultStatus.entry_count !== 1)
+              throw new Error('Expected 1 entry after delete, got ' + state.vaultStatus.entry_count);
+          })()
+
+gates:
+  startupMaxMs: 120000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

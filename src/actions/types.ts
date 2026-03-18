@@ -50,10 +50,18 @@ export interface WaitAction {
 
 export interface AssertAction {
   type: 'assert';
-  assertType: 'visible' | 'hidden' | 'contains' | 'not-contains' | 'exists';
+  assertType: 'visible' | 'hidden' | 'contains' | 'not-contains' | 'exists' | 'css' | 'attribute' | 'count';
   selector: string;
   text?: string;
   timeout?: number;
+  /** CSS property name for assertType: 'css' */
+  property?: string;
+  /** Expected value for css/attribute assertions */
+  value?: string;
+  /** HTML attribute name for assertType: 'attribute' */
+  attribute?: string;
+  /** Expected minimum element count for assertType: 'count' */
+  count?: number;
 }
 
 export interface ScrollAction {

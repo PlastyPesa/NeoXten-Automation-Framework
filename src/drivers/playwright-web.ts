@@ -81,6 +81,10 @@ export class PlaywrightWebDriver implements UIDriver {
             await loc.waitFor({ state: 'visible', timeout });
             return { success: true };
           }
+          if (step.type === 'hidden' || step.type === 'timeout') {
+            await loc.waitFor({ state: 'hidden', timeout });
+            return { success: true };
+          }
           if (step.type === 'contains') {
             await loc.waitFor({ state: 'visible', timeout });
             const text = await loc.textContent();
@@ -89,8 +93,46 @@ export class PlaywrightWebDriver implements UIDriver {
             }
             return { success: true };
           }
-          if (step.type === 'timeout') {
-            await loc.waitFor({ state: 'hidden', timeout });
+          if (step.type === 'not-contains') {
+            await loc.waitFor({ state: 'visible', timeout });
+            const text = await loc.textContent();
+            if (text?.includes(step.text ?? '')) {
+              return { success: false, error: `Expected NOT to contain "${step.text}" but it was present` };
+            }
+            return { success: true };
+          }
+          if (step.type === 'css') {
+            const prop = (step as { property?: string }).property;
+            const expected = (step as { value?: string }).value;
+            if (!prop) return { success: false, error: 'css assert requires property' };
+            await loc.waitFor({ state: 'attached', timeout });
+            const actual = await loc.evaluate((el, p) => window.getComputedStyle(el).getPropertyValue(p), prop);
+            if (expected && actual.trim() !== expected.trim()) {
+              return { success: false, error: `CSS "${prop}": expected "${expected}", got "${actual}"` };
+            }
+            return { success: true };
+          }
+          if (step.type === 'attribute') {
+            const attr = (step as { attribute?: string }).attribute;
+            const expected = (step as { value?: string }).value;
+            if (!attr) return { success: false, error: 'attribute assert requires attribute name' };
+            await loc.waitFor({ state: 'attached', timeout });
+            const actual = await loc.getAttribute(attr);
+            if (expected !== undefined) {
+              if (actual !== expected) {
+                return { success: false, error: `Attribute "${attr}": expected "${expected}", got "${actual}"` };
+              }
+            } else if (actual === null) {
+              return { success: false, error: `Attribute "${attr}" not present on element` };
+            }
+            return { success: true };
+          }
+          if (step.type === 'count') {
+            const expected = (step as { count?: number }).count ?? 0;
+            const actual = await page.locator(step.selector).count();
+            if (actual < expected) {
+              return { success: false, error: `Element count: expected >= ${expected}, got ${actual}` };
+            }
             return { success: true };
           }
           return { success: false, error: `Unknown assert type: ${step.type}` };
@@ -107,6 +149,14 @@ export class PlaywrightWebDriver implements UIDriver {
           if (!expression) return { success: false, error: 'evaluate step requires expression' };
           await page.evaluate(expression);
           return { success: true };
+        }
+        case 'getTestState': {
+          const state = await page.evaluate(() => {
+            const fn = (window as unknown as Record<string, unknown>).__NEOXTEMUS_TEST_STATE__;
+            if (typeof fn === 'function') return fn();
+            return null;
+          });
+          return { success: true, testState: (state as Record<string, unknown>) ?? undefined };
         }
         default:
           return { success: false, error: `Unknown action: ${step.action}` };

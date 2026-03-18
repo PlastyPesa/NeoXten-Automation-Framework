@@ -5,12 +5,20 @@ export const FlowStepSchema = z.object({
   selector: z.string().optional(),
   text: z.string().optional(),
   url: z.string().optional(),
-  type: z.enum(['visible', 'contains', 'timeout']).optional(),
+  type: z.enum(['visible', 'hidden', 'contains', 'not-contains', 'css', 'attribute', 'count', 'timeout']).optional(),
   timeout: z.number().optional(),
   /** File paths for setInputFiles (relative to cwd or absolute) */
   files: z.array(z.string()).optional(),
   /** JS expression for evaluate (run in page context) */
   expression: z.string().optional(),
+  /** CSS property name for type: 'css' assertions */
+  property: z.string().optional(),
+  /** Expected value for css/attribute assertions */
+  value: z.string().optional(),
+  /** HTML attribute name for type: 'attribute' assertions */
+  attribute: z.string().optional(),
+  /** Expected element count for type: 'count' assertions */
+  count: z.number().optional(),
 });
 
 export const FlowSchema = z.object({

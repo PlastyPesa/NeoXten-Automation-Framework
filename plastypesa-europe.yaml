@@ -1,0 +1,257 @@
+# NeoXten Automation -- PlastyPesa Europe Features E2E
+# Tests new batch 1-7 endpoints: pledges, scan, badges, news, tips, challenges,
+# city rankings, prize draw, fund impact, impact stories
+
+project:
+  type: nextjs
+  root: ../plastypesa-admin-dashboard/lib/frontend
+  nextjs:
+    script: npm run dev
+    url: http://localhost:8081
+
+flows:
+  - name: europe_login
+    steps:
+      - action: navigate
+        url: http://localhost:8081/
+        timeout: 20000
+      - action: wait
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'MaryJay11987.' })
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('Login failed: ' + r.status);
+            if (!data.token) throw new Error('No token');
+            window.__plastyToken = data.token;
+          })()
+
+  - name: carbon_footprint_returns_plastic_iq
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/carbon-footprint', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('carbon-footprint failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success: ' + JSON.stringify(data));
+            if (typeof data.data.plasticIQ !== 'number') throw new Error('plasticIQ missing or not number');
+            if (typeof data.data.estimatedCO2OffsetKg !== 'number') throw new Error('estimatedCO2OffsetKg missing');
+          })()
+
+  - name: daily_tip_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/daily-tip', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('daily-tip failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+          })()
+
+  - name: plastic_news_public_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/plastic-news');
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('plastic-news failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+          })()
+
+  - name: weekly_challenge_public_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/weekly-challenge');
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('weekly-challenge failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+          })()
+
+  - name: pledges_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/pledges', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('pledges failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success: ' + JSON.stringify(data));
+            if (!Array.isArray(data.data.pledges)) throw new Error('pledges not array');
+            if (typeof data.data.todayCount !== 'number') throw new Error('todayCount missing');
+          })()
+
+  - name: community_impact_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/community-impact', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('community-impact failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+            if (typeof data.data.totalPledges !== 'number') throw new Error('totalPledges missing');
+          })()
+
+  - name: badges_check_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/check-badges', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('check-badges failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+            if (!Array.isArray(data.data.definitions)) throw new Error('definitions not array');
+            if (!Array.isArray(data.data.badges)) throw new Error('badges not array');
+          })()
+
+  - name: badge_definitions_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/badges', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('badges failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+            if (!Array.isArray(data.data)) throw new Error('data not array');
+            if (data.data.length < 5) throw new Error('Expected at least 5 badges, got ' + data.data.length);
+          })()
+
+  - name: city_rankings_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/city-rankings', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('city-rankings failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+          })()
+
+  - name: prize_draw_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/prize-draw', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('prize-draw failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+            if (typeof data.data.daysRemaining !== 'number') throw new Error('daysRemaining missing');
+          })()
+
+  - name: fund_impact_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/fund-impact', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('fund-impact failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+          })()
+
+  - name: impact_stories_endpoint_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/impact-stories', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('impact-stories failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+          })()
+
+  - name: share_card_quiz_result_works
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            if (!window.__plastyToken) throw new Error('No auth token');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/share-card/plastic-iq', {
+              headers: { 'Authorization': 'Bearer ' + window.__plastyToken }
+            });
+            const data = await r.json();
+            if (r.status !== 200) throw new Error('share-card failed: ' + r.status);
+            if (data.type !== 'success') throw new Error('Not success');
+            if (!data.data.text) throw new Error('No text in share card');
+          })()
+
+  - name: pledges_require_auth
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/pledges');
+            if (r.status === 200) throw new Error('SECURITY: pledges returned 200 without auth');
+            if (r.status !== 403 && r.status !== 401) throw new Error('Expected 401/403, got ' + r.status);
+          })()
+
+  - name: scan_plastic_requires_auth
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/scan-plastic', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image: 'test' })
+            });
+            if (r.status === 200) throw new Error('SECURITY: scan-plastic returned 200 without auth');
+            if (r.status !== 403 && r.status !== 401) throw new Error('Expected 401/403, got ' + r.status);
+          })()
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 60000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: false
+  consoleLog: true

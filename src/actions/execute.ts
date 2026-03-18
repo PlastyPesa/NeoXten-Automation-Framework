@@ -192,6 +192,45 @@ async function performAssert(page: Page, action: AssertAction): Promise<string |
       return undefined;
     }
 
+    case 'css': {
+      if (!action.property) return 'css assert requires property';
+      await loc.waitFor({ state: 'attached', timeout });
+      const actual = await loc.evaluate(
+        (el, p) => window.getComputedStyle(el).getPropertyValue(p),
+        action.property,
+      );
+      if (action.value && actual.trim() !== action.value.trim()) {
+        return `CSS "${action.property}" on "${action.selector}": expected "${action.value}", got "${actual}"`;
+      }
+      return undefined;
+    }
+
+    case 'attribute': {
+      if (!action.attribute) return 'attribute assert requires attribute name';
+      await loc.waitFor({ state: 'attached', timeout });
+      const actual = await loc.evaluate(
+        (el, a) => el.getAttribute(a),
+        action.attribute,
+      );
+      if (action.value !== undefined) {
+        if (actual !== action.value) {
+          return `Attribute "${action.attribute}" on "${action.selector}": expected "${action.value}", got "${actual}"`;
+        }
+      } else if (actual === null) {
+        return `Attribute "${action.attribute}" not present on "${action.selector}"`;
+      }
+      return undefined;
+    }
+
+    case 'count': {
+      const expected = action.count ?? 0;
+      const actual = await page.locator(action.selector).count();
+      if (actual < expected) {
+        return `Element count for "${action.selector}": expected >= ${expected}, got ${actual}`;
+      }
+      return undefined;
+    }
+
     default:
       return `Unknown assert type: ${action.assertType}`;
   }

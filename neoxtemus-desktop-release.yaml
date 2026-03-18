@@ -1,0 +1,660 @@
+# Neoxtemus — Desktop release regression (CDP = real Tauri Windows app)
+# Comprehensive test covering all release-critical flows on Windows/Desktop.
+# Covers: boot, onboarding, vault CRUD + reveal/copy, OCR result UI, settings,
+# health, files, command bar, export, lock/unlock (PIN + password), desktop layout.
+# Run: node dist/cli/index.js run --config neoxtemus-desktop-release.yaml
+preRun: node scripts/clean-neoxtemus-state.js && node -e "require('fs').mkdirSync('fixtures/tmp',{recursive:true})"
+
+project:
+  type: tauri
+  root: ../neoxtemus/neoxtemus-app
+  tauri:
+    strategy: cdp
+    devCommand: "npm run tauri dev"
+    devCwd: .
+    devUrl: http://localhost:1420
+    cdpPort: 9222
+    startupTimeoutMs: 120000
+
+flows:
+  # ─── 1. Boot & Onboarding ───────────────────────────────────────
+  - name: boot_and_onboard
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='app-root']"
+        timeout: 30000
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-screen']"
+        timeout: 10000
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-0']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='get-started-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-1']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='master-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='confirm-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='next-step-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='onboarding-step-2']"
+        timeout: 8000
+      - action: type
+        selector: "[data-testid='setup-pin-0']"
+        text: "1"
+      - action: type
+        selector: "[data-testid='setup-pin-1']"
+        text: "2"
+      - action: type
+        selector: "[data-testid='setup-pin-2']"
+        text: "3"
+      - action: type
+        selector: "[data-testid='setup-pin-3']"
+        text: "4"
+      - action: type
+        selector: "[data-testid='setup-pin-4']"
+        text: "5"
+      - action: type
+        selector: "[data-testid='setup-pin-5']"
+        text: "6"
+      - action: click
+        selector: "[data-testid='create-vault-btn']"
+        timeout: 20000
+      - action: wait
+        timeout: 20000
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-view']"
+        timeout: 25000
+
+  # ─── 2. Overview content verification ───────────────────────────
+  - name: overview_content
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-keys']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-files']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-health']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-quick-actions']"
+        timeout: 5000
+
+  # ─── 3. Full navigation cycle ───────────────────────────────────
+  - name: full_navigation_cycle
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='dock-files']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-view']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='dock-health']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='health-view']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='dock-ocr']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='ocr-extractor']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='dock-overview']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='overview-view']"
+        timeout: 5000
+
+  # ─── 4. Vault: add entry, verify, reveal, copy ─────────────────
+  - name: vault_add_entry
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='add-entry-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='add-entry-modal']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='template-grid']"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const el = document.querySelector('[data-testid="template-login"]');
+            if (!el) throw new Error('template-login not found');
+            el.scrollIntoView({ block: 'center' });
+            el.click();
+          })()
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid='add-name']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='add-name']"
+        text: "Desktop Release Test"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='field-password']"
+        text: "DesktopSecret!123"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='field-username']"
+        text: "testuser@example.com"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => { document.querySelector('[data-testid="add-submit"]')?.click(); })()
+      - action: wait
+        timeout: 1500
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-view']"
+        timeout: 5000
+      - action: assert
+        type: contains
+        selector: "[data-testid='vault-view']"
+        text: "Desktop Release Test"
+        timeout: 10000
+
+  - name: vault_reveal_and_copy
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid^="reveal-"]');
+            if (!btn) throw new Error('No reveal button found');
+            btn.click();
+          })()
+      - action: wait
+        timeout: 1500
+      - action: assert
+        type: visible
+        selector: ".entry-value.revealed"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const revealed = document.querySelector('.entry-value.revealed');
+            if (!revealed) throw new Error('No revealed value found');
+            const text = revealed.textContent || '';
+            if (!text.includes('DesktopSecret') && !text.includes('testuser'))
+              throw new Error('Revealed value does not match: ' + text.slice(0, 50));
+          })()
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid^="reveal-"]');
+            if (!btn) throw new Error('No reveal button found');
+            btn.click();
+          })()
+      - action: wait
+        timeout: 500
+      - action: assert
+        type: visible
+        selector: ".entry-value.masked"
+        timeout: 5000
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid^="copy-"]');
+            if (!btn) throw new Error('No copy button found');
+            btn.click();
+          })()
+      - action: wait
+        timeout: 500
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid^="copy-"]');
+            if (!btn) throw new Error('No copy button found');
+            if (!btn.textContent?.includes('Copied'))
+              throw new Error('Copy button did not change to Copied state');
+          })()
+
+  # ─── 5. Vault search ───────────────────────────────────────────
+  - name: vault_search
+    steps:
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-search-input']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='vault-search-input']"
+        text: "Desktop Release"
+        timeout: 5000
+      - action: wait
+        timeout: 500
+      - action: assert
+        type: contains
+        selector: "[data-testid='entries-list']"
+        text: "Desktop Release Test"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='vault-search-input']"
+        text: "zzzznonexistent"
+        timeout: 5000
+      - action: wait
+        timeout: 500
+      - action: assert
+        type: visible
+        selector: "[data-testid='vault-empty']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='vault-search-input']"
+        text: ""
+        timeout: 5000
+      - action: wait
+        timeout: 500
+
+  # ─── 6. Vault more menu + entry export button ──────────────────
+  - name: vault_more_menu
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid^="more-"]');
+            if (!btn) throw new Error('No more button found');
+            btn.click();
+          })()
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid^='entry-export-']"
+        timeout: 3000
+      - action: evaluate
+        expression: |
+          (() => { document.body.click(); })()
+      - action: wait
+        timeout: 300
+
+  # ─── 7. OCR flow + result UI ────────────────────────────────────
+  - name: ocr_navigate_and_ui
+    steps:
+      - action: click
+        selector: "[data-testid='dock-ocr']"
+        timeout: 5000
+      - action: wait
+        timeout: 800
+      - action: assert
+        type: visible
+        selector: "[data-testid='ocr-extractor']"
+        timeout: 8000
+      - action: assert
+        type: visible
+        selector: "[data-testid='ocr-accuracy-toggle']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='ocr-close']"
+        timeout: 5000
+
+  # ─── 8. Files view + tabs ───────────────────────────────────────
+  - name: files_tabs_navigation
+    steps:
+      - action: click
+        selector: "[data-testid='dock-files']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='files-tabs']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='tab-stored-files']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: assert
+        type: visible
+        selector: "[data-testid='stored-files-content']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='file-upload-btn']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='tab-duplicates']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+      - action: click
+        selector: "[data-testid='tab-import']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+
+  # ─── 9. Health view + password generator ────────────────────────
+  - name: health_view_and_generator
+    steps:
+      - action: click
+        selector: "[data-testid='dock-health']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='health-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='health-score']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='password-generator']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='generate-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='generated-password']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='copy-generated']"
+        timeout: 5000
+      - action: wait
+        timeout: 500
+
+  # ─── 10. Settings: all sections + export buttons ────────────────
+  - name: settings_sections
+    steps:
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='security-section']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='data-section']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='export-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='restore-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='generate-emergency-kit-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='export-audit-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='lock-now-btn']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='timeout-select']"
+        timeout: 5000
+
+  # ─── 11. Export backup + restore roundtrip ──────────────────────
+  - name: export_backup
+    steps:
+      - action: evaluate
+        expression: |
+          (async () => {
+            const p = "C:/Users/Bobby/Documents/NeoXten-Automation-Framework/fixtures/tmp/desktop-release-backup.nex";
+            await window.__NEOXTEMUS_EXPORT_TO_PATH__(p);
+          })()
+      - action: wait
+        timeout: 1500
+
+  - name: restore_backup
+    steps:
+      - action: setInputFiles
+        selector: "[data-testid='restore-file-input']"
+        files:
+          - "C:/Users/Bobby/Documents/NeoXten-Automation-Framework/fixtures/tmp/desktop-release-backup.nex"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='restore-modal']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='restore-password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='restore-confirm-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='unlock-screen']"
+        timeout: 10000
+
+  # ─── 12. Unlock with password after restore ─────────────────────
+  - name: unlock_with_password
+    steps:
+      - action: evaluate
+        expression: |
+          (() => {
+            const btn = document.querySelector('[data-testid="switch-to-password"]');
+            if (btn) btn.click();
+          })()
+      - action: wait
+        timeout: 800
+      - action: type
+        selector: "[data-testid='password-input']"
+        text: "TestMaster!2026#Secure"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='unlock-button']"
+        timeout: 10000
+      - action: wait
+        timeout: 3000
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view'], [data-testid='overview-view'], [data-testid='vault-view']"
+        timeout: 15000
+
+  # ─── 13. Verify entry survived restore ──────────────────────────
+  - name: verify_entry_after_restore
+    steps:
+      - action: click
+        selector: "[data-testid='dock-vault']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: assert
+        type: contains
+        selector: "[data-testid='vault-view']"
+        text: "Desktop Release Test"
+        timeout: 10000
+
+  # ─── 14. Command bar ────────────────────────────────────────────
+  - name: command_bar
+    steps:
+      - action: click
+        selector: "[data-testid='command-trigger']"
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='command-input']"
+        timeout: 5000
+      - action: type
+        selector: "[data-testid='command-input']"
+        text: "Desktop"
+        timeout: 5000
+      - action: wait
+        timeout: 800
+      - action: assert
+        type: visible
+        selector: "[data-testid='command-results'], [data-testid='command-empty']"
+        timeout: 5000
+      - action: click
+        selector: "[data-testid='command-overlay']"
+        timeout: 5000
+      - action: wait
+        timeout: 400
+
+  # ─── 15. Lock and unlock with PIN ───────────────────────────────
+  - name: lock_and_pin_unlock
+    steps:
+      - action: click
+        selector: "[data-testid='dock-settings']"
+        timeout: 5000
+      - action: wait
+        timeout: 600
+      - action: click
+        selector: "[data-testid='lock-now-btn']"
+        timeout: 5000
+      - action: wait
+        timeout: 1200
+      - action: assert
+        type: visible
+        selector: "[data-testid='unlock-screen']"
+        timeout: 8000
+      - action: assert
+        type: visible
+        selector: "[data-testid='pin-section']"
+        timeout: 8000
+      - action: type
+        selector: "[data-testid='pin-input-0']"
+        text: "1"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='pin-input-1']"
+        text: "2"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='pin-input-2']"
+        text: "3"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='pin-input-3']"
+        text: "4"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='pin-input-4']"
+        text: "5"
+        timeout: 2000
+      - action: type
+        selector: "[data-testid='pin-input-5']"
+        text: "6"
+        timeout: 2000
+      - action: wait
+        timeout: 5000
+      - action: assert
+        type: visible
+        selector: "[data-testid='settings-view']"
+        timeout: 20000
+
+  # ─── 16. Final state check via test hook ────────────────────────
+  - name: final_state_check
+    steps:
+      - action: getTestState
+      - action: evaluate
+        expression: |
+          (() => {
+            const state = window.__NEOXTEMUS_TEST_STATE__();
+            if (!state) throw new Error('Test state not available');
+            if (!state.vaultStatus) throw new Error('vaultStatus missing');
+            if (state.vaultStatus.locked) throw new Error('Vault should be unlocked');
+            if (state.vaultStatus.entry_count < 1) throw new Error('Expected at least 1 entry');
+          })()
+
+gates:
+  startupMaxMs: 120000
+  noConsoleErrors: false
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: true
+  consoleLog: true

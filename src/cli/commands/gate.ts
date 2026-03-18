@@ -124,6 +124,12 @@ const NEOXTEMUS_STEPS: GateStep[] = [
     outSubDir: 'neoxtemus-vault',
   },
   {
+    name: 'Neoxtemus Vault Interactions',
+    type: 'yaml',
+    config: 'neoxtemus-vault-interactions.yaml',
+    outSubDir: 'neoxtemus-vault-interactions',
+  },
+  {
     name: 'Neoxtemus OCR',
     type: 'yaml',
     config: 'neoxtemus-ocr-test.yaml',
@@ -134,6 +140,12 @@ const NEOXTEMUS_STEPS: GateStep[] = [
     type: 'yaml',
     config: 'neoxtemus-export-roundtrip.yaml',
     outSubDir: 'neoxtemus-export-roundtrip',
+  },
+  {
+    name: 'Neoxtemus Desktop Layout',
+    type: 'yaml',
+    config: 'neoxtemus-desktop-layout.yaml',
+    outSubDir: 'neoxtemus-desktop-layout',
   },
   {
     name: 'Neoxtemus Rust Tests',
