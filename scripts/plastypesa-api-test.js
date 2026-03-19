@@ -111,6 +111,30 @@ async function run() {
     }
   });
 
+  // Home sorting proof (SORT_PROOF MVP)
+  await test('sort_proof_config_requires_auth', async () => {
+    const r = await fetch(`${API_BASE}/home/sort-proof/config`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const body = await r.text();
+    if (r.status !== 403 && r.status !== 401) {
+      throw new Error(`Expected 401 or 403 (auth required), got ${r.status}. Body: ${body.substring(0, 200)}`);
+    }
+  });
+
+  await test('sort_proof_submit_requires_auth', async () => {
+    const r = await fetch(`${API_BASE}/home/sort-proof`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: 'abc', streamA: 'PET', streamB: 'HDPE' }),
+    });
+    const body = await r.text();
+    if (r.status !== 403 && r.status !== 401) {
+      throw new Error(`Expected 401 or 403 (auth required), got ${r.status}. Body: ${body.substring(0, 200)}`);
+    }
+  });
+
   // Admin login should respond (not 404). 500 is expected for invalid credentials
   // due to pre-existing bug: catch block hardcodes status(500) instead of using error.status.
   await test('admin_login_endpoint_exists', async () => {
