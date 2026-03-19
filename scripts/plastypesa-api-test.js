@@ -74,6 +74,43 @@ async function run() {
     }
   });
 
+  // Impact Report MUST return 403 without auth (Impact Report MVP).
+  await test('impact_report_requires_auth', async () => {
+    const r = await fetch(`${API_BASE}/home/impact-report`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const body = await r.text();
+    if (r.status !== 403 && r.status !== 401) {
+      throw new Error(`Expected 401 or 403 (auth required), got ${r.status}. Body: ${body.substring(0, 200)}`);
+    }
+  });
+
+  // Weekly Challenge complete MUST return 403 without auth (Weekly Challenge MVP).
+  await test('weekly_challenge_complete_requires_auth', async () => {
+    const r = await fetch(`${API_BASE}/home/weekly-challenge/complete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    const body = await r.text();
+    if (r.status !== 403 && r.status !== 401) {
+      throw new Error(`Expected 401 or 403 (auth required), got ${r.status}. Body: ${body.substring(0, 200)}`);
+    }
+  });
+
+  // Weekly Challenge status MUST return 403 without auth.
+  await test('weekly_challenge_status_requires_auth', async () => {
+    const r = await fetch(`${API_BASE}/home/weekly-challenge/status`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const body = await r.text();
+    if (r.status !== 403 && r.status !== 401) {
+      throw new Error(`Expected 401 or 403 (auth required), got ${r.status}. Body: ${body.substring(0, 200)}`);
+    }
+  });
+
   // Admin login should respond (not 404). 500 is expected for invalid credentials
   // due to pre-existing bug: catch block hardcodes status(500) instead of using error.status.
   await test('admin_login_endpoint_exists', async () => {
