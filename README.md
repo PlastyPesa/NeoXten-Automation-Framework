@@ -108,6 +108,8 @@ gates:
 | `npm run dev` | Watch mode compilation |
 | `npm run test:paths` | Path resolution regression test |
 | `npm run test:enoent` | ENOENT structured failure test |
+| `npm run test:plastypesa-e2e` | PlastyPesa orchestrated E2E (API + admin + device); see `scripts/plastypesa/PLASTYPESA_E2E.md` |
+| `npm run test:plastypesa-e2e:sort-proof-visibility` | Sort-proof toggle + API + device Home UI; see `scripts/plastypesa/PLASTYPESA_SORT_PROOF_VISIBILITY_E2E.md` |
 
 ## Architecture
 

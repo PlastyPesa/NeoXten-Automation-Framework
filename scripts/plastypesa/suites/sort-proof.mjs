@@ -5,7 +5,10 @@ export const id = 'sort-proof';
 
 export async function run(cfg, runner) {
   if (!cfg.authHeaders) {
-    runner.skip('sort_proof_authenticated', 'Set PLASTYPESA_USER_JWT');
+    runner.skip(
+      'sort_proof_authenticated',
+      'No JWT — set PLASTYPESA_USER_JWT or PLASTYPESA_TEST_EMAIL + PLASTYPESA_TEST_PASSWORD',
+    );
     return;
   }
 
