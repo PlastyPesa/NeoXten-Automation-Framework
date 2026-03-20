@@ -33,6 +33,8 @@
     "test:manifest-cli": "node dist/factory/__tests__/manifest-cli.test.js",
     "test:store-pipelines": "node dist/factory/__tests__/store-pipelines.test.js",
     "test:system-validation": "node dist/factory/__tests__/system-validation.test.js",
+    "test:plastypesa-api": "node scripts/plastypesa-api-test.js",
+    "test:plastypesa-api:auth-only": "node scripts/plastypesa-api-auth-only.mjs",
     "exe:build": "echo EXE build not configured"
   },
   "dependencies": {

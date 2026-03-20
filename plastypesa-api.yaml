@@ -1,22 +1,26 @@
-# NeoXten Automation — PlastyPesa Backend API
-# Tests that critical API endpoints enforce authentication.
+# NeoXten Automation — PlastyPesa Backend API (browser flows)
 # Uses the admin dashboard Vite dev server as browser context,
 # then makes fetch() calls to the production API Gateway.
-# NOTE: These tests verify auth enforcement only — no write operations.
+#
+# For the full Node regression pack (auth + public + optional JWT flows):
+#   npm run test:plastypesa-api
+#   See scripts/plastypesa/README.md
+#
+# This YAML remains for legacy Playwright-eval checks without Node-only CI.
 
 project:
   type: nextjs
   root: ../plastypesa-admin-dashboard/lib/frontend
   nextjs:
     script: npm run dev
-    url: http://localhost:8081
+    url: http://localhost:8080
 
 flows:
   # ── Feature routes must require auth (Phase 1 security fix) ──
   - name: feature_presigned_url_requires_auth
     steps:
       - action: navigate
-        url: http://localhost:8081/
+        url: http://localhost:8080/
         timeout: 20000
       - action: wait
         timeout: 3000
@@ -35,7 +39,7 @@ flows:
   - name: feature_reward_calc_requires_auth
     steps:
       - action: navigate
-        url: http://localhost:8081/
+        url: http://localhost:8080/
         timeout: 15000
       - action: wait
         timeout: 2000
@@ -55,7 +59,7 @@ flows:
   - name: auth_login_endpoint_responds
     steps:
       - action: navigate
-        url: http://localhost:8081/
+        url: http://localhost:8080/
         timeout: 15000
       - action: wait
         timeout: 2000
@@ -75,7 +79,7 @@ flows:
   - name: auth_forgot_password_endpoint_responds
     steps:
       - action: navigate
-        url: http://localhost:8081/
+        url: http://localhost:8080/
         timeout: 15000
       - action: wait
         timeout: 2000
@@ -98,7 +102,7 @@ flows:
   - name: user_profile_requires_auth
     steps:
       - action: navigate
-        url: http://localhost:8081/
+        url: http://localhost:8080/
         timeout: 15000
       - action: wait
         timeout: 2000
