@@ -12,8 +12,6 @@ export const RELEASE_PACK_SUITE_IDS = [
   'public-routes',
   'user-profile',
   'impact-report',
-  'weekly-challenge',
   'sort-proof',
-  'challenges-progress',
   'regression-core',
 ];
