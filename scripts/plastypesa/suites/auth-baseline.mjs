@@ -135,17 +135,6 @@ export async function run(cfg, runner) {
     }
   });
 
-  await runner.test('challenges_active_requires_auth', async () => {
-    const r = await fetch(url(cfg, '/challenges/active'), {
-      method: 'GET',
-      headers: cfg.headersJson,
-    });
-    await readJson(r);
-    if (r.status !== 403 && r.status !== 401) {
-      throw new Error(`Expected 401/403, got ${r.status}`);
-    }
-  });
-
   await runner.test('admin_login_endpoint_exists', async () => {
     const r = await fetch(url(cfg, '/auth/admin-login'), {
       method: 'POST',

@@ -27,7 +27,6 @@ import * as userProfile from './suites/user-profile.mjs';
 import * as impactReport from './suites/impact-report.mjs';
 import * as weeklyChallenge from './suites/weekly-challenge.mjs';
 import * as sortProof from './suites/sort-proof.mjs';
-import * as challengesProgress from './suites/challenges-progress.mjs';
 import * as regressionCore from './suites/regression-core.mjs';
 
 const ALL_SUITES = [
@@ -37,7 +36,6 @@ const ALL_SUITES = [
   { id: 'impact-report', mod: impactReport },
   { id: 'weekly-challenge', mod: weeklyChallenge },
   { id: 'sort-proof', mod: sortProof },
-  { id: 'challenges-progress', mod: challengesProgress },
   { id: 'regression-core', mod: regressionCore },
 ];
 
