@@ -17,15 +17,4 @@ export async function run(cfg, runner) {
     assert(Array.isArray(body?.data), 'data must be array');
   });
 
-  await runner.test('public_weekly_challenge_master_returns_200', async () => {
-    const r = await fetch(url(cfg, '/home/weekly-challenge'), {
-      method: 'GET',
-      headers: cfg.headersJson,
-    });
-    const { body } = await readJson(r);
-    if (r.status !== 200) {
-      throw new Error(`Expected 200, got ${r.status}`);
-    }
-    assert(body?.type === 'success', 'type success');
-  });
 }

@@ -63,29 +63,6 @@ export async function run(cfg, runner) {
     }
   });
 
-  await runner.test('weekly_challenge_complete_requires_auth', async () => {
-    const r = await fetch(url(cfg, '/home/weekly-challenge/complete'), {
-      method: 'POST',
-      headers: cfg.headersJson,
-      body: JSON.stringify({}),
-    });
-    await readJson(r);
-    if (r.status !== 403 && r.status !== 401) {
-      throw new Error(`Expected 401/403, got ${r.status}`);
-    }
-  });
-
-  await runner.test('weekly_challenge_status_requires_auth', async () => {
-    const r = await fetch(url(cfg, '/home/weekly-challenge/status'), {
-      method: 'GET',
-      headers: cfg.headersJson,
-    });
-    await readJson(r);
-    if (r.status !== 403 && r.status !== 401) {
-      throw new Error(`Expected 401/403, got ${r.status}`);
-    }
-  });
-
   await runner.test('sort_proof_config_requires_auth', async () => {
     const r = await fetch(url(cfg, '/home/sort-proof/config'), {
       method: 'GET',

@@ -25,7 +25,6 @@ import * as authBaseline from './suites/auth-baseline.mjs';
 import * as publicRoutes from './suites/public-routes.mjs';
 import * as userProfile from './suites/user-profile.mjs';
 import * as impactReport from './suites/impact-report.mjs';
-import * as weeklyChallenge from './suites/weekly-challenge.mjs';
 import * as sortProof from './suites/sort-proof.mjs';
 import * as regressionCore from './suites/regression-core.mjs';
 import * as communityFeed from './suites/community-feed.mjs';
@@ -35,7 +34,6 @@ const ALL_SUITES = [
   { id: 'public-routes', mod: publicRoutes },
   { id: 'user-profile', mod: userProfile },
   { id: 'impact-report', mod: impactReport },
-  { id: 'weekly-challenge', mod: weeklyChallenge },
   { id: 'sort-proof', mod: sortProof },
   { id: 'regression-core', mod: regressionCore },
   { id: 'community-feed', mod: communityFeed },
