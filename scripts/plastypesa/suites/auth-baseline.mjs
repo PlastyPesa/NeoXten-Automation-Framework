@@ -80,8 +80,7 @@ export async function run(cfg, runner) {
       headers: cfg.headersJson,
       body: JSON.stringify({
         image: 'abc',
-        streamA: 'PET',
-        streamB: 'HDPE',
+        stream: 'PET',
       }),
     });
     await readJson(r);

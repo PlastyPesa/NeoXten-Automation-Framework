@@ -49,8 +49,7 @@ export async function run(cfg, runner) {
       headers: cfg.authHeaders,
       body: JSON.stringify({
         image: TINY_PNG_BASE64,
-        streamA: 'PET',
-        streamB: 'HDPE',
+        stream: 'PET',
       }),
     });
     const { body, text } = await readJson(r);
@@ -77,8 +76,7 @@ export async function run(cfg, runner) {
       headers: cfg.authHeaders,
       body: JSON.stringify({
         image: TINY_PNG_BASE64,
-        streamA: 'NOT_A_STREAM',
-        streamB: 'PET',
+        stream: 'NOT_A_STREAM',
       }),
     });
     const { text } = await readJson(r);
@@ -87,7 +85,7 @@ export async function run(cfg, runner) {
     }
   });
 
-  await runner.test('sort_proof_validation_same_stream_400_when_enabled', async () => {
+  await runner.test('sort_proof_validation_legacy_dual_stream_when_enabled', async () => {
     const cfgRes = await fetch(url(cfg, '/home/sort-proof/config'), {
       method: 'GET',
       headers: cfg.authHeaders,
@@ -103,13 +101,25 @@ export async function run(cfg, runner) {
       body: JSON.stringify({
         image: TINY_PNG_BASE64,
         streamA: 'PET',
-        streamB: 'PET',
+        streamB: 'HDPE',
       }),
     });
-    const { text } = await readJson(r);
-    if (r.status !== 400) {
-      throw new Error(`Expected 400 same stream, got ${r.status}: ${text.slice(0, 250)}`);
+    const { body, text } = await readJson(r);
+    // Strict API rejects two distinct grades with 400 (one grade per photo). Older deployments may still accept and evaluate using the primary stream only (200 + success shape).
+    if (r.status === 400) {
+      assert(body?.type === 'error', 'legacy dual stream: error type');
+      return;
     }
+    if (r.status === 200) {
+      assert(body?.type === 'success', 'legacy dual stream transitional: success type');
+      const d = body?.data;
+      assert(d && typeof d === 'object', 'data object');
+      assert(typeof d.verified === 'boolean', 'verified boolean');
+      return;
+    }
+    throw new Error(
+      `Expected 400 or 200 for legacy dual stream, got ${r.status}: ${text.slice(0, 250)}`,
+    );
   });
 
   await runner.test('sort_proof_validation_missing_image_400_when_enabled', async () => {
@@ -125,11 +135,32 @@ export async function run(cfg, runner) {
     const r = await fetch(url(cfg, '/home/sort-proof'), {
       method: 'POST',
       headers: cfg.authHeaders,
-      body: JSON.stringify({ streamA: 'PET', streamB: 'HDPE' }),
+      body: JSON.stringify({ stream: 'PET' }),
     });
     const { text } = await readJson(r);
     if (r.status !== 400) {
       throw new Error(`Expected 400 missing image, got ${r.status}: ${text.slice(0, 250)}`);
+    }
+  });
+
+  await runner.test('sort_proof_validation_missing_stream_400_when_enabled', async () => {
+    const cfgRes = await fetch(url(cfg, '/home/sort-proof/config'), {
+      method: 'GET',
+      headers: cfg.authHeaders,
+    });
+    const cfgJson = await readJson(cfgRes);
+    if (cfgJson.body?.data?.enabled !== true) {
+      return;
+    }
+
+    const r = await fetch(url(cfg, '/home/sort-proof'), {
+      method: 'POST',
+      headers: cfg.authHeaders,
+      body: JSON.stringify({ image: TINY_PNG_BASE64 }),
+    });
+    const { text } = await readJson(r);
+    if (r.status !== 400) {
+      throw new Error(`Expected 400 missing stream, got ${r.status}: ${text.slice(0, 250)}`);
     }
   });
 
@@ -156,8 +187,7 @@ export async function run(cfg, runner) {
       headers: cfg.authHeaders,
       body: JSON.stringify({
         image: TINY_PNG_BASE64,
-        streamA: 'PET',
-        streamB: 'PP',
+        stream: 'PP',
       }),
     });
     const { body, text } = await readJson(r);

@@ -1,6 +1,9 @@
 # NeoXten Automation -- PlastyPesa Europe Features E2E
 # Tests new batch 1-7 endpoints: pledges, scan, badges, news, tips, challenges,
 # city rankings, prize draw, fund impact, impact stories
+#
+# Auth: run via `npm run test:plastypesa-europe` (injects JWT from PlastyPesa auth bootstrap).
+# Do not hardcode credentials here — use PLASTYPESA_USER_JWT or email/password + token cache.
 
 project:
   type: nextjs
@@ -19,16 +22,12 @@ flows:
         timeout: 3000
       - action: evaluate
         expression: |
-          (async () => {
-            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/auth/login', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email: 'bogdanmircea11987@gmail.com', password: 'MaryJay11987.' })
-            });
-            const data = await r.json();
-            if (r.status !== 200) throw new Error('Login failed: ' + r.status);
-            if (!data.token) throw new Error('No token');
-            window.__plastyToken = data.token;
+          (() => {
+            if (typeof window.__plastyToken !== 'string' || !window.__plastyToken) {
+              throw new Error(
+                'Missing window.__plastyToken. Run: npm run test:plastypesa-europe (JWT from PLASTYPESA_USER_JWT or email/password).',
+              );
+            }
           })()
 
   - name: carbon_footprint_returns_plastic_iq
@@ -72,14 +71,14 @@ flows:
             if (data.type !== 'success') throw new Error('Not success');
           })()
 
-  - name: weekly_challenge_public_endpoint_works
+  - name: active_regions_public_endpoint_works
     steps:
       - action: evaluate
         expression: |
           (async () => {
-            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/weekly-challenge');
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/active-regions');
             const data = await r.json();
-            if (r.status !== 200) throw new Error('weekly-challenge failed: ' + r.status);
+            if (r.status !== 200) throw new Error('active-regions failed: ' + r.status);
             if (data.type !== 'success') throw new Error('Not success');
           })()
 
@@ -96,7 +95,8 @@ flows:
             if (r.status !== 200) throw new Error('pledges failed: ' + r.status);
             if (data.type !== 'success') throw new Error('Not success: ' + JSON.stringify(data));
             if (!Array.isArray(data.data.pledges)) throw new Error('pledges not array');
-            if (typeof data.data.todayCount !== 'number') throw new Error('todayCount missing');
+            if (typeof data.data.verifiedPledgesToday !== 'number') throw new Error('verifiedPledgesToday missing');
+            if (typeof data.data.totalCount !== 'number') throw new Error('totalCount missing');
           })()
 
   - name: community_impact_endpoint_works

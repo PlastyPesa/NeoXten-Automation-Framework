@@ -32,6 +32,16 @@ export class PlaywrightWebDriver implements UIDriver {
       ignoreHTTPSErrors: true,
     });
 
+    const injectJwt = process.env.NEOXTEN_PLASTYPESA_WINDOW_JWT?.trim();
+    if (injectJwt) {
+      await this.context.addInitScript(
+        (token: string) => {
+          (window as unknown as { __plastyToken: string }).__plastyToken = token;
+        },
+        injectJwt,
+      );
+    }
+
     await this.context.tracing.start({ screenshots: true, snapshots: true });
 
     this.page = await this.context.newPage();

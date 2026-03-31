@@ -90,8 +90,7 @@ async function main() {
     headers: h,
     body: JSON.stringify({
       image: TINY_PNG_BASE64,
-      streamA: 'PET',
-      streamB: 'PP',
+      stream: 'PP',
     }),
   });
   const submit = await readJson(r);
