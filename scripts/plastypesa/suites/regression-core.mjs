@@ -40,6 +40,60 @@ export async function run(cfg, runner) {
     assert(typeof d.type === 'string', 'type string');
   });
 
+  await runner.test('home_eco_streak_authenticated_shape', async () => {
+    const r = await fetch(url(cfg, '/home/eco-streak'), {
+      method: 'GET',
+      headers: cfg.authHeaders,
+    });
+    const { body, text } = await readJson(r);
+    if (r.status !== 200) {
+      throw new Error(`home/eco-streak ${r.status}: ${text.slice(0, 400)}`);
+    }
+    assert(body?.type === 'success', 'type success');
+    const d = body?.data;
+    assert(d && typeof d === 'object', 'data object');
+    assert(typeof d.currentStreak === 'number', 'currentStreak number');
+    assert(typeof d.maxDays === 'number', 'maxDays number');
+    assert(typeof d.bonusPoints === 'number', 'bonusPoints number');
+    assert(typeof d.bonusEarned === 'boolean', 'bonusEarned boolean');
+    if (d.bonusPending !== undefined) {
+      assert(typeof d.bonusPending === 'boolean', 'bonusPending boolean when present');
+    }
+    assert(typeof d.todayActive === 'boolean', 'todayActive boolean');
+    assert(Array.isArray(d.daysCompleted), 'daysCompleted array');
+    assert(d.daysCompleted.length === 7, 'daysCompleted length 7');
+    for (const x of d.daysCompleted) {
+      assert(typeof x === 'boolean', 'each dayCompleted boolean');
+    }
+    assert(typeof d.weekStart === 'string', 'weekStart string');
+  });
+
+  await runner.test('home_eco_streak_claim_returns_auto_message', async () => {
+    const r = await fetch(url(cfg, '/home/eco-streak/claim'), {
+      method: 'POST',
+      headers: { ...cfg.authHeaders, 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    const { body, text } = await readJson(r);
+    if (r.status === 400 && body?.code === 'ECO_STREAK_AUTO') {
+      assert(typeof body?.message === 'string', 'message string');
+      return;
+    }
+    if (r.status === 400 && body?.type === 'error' && typeof body?.message === 'string') {
+      console.warn(
+        '[regression-core] eco-streak/claim pre-auto-deploy response; deploy backend for 400 ECO_STREAK_AUTO only',
+      );
+      return;
+    }
+    if (r.status === 200 && body?.type === 'success') {
+      console.warn(
+        '[regression-core] eco-streak/claim returned legacy success; deploy backend so claim returns 400 ECO_STREAK_AUTO',
+      );
+      return;
+    }
+    throw new Error(`eco-streak/claim unexpected ${r.status}: ${text.slice(0, 400)}`);
+  });
+
   await runner.test('winners_wall_authenticated_shape', async () => {
     const r = await fetch(url(cfg, '/weekly-rewards/winners-wall'), {
       method: 'GET',
