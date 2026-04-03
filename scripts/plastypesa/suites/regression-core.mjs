@@ -40,6 +40,55 @@ export async function run(cfg, runner) {
     assert(typeof d.type === 'string', 'type string');
   });
 
+  await runner.test('home_active_in_app_banner_authenticated_shape', async () => {
+    const r = await fetch(url(cfg, '/home/active-in-app-banner'), {
+      method: 'GET',
+      headers: cfg.authHeaders,
+    });
+    const text = await r.text();
+    if (r.status === 404) {
+      console.warn(
+        '[regression-core] home/active-in-app-banner 404 — deploy Phase 5 pinned-banner backend, then re-run suite',
+      );
+      return;
+    }
+    let body;
+    try {
+      body = text ? JSON.parse(text) : null;
+    } catch {
+      throw new Error(
+        `home/active-in-app-banner ${r.status}: expected JSON, got ${text.slice(0, 400)}`,
+      );
+    }
+    if (r.status !== 200) {
+      throw new Error(`home/active-in-app-banner ${r.status}: ${text.slice(0, 400)}`);
+    }
+    assert(body?.type === 'success', 'type success');
+    const d = body?.data;
+    assert(d && typeof d === 'object', 'data object');
+    const b = d.banner;
+    if (b === null) {
+      return;
+    }
+    assert(typeof b === 'object', 'banner object or null');
+    assert(typeof b.title === 'string', 'banner.title');
+    assert(typeof b.message === 'string', 'banner.message');
+    assert(typeof b.bannerId === 'string' && b.bannerId.length > 0, 'banner.bannerId');
+    assert(b.source === 'pinned', 'banner.source pinned');
+    const ib = b.inAppBanner;
+    assert(ib && typeof ib === 'object', 'banner.inAppBanner');
+    assert(typeof ib.bannerDurationSec === 'number', 'inAppBanner.bannerDurationSec');
+    assert(
+      ib.bannerScope === 'main_shell' || ib.bannerScope === 'app_wide',
+      'inAppBanner.bannerScope',
+    );
+    assert(
+      ib.bannerPosition === 'top' || ib.bannerPosition === 'center' || ib.bannerPosition === 'bottom',
+      'inAppBanner.bannerPosition',
+    );
+    assert(ib.bannerStyle === 'standard' || ib.bannerStyle === 'premium', 'inAppBanner.bannerStyle');
+  });
+
   await runner.test('home_eco_streak_authenticated_shape', async () => {
     const r = await fetch(url(cfg, '/home/eco-streak'), {
       method: 'GET',
