@@ -14,6 +14,8 @@
  *   PLASTYPESA_SUITES         — comma list (overrides release-pack when set)
  *   PLASTYPESA_SORT_PROOF_E2E=1 — extra Anthropic-backed POST (costs quota; feature must be enabled)
  *   PLASTYPESA_ENV_FILE       — optional path to .env (defaults to NeoXten repo .env); loads PLASTYPESA_* keys only
+ *   PLASTYPESA_ADMIN_JWT      — admin Bearer for admin-announcements suite (GET + gated POST)
+ *   PLASTYPESA_PHASE1_ANNOUNCEMENT_API=1 — enable POST dry-run test (set after backend in-app banner Phase 1 is deployed)
  */
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
@@ -28,6 +30,7 @@ import * as impactReport from './suites/impact-report.mjs';
 import * as sortProof from './suites/sort-proof.mjs';
 import * as regressionCore from './suites/regression-core.mjs';
 import * as communityFeed from './suites/community-feed.mjs';
+import * as adminAnnouncements from './suites/admin-announcements.mjs';
 
 const ALL_SUITES = [
   { id: 'auth-baseline', mod: authBaseline },
@@ -37,6 +40,7 @@ const ALL_SUITES = [
   { id: 'sort-proof', mod: sortProof },
   { id: 'regression-core', mod: regressionCore },
   { id: 'community-feed', mod: communityFeed },
+  { id: 'admin-announcements', mod: adminAnnouncements },
 ];
 
 export async function runPlastyPesaApiSuite() {
