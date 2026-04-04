@@ -1,0 +1,8 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Main NeoXten window — core, shell plugin, and app IPC",
+  "windows": ["*"],
+  "webviews": ["*"],
+  "permissions": ["core:default", "shell:default", "allow-neoxten-ipc"]
+}

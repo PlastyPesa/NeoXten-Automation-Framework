@@ -1,0 +1,19 @@
+[[permission]]
+identifier = "allow-neoxten-ipc"
+description = "NeoXten desktop shell: factory + operator Control API IPC"
+commands.allow = [
+  "start_run",
+  "abort_run",
+  "get_run_status",
+  "get_run_history",
+  "get_gate_results",
+  "get_evidence_range",
+  "validate_spec",
+  "product_paths_command",
+  "operator_service_health",
+  "operator_ensure_running",
+  "operator_stop_child",
+  "product_first_run_state",
+  "product_readiness_cli",
+  "product_mark_first_run_cli",
+]

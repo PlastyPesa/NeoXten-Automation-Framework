@@ -1,18 +1,18 @@
 {
   "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-config-schema/schema.json",
-  "productName": "NeoXten Factory",
-  "version": "0.1.0",
+  "productName": "NeoXten Desktop",
+  "version": "2.1.0",
   "identifier": "com.neoxten.factory",
   "build": {
     "frontendDist": "../ui/dist",
     "devUrl": "http://localhost:5173",
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build"
+    "beforeDevCommand": "npm run dev --prefix ui",
+    "beforeBuildCommand": "npm run build && npm run build --prefix ui && node scripts/prepare-windows-bundle.mjs"
   },
   "app": {
     "windows": [
       {
-        "title": "NeoXten Factory",
+        "title": "NeoXten",
         "width": 1400,
         "height": 900,
         "minWidth": 1024,
@@ -24,16 +24,25 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost"
+      "csp": "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost; connect-src 'self' http://127.0.0.1:* http://localhost:* ws://127.0.0.1:* ws://localhost:*"
     }
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis"],
+    "resources": [
+      "resources/nodejs/",
+      "resources/neoxten-runtime/"
+    ],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "installerHooks": "./windows/hooks.nsh"
+      }
+    }
   }
 }
