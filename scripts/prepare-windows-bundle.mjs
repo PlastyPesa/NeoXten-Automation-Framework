@@ -125,6 +125,8 @@ function stageNeoxtenRuntime() {
     throw new Error('prepare-windows-bundle: staged CLI missing after npm ci');
   }
   console.log('prepare-windows-bundle: neoxten-runtime ->', RUNTIME_DEST);
+  // Keep empty marker so Git tracks the directory when everything else is gitignored.
+  writeFileSync(join(RUNTIME_DEST, '.gitkeep'), '');
 }
 
 async function main() {
