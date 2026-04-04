@@ -1,0 +1,32 @@
+NeoXten — Windows desktop installer (NSIS via Tauri)
+
+Prerequisites (build machine):
+  - Windows x64, Rust stable, Node 18+, npm
+  - WebView2 runtime on target PCs (installer runs Microsoft bootstrapper by default — needs network unless you change webviewInstallMode in tauri.conf.json)
+  - NSIS (included with Tauri CLI on Windows)
+
+Build steps:
+  1. From repo root: npm install
+  2. npm run package:windows
+     This runs: TypeScript build, UI build, scripts/prepare-windows-bundle.mjs (downloads portable Node v20 win-x64, npm ci --omit=dev into src-tauri/resources/neoxten-runtime), then tauri build --bundles nsis.
+
+Output:
+  - src-tauri/target/release/bundle/nsis/NeoXten Desktop_*_x64-setup.exe (productName avoids colliding with data dir)
+
+Install layout:
+  - Application under %LOCALAPPDATA%\NeoXten Desktop\ (currentUser NSIS default in this project)
+  - resources/nodejs/node.exe — bundled Node (no separate Node install required for Operator service)
+  - resources/neoxten-runtime — dist/, node_modules/, operator/, suites/ (NEOXTEN_FRAMEWORK_ROOT at runtime)
+
+Per-user data (not removed on uninstall):
+  - %LOCALAPPDATA%\NeoXten\ — config, logs, operator DB, blobs
+
+Uninstall:
+  - NSIS PREUNINSTALL: taskkill neoxten-factory.exe, delete service-lock.json only.
+
+Validation:
+  - npm run validate:windows-bundle (after prepare) — structure + product readiness-sync against staged runtime
+  - After install: launch NeoXten, Mission Control should load; Setup panel shows readiness once
+
+Environment overrides (same as dev):
+  - NEOXTEN_DATA_DIR, NEOXTEN_OPERATOR_HOME, NEOXTEN_FRAMEWORK_ROOT
