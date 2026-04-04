@@ -4,6 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 
 const host = process.env.TAURI_DEV_HOST;
 
+/** Playwright dashboard e2e sets this so preview proxies to the same port as `operator serve`. */
+const operatorApiPort = process.env.NEOXTEN_OPERATOR_API_PORT?.trim() || "8787";
+const operatorHttpTarget = `http://127.0.0.1:${operatorApiPort}`;
+const operatorWsTarget = `ws://127.0.0.1:${operatorApiPort}`;
+
 export default defineConfig(async () => ({
   plugins: [react(), tailwindcss()],
   clearScreen: false,
@@ -14,8 +19,8 @@ export default defineConfig(async () => ({
     hmr: host ? { protocol: "ws", host, port: 5174 } : undefined,
     watch: { ignored: ["**/src-tauri/**"] },
     proxy: {
-      "/api": { target: "http://127.0.0.1:8787", changeOrigin: true },
-      "/ws": { target: "ws://127.0.0.1:8787", ws: true },
+      "/api": { target: operatorHttpTarget, changeOrigin: true },
+      "/ws": { target: operatorWsTarget, ws: true },
     },
   },
   preview: {
@@ -23,8 +28,8 @@ export default defineConfig(async () => ({
     strictPort: true,
     host: "127.0.0.1",
     proxy: {
-      "/api": { target: "http://127.0.0.1:8787", changeOrigin: true },
-      "/ws": { target: "ws://127.0.0.1:8787", ws: true },
+      "/api": { target: operatorHttpTarget, changeOrigin: true },
+      "/ws": { target: operatorWsTarget, ws: true },
     },
   },
 }));
