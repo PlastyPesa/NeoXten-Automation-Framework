@@ -1,14 +1,41 @@
-import { useState, useCallback } from "react";
-import { Dashboard } from "./views/Dashboard";
-import { Pipeline } from "./views/Pipeline";
-import { Evidence } from "./views/Evidence";
-import { Chat } from "./views/Chat";
-import { StorePack } from "./views/StorePack";
-import { Import } from "./views/Import";
+import { useState, useCallback, useEffect, lazy, Suspense } from "react";
+const Dashboard = lazy(() =>
+  import("./views/Dashboard").then((m) => ({ default: m.Dashboard })),
+);
+const Pipeline = lazy(() =>
+  import("./views/Pipeline").then((m) => ({ default: m.Pipeline })),
+);
+const Evidence = lazy(() =>
+  import("./views/Evidence").then((m) => ({ default: m.Evidence })),
+);
+const Chat = lazy(() => import("./views/Chat").then((m) => ({ default: m.Chat })));
+const StorePack = lazy(() =>
+  import("./views/StorePack").then((m) => ({ default: m.StorePack })),
+);
+const Import = lazy(() => import("./views/Import").then((m) => ({ default: m.Import })));
+import { OperatorMissionControl } from "./views/operator/MissionControl";
+import { OperatorRunsList } from "./views/operator/RunsList";
+import { OperatorRunDetail } from "./views/operator/RunDetail";
+import { OperatorIssuesList } from "./views/operator/IssuesList";
+import { OperatorPatchesView } from "./views/operator/PatchesView";
+import { OperatorProductSetupPanel } from "./views/operator/ProductSetupPanel";
 import { useTauriEvent } from "./hooks/useTauriEvents";
 import { useRunStore } from "./stores/run-store";
+import { setOperatorApiBase } from "./lib/operator-api";
+import { invoke } from "@tauri-apps/api/core";
 
-type View = "dashboard" | "pipeline" | "evidence" | "chat" | "storepack" | "import";
+type View =
+  | "dashboard"
+  | "pipeline"
+  | "evidence"
+  | "chat"
+  | "storepack"
+  | "import"
+  | "op_mission"
+  | "op_runs"
+  | "op_run_detail"
+  | "op_issues"
+  | "op_patches";
 
 const NAV_ITEMS: Array<{ id: View; label: string; icon: string }> = [
   { id: "dashboard", label: "Dashboard", icon: "◉" },
@@ -17,11 +44,58 @@ const NAV_ITEMS: Array<{ id: View; label: string; icon: string }> = [
   { id: "chat", label: "Chat", icon: "◇" },
   { id: "storepack", label: "Store Packs", icon: "▤" },
   { id: "import", label: "New Run", icon: "+" },
+  { id: "op_mission", label: "Op · Mission", icon: "◎" },
+  { id: "op_runs", label: "Op · Runs", icon: "▣" },
+  { id: "op_issues", label: "Op · Issues", icon: "⚠" },
+  { id: "op_patches", label: "Op · Patches", icon: "⚡" },
 ];
 
+function ViewFallback() {
+  return (
+    <div className="p-8 text-sm text-zinc-500" data-testid="view-fallback">
+      Loading…
+    </div>
+  );
+}
+
+/** Avoid `opFetch` against relative `/api/*` before Tauri sets `setOperatorApiBase` (asset server returns HTML). */
+function OperatorHttpGate(props: { ready: boolean; children: React.ReactNode }) {
+  if (!props.ready) {
+    return (
+      <div className="p-8 text-sm text-zinc-500" data-testid="operator-http-wait">
+        Connecting to local operator…
+      </div>
+    );
+  }
+  return <>{props.children}</>;
+}
+
 export default function App() {
-  const [view, setView] = useState<View>("dashboard");
+  const [view, setView] = useState<View>("op_mission");
+  const [operatorRunId, setOperatorRunId] = useState<string | null>(null);
+  const [operatorPort, setOperatorPort] = useState<number | null>(null);
+  const [operatorServiceError, setOperatorServiceError] = useState<string | null>(null);
   const { setRunStarted } = useRunStore();
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!("__TAURI_INTERNALS__" in window)) return;
+    void (async () => {
+      try {
+        const r = await invoke<{ ok: boolean; port?: number }>("operator_ensure_running");
+        if (r.ok && typeof r.port === "number") {
+          setOperatorApiBase(`http://127.0.0.1:${r.port}`);
+          setOperatorPort(r.port);
+          setOperatorServiceError(null);
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        setOperatorServiceError(msg);
+        setOperatorPort(null);
+        console.warn("[NeoXten] operator_ensure_running failed:", e);
+      }
+    })();
+  }, []);
 
   useTauriEvent(
     "factory://run-started",
@@ -36,6 +110,10 @@ export default function App() {
 
   const handleNavigate = (v: string) => setView(v as View);
 
+  const isTauri =
+    typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+  const operatorHttpReady = !isTauri || operatorPort != null;
+
   return (
     <div className="flex h-screen" data-testid="app-shell">
       <nav
@@ -46,7 +124,7 @@ export default function App() {
           <h1 className="text-sm font-semibold tracking-widest text-zinc-300 uppercase">
             NeoXten
           </h1>
-          <p className="text-[10px] text-zinc-600 mt-0.5">AI Shipping Factory</p>
+          <p className="text-[10px] text-zinc-600 mt-0.5">Factory + Operator</p>
         </div>
 
         <div className="flex-1 py-4 space-y-1 px-3">
@@ -68,17 +146,59 @@ export default function App() {
         </div>
 
         <div className="px-5 py-4 border-t border-white/5">
-          <p className="text-[10px] text-zinc-700">v0.1.0 — headless core ready</p>
+          <p className="text-[10px] text-zinc-700">v2.1.0 — desktop + operator</p>
         </div>
       </nav>
 
       <main className="flex-1 overflow-y-auto p-8">
-        {view === "dashboard" && <Dashboard onNavigate={handleNavigate} />}
-        {view === "pipeline" && <Pipeline />}
-        {view === "evidence" && <Evidence />}
-        {view === "chat" && <Chat />}
-        {view === "storepack" && <StorePack />}
-        {view === "import" && <Import onNavigate={handleNavigate} />}
+        <OperatorProductSetupPanel operatorPort={operatorPort} serviceError={operatorServiceError} />
+        <Suspense fallback={<ViewFallback />}>
+          {view === "dashboard" && <Dashboard onNavigate={handleNavigate} />}
+          {view === "pipeline" && <Pipeline />}
+          {view === "evidence" && <Evidence />}
+          {view === "chat" && <Chat />}
+          {view === "storepack" && <StorePack />}
+          {view === "import" && <Import onNavigate={handleNavigate} />}
+        </Suspense>
+        {view === "op_mission" && (
+          <OperatorHttpGate ready={operatorHttpReady}>
+            <OperatorMissionControl
+              onOpenRun={(id) => {
+                setOperatorRunId(id);
+                setView("op_run_detail");
+              }}
+              onOpenIssues={() => setView("op_issues")}
+            />
+          </OperatorHttpGate>
+        )}
+        {view === "op_runs" && (
+          <OperatorHttpGate ready={operatorHttpReady}>
+            <OperatorRunsList
+              onOpenRun={(id) => {
+                setOperatorRunId(id);
+                setView("op_run_detail");
+              }}
+            />
+          </OperatorHttpGate>
+        )}
+        {view === "op_run_detail" && operatorRunId && (
+          <OperatorHttpGate ready={operatorHttpReady}>
+            <OperatorRunDetail
+              runDbId={operatorRunId}
+              onBack={() => setView("op_runs")}
+            />
+          </OperatorHttpGate>
+        )}
+        {view === "op_issues" && (
+          <OperatorHttpGate ready={operatorHttpReady}>
+            <OperatorIssuesList />
+          </OperatorHttpGate>
+        )}
+        {view === "op_patches" && (
+          <OperatorHttpGate ready={operatorHttpReady}>
+            <OperatorPatchesView />
+          </OperatorHttpGate>
+        )}
       </main>
     </div>
   );
