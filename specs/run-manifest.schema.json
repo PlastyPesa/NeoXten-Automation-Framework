@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "NeoXten RunManifest",
+  "description": "Canonical manifest for Control Plane ingest (verdict + artifacts + env snapshot)",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "runId",
+    "ingestedAt",
+    "completedAt",
+    "configPath",
+    "verdict",
+    "artifacts"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "2026.1" },
+    "runId": { "type": "string" },
+    "ingestedAt": { "type": "string", "format": "date-time" },
+    "completedAt": { "type": "string", "format": "date-time" },
+    "configPath": { "type": "string" },
+    "projectId": { "type": "string" },
+    "suiteId": { "type": "string" },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "profileId": { "type": "string" },
+        "nodeVersion": { "type": "string" },
+        "platform": { "type": "string" },
+        "envVarsNonSecret": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "verdict": { "type": "object" },
+    "evidenceTimeline": {},
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["relativePath", "kind"],
+        "properties": {
+          "relativePath": { "type": "string" },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "verdict",
+              "evidence_timeline",
+              "console_log",
+              "screenshot",
+              "trace",
+              "har",
+              "video",
+              "other"
+            ]
+          },
+          "bytes": { "type": "integer" },
+          "sha256": { "type": "string" }
+        }
+      }
+    },
+    "reproducibleCommand": { "type": "string" }
+  },
+  "additionalProperties": false
+}

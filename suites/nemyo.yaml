@@ -1,0 +1,46 @@
+schema_version: "2026.1"
+suite_id: nemyo
+display_name: Nemyo Gate
+steps:
+  - name: Nemyo Web Dashboard
+    type: yaml
+    config: nemyo-web.yaml
+    outSubDir: nemyo-web
+  - name: Nemyo Subscription Flow
+    type: yaml
+    config: nemyo-subscription.yaml
+    outSubDir: nemyo-subscription
+  - name: NeoXten Website
+    type: yaml
+    config: neoxten-website.yaml
+    outSubDir: neoxten-website
+  - name: Nemyo Extension (MV3)
+    type: yaml
+    config: nemyo-extension.yaml
+    outSubDir: nemyo-extension
+  - name: Nemyo Extension KidMode OFF
+    type: yaml
+    config: nemyo-extension-kidmode-off.yaml
+    outSubDir: nemyo-extension-kidmode-off
+  - name: Nemyo API Endpoints
+    type: yaml
+    config: nemyo-api.yaml
+    outSubDir: nemyo-api
+  - name: Child App Widget Tests
+    type: flutter
+    testPath: test/pairing_screen_test.dart
+    cwd: ../kidguard_child_app
+  - name: Parent App Widget Tests
+    type: flutter
+    testPath: test/widget_test.dart
+    cwd: ../kidguard-mobile-app
+  - name: Child App Integration Tests
+    type: flutter_integration
+    testTarget: integration_test/app_test.dart
+    cwd: ../kidguard_child_app
+    outSubDir: nemyo-child-integration
+  - name: Parent App Integration Tests
+    type: flutter_integration
+    testTarget: integration_test/app_test.dart
+    cwd: ../kidguard-mobile-app
+    outSubDir: nemyo-parent-integration

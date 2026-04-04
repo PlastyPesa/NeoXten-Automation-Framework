@@ -13,6 +13,14 @@ import {
   consequencesExportCommand, consequencesImportCommand, consequencesStatusCommand,
   manifestExportCommand,
 } from './commands/factory.js';
+import { operatorIngestCommand, operatorServeCommand } from './commands/operator.js';
+import {
+  productPathsCommand,
+  productReadinessCommand,
+  productReadinessSyncCommand,
+  productFirstRunStatusCommand,
+  productMarkFirstRunCommand,
+} from './commands/product.js';
 
 program
   .name('nx')
@@ -127,5 +135,69 @@ factory
   .description('Export run manifest to a file')
   .option('-o, --out <path>', 'Output file path (default: manifests/RUN-<runId>.json)')
   .action((runId: string, opts: { out?: string }) => manifestExportCommand(runId, opts).catch((e) => { console.error(e); process.exit(2); }));
+
+/* ---- Operator Control Plane ---- */
+const operator = program.command('operator').description('Operator Control Plane — ingest runs, serve API');
+operator
+  .command('ingest')
+  .description('Ingest a completed run directory into SQLite (requires run-manifest.json)')
+  .argument('<runDir>', 'Path to .neoxten-out/<runId>')
+  .option('--home <path>', 'Operator data directory (default: .neoxten-operator or NEOXTEN_OPERATOR_HOME)')
+  .option('--archive', 'Copy artifacts into content-addressed blob store')
+  .option('--project <slug>', 'Project slug hint for fingerprinting')
+  .action((runDir: string, opts: { home?: string; archive?: boolean; project?: string }) =>
+    operatorIngestCommand({ runDir, ...opts }).catch((e) => {
+      console.error(e);
+      process.exit(2);
+    }),
+  );
+operator
+  .command('serve')
+  .description('Start Control API (Fastify); port from --port, env, or config with auto fallback')
+  .option('-p, --port <n>', 'Port (optional; resolves free port near app.json preference)')
+  .option('--host <addr>', 'Bind address', '127.0.0.1')
+  .option('--home <path>', 'Operator data directory')
+  .option('--no-lock', 'Skip service-lock.json and process signal handlers (debug)')
+  .action((opts: { port?: string; host?: string; home?: string; noLock?: boolean }) =>
+    operatorServeCommand(opts).catch((e) => {
+      console.error(e);
+      process.exit(2);
+    }),
+  );
+
+const product = program.command('product').description('Local product runtime — paths, readiness, first-run');
+product
+  .command('paths')
+  .description('Print canonical data/config/operator paths')
+  .option('--json', 'Machine-readable output')
+  .action((opts: { json?: boolean }) => productPathsCommand(opts));
+product
+  .command('readiness')
+  .description('Check writable dirs, git, node, Playwright cache, registry paths; optional Control API probe')
+  .option('--json', 'Machine-readable output')
+  .option('--check-service', 'HTTP GET /api/health (needs running operator serve)')
+  .option('--service-port <n>', 'Port for --check-service', '8787')
+  .action((opts: { json?: boolean; checkService?: boolean; servicePort?: string }) =>
+    productReadinessCommand(opts).catch((e) => {
+      console.error(e);
+      process.exit(2);
+    }),
+  );
+product
+  .command('readiness-sync')
+  .description('Same as readiness without async service probe (for subprocess callers)')
+  .option('--json', 'Machine-readable output')
+  .action((opts: { json?: boolean }) => productReadinessSyncCommand(opts));
+product
+  .command('first-run-status')
+  .description('Show first-run marker and app.json operator port prefs')
+  .option('--json', 'Machine-readable output')
+  .action((opts: { json?: boolean }) => productFirstRunStatusCommand(opts));
+product
+  .command('mark-first-run')
+  .description('Mark guided first-run as complete')
+  .option('--json', 'Machine-readable output')
+  .option('--version <v>', 'Product version string to record')
+  .action((opts: { json?: boolean; version?: string }) => productMarkFirstRunCommand(opts));
 
 program.parse();

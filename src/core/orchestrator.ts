@@ -23,6 +23,7 @@ import { AndroidAdapter } from '../adapters/android.js';
 import { PageObserver } from '../observer/index.js';
 import { EvidenceCollector } from '../evidence/collector.js';
 import { execSync } from 'child_process';
+import { writeRunManifestToRunDir } from '../operator/manifest/build.js';
 
 const DEFAULT_OUT_DIR = '.neoxten-out';
 
@@ -101,6 +102,18 @@ export async function run(options: RunOptions): Promise<RunResult> {
     logExcerpts.push(msg);
     evidence.addNote(msg);
     appendLog(artifacts.consoleLog, `[${new Date().toISOString()}] ${msg}`);
+  };
+
+  const persistManifest = (verdict: Verdict) => {
+    try {
+      writeRunManifestToRunDir({
+        runDir: artifacts.runDir,
+        verdict,
+        configPath: resolve(options.configPath),
+      });
+    } catch {
+      /* best effort — manifest must not break runs */
+    }
   };
 
   try {
@@ -338,6 +351,7 @@ export async function run(options: RunOptions): Promise<RunResult> {
     });
     writeJson(artifacts.verdict, verdict);
     writeEvidence();
+    persistManifest(verdict);
     await driver.close();
     return { verdict, artifacts };
   } catch (e) {
@@ -377,6 +391,7 @@ export async function run(options: RunOptions): Promise<RunResult> {
     });
     writeJson(artifacts.verdict, verdict);
     writeEvidence();
+    persistManifest(verdict);
     if (driver) await driver.close().catch(() => {});
     return { verdict, artifacts };
   }

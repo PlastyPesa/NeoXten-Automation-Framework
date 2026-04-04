@@ -1,0 +1,11 @@
+{
+  "id": "broken-selector",
+  "title": "Broken selector / element not found",
+  "sections": {
+    "whatHappened": "Playwright could not find the element described by the step selector within the timeout.",
+    "whatItMeans": "The UI tree does not match what the flow expects — layout change, wrong screen, or flaky timing.",
+    "inspectNext": "Open the failure screenshot and trace; compare visible text and URL to the expected screen.",
+    "reproduce": "Re-run the same neoxten config with the same environment profile.",
+    "afterPatch": "Re-run the failing flow only, then the full gate suite for the project."
+  }
+}

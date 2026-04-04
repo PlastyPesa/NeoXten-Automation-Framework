@@ -1,0 +1,8 @@
+schema_version: "2026.1"
+suite_id: operator
+display_name: NeoXten Operator Dogfood Gate
+steps:
+  - name: Operator web self-test (Playwright, no Tauri)
+    type: yaml
+    config: operator-selftest.yaml
+    outSubDir: operator-smoke

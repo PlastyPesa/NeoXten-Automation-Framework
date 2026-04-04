@@ -1,0 +1,38 @@
+schema_version: "2026.1"
+suite_id: neoxtemus
+display_name: Neoxtemus Gate
+steps:
+  - name: Neoxtemus Boot
+    type: yaml
+    config: neoxtemus-boot.yaml
+    outSubDir: neoxtemus-boot
+  - name: Neoxtemus Navigation
+    type: yaml
+    config: neoxtemus-nav.yaml
+    outSubDir: neoxtemus-nav
+  - name: Neoxtemus Vault Operations
+    type: yaml
+    config: neoxtemus-vault-test.yaml
+    outSubDir: neoxtemus-vault
+  - name: Neoxtemus Vault Interactions
+    type: yaml
+    config: neoxtemus-vault-interactions.yaml
+    outSubDir: neoxtemus-vault-interactions
+  - name: Neoxtemus OCR
+    type: yaml
+    config: neoxtemus-ocr-test.yaml
+    outSubDir: neoxtemus-ocr
+  - name: Neoxtemus Export Roundtrip
+    type: yaml
+    config: neoxtemus-export-roundtrip.yaml
+    outSubDir: neoxtemus-export-roundtrip
+  - name: Neoxtemus Desktop Layout
+    type: yaml
+    config: neoxtemus-desktop-layout.yaml
+    outSubDir: neoxtemus-desktop-layout
+  - name: Neoxtemus Rust Tests
+    type: cargo
+    cwd: ../neoxtemus/neoxtemus-app/src-tauri
+  - name: Artifact Policy
+    type: policy
+    policyRoot: ../neoxtemus/neoxtemus-app

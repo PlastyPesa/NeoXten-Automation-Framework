@@ -1,0 +1,11 @@
+{
+  "slug": "failed_step",
+  "sections": {
+    "whatHappened": "A flow step did not meet its assertion or timed out.",
+    "whatItMeans": "The application state diverged from the expected DOM or timing.",
+    "codeImplicated": "Use Code bridge (API) and selector → file mapping when indexer has run.",
+    "inspectNext": "Screenshot, trace, console.log, network tab for the same timestamp window.",
+    "reproduce": "Copy reproducibleCommand from verdict.",
+    "testAfterChange": "Re-run the same config; then run the project gate suite."
+  }
+}

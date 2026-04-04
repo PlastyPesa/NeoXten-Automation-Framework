@@ -1,0 +1,28 @@
+# Operator dogfood: Playwright web smoke only (no Tauri/dev server).
+# Keeps `gate --preset operator` valid on CI and dev machines without `npm run tauri:dev`.
+project:
+  type: web
+  root: .
+  web:
+    url: https://example.com
+
+flows:
+  - name: operator_web_smoke
+    steps:
+      - action: assert
+        type: visible
+        selector: h1
+        timeout: 15000
+
+assistant:
+  enabled: false
+
+gates:
+  startupMaxMs: 45000
+
+artifacts:
+  traceOnFailure: true
+  screenshotOnFailure: true
+  screenshotFinal: false
+  consoleLog: true
+  backendLog: false

@@ -13,21 +13,10 @@ import { execSync } from 'child_process';
 import { writeFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'fs';
 import { join } from 'path';
 import { run } from '../../core/orchestrator.js';
+import { loadGateSuite } from '../../operator/suites/load.js';
+import type { GateStep } from '../../operator/suites/types.js';
 
-interface GateStep {
-  name: string;
-  type: 'yaml' | 'flutter' | 'flutter_integration' | 'cargo' | 'policy';
-  config?: string;
-  outSubDir?: string;
-  testPath?: string;
-  testTarget?: string;
-  driverPath?: string;
-  cwd?: string;
-  policyRoot?: string;
-  deviceId?: string;
-}
-
-interface GateStepResult {
+export interface GateStepResult {
   name: string;
   verdict: 'PASS' | 'FAIL';
   runId: string | null;
@@ -37,132 +26,15 @@ interface GateStepResult {
   error: string | null;
 }
 
-const AVAILABLE_PRESETS = ['nemyo', 'neoxtemus'] as const;
-
-const NEMYO_STEPS: GateStep[] = [
-  {
-    name: 'Nemyo Web Dashboard',
-    type: 'yaml',
-    config: 'nemyo-web.yaml',
-    outSubDir: 'nemyo-web',
-  },
-  {
-    name: 'Nemyo Subscription Flow',
-    type: 'yaml',
-    config: 'nemyo-subscription.yaml',
-    outSubDir: 'nemyo-subscription',
-  },
-  {
-    name: 'NeoXten Website',
-    type: 'yaml',
-    config: 'neoxten-website.yaml',
-    outSubDir: 'neoxten-website',
-  },
-  {
-    name: 'Nemyo Extension (MV3)',
-    type: 'yaml',
-    config: 'nemyo-extension.yaml',
-    outSubDir: 'nemyo-extension',
-  },
-  {
-    name: 'Nemyo Extension KidMode OFF',
-    type: 'yaml',
-    config: 'nemyo-extension-kidmode-off.yaml',
-    outSubDir: 'nemyo-extension-kidmode-off',
-  },
-  {
-    name: 'Nemyo API Endpoints',
-    type: 'yaml',
-    config: 'nemyo-api.yaml',
-    outSubDir: 'nemyo-api',
-  },
-  {
-    name: 'Child App Widget Tests',
-    type: 'flutter',
-    testPath: 'test/pairing_screen_test.dart',
-    cwd: '../kidguard_child_app',
-  },
-  {
-    name: 'Parent App Widget Tests',
-    type: 'flutter',
-    testPath: 'test/widget_test.dart',
-    cwd: '../kidguard-mobile-app',
-  },
-  {
-    name: 'Child App Integration Tests',
-    type: 'flutter_integration',
-    testTarget: 'integration_test/app_test.dart',
-    cwd: '../kidguard_child_app',
-    outSubDir: 'nemyo-child-integration',
-  },
-  {
-    name: 'Parent App Integration Tests',
-    type: 'flutter_integration',
-    testTarget: 'integration_test/app_test.dart',
-    cwd: '../kidguard-mobile-app',
-    outSubDir: 'nemyo-parent-integration',
-  },
-];
-
-const NEOXTEMUS_STEPS: GateStep[] = [
-  {
-    name: 'Neoxtemus Boot',
-    type: 'yaml',
-    config: 'neoxtemus-boot.yaml',
-    outSubDir: 'neoxtemus-boot',
-  },
-  {
-    name: 'Neoxtemus Navigation',
-    type: 'yaml',
-    config: 'neoxtemus-nav.yaml',
-    outSubDir: 'neoxtemus-nav',
-  },
-  {
-    name: 'Neoxtemus Vault Operations',
-    type: 'yaml',
-    config: 'neoxtemus-vault-test.yaml',
-    outSubDir: 'neoxtemus-vault',
-  },
-  {
-    name: 'Neoxtemus Vault Interactions',
-    type: 'yaml',
-    config: 'neoxtemus-vault-interactions.yaml',
-    outSubDir: 'neoxtemus-vault-interactions',
-  },
-  {
-    name: 'Neoxtemus OCR',
-    type: 'yaml',
-    config: 'neoxtemus-ocr-test.yaml',
-    outSubDir: 'neoxtemus-ocr',
-  },
-  {
-    name: 'Neoxtemus Export Roundtrip',
-    type: 'yaml',
-    config: 'neoxtemus-export-roundtrip.yaml',
-    outSubDir: 'neoxtemus-export-roundtrip',
-  },
-  {
-    name: 'Neoxtemus Desktop Layout',
-    type: 'yaml',
-    config: 'neoxtemus-desktop-layout.yaml',
-    outSubDir: 'neoxtemus-desktop-layout',
-  },
-  {
-    name: 'Neoxtemus Rust Tests',
-    type: 'cargo',
-    cwd: '../neoxtemus/neoxtemus-app/src-tauri',
-  },
-  {
-    name: 'Artifact Policy',
-    type: 'policy',
-    policyRoot: '../neoxtemus/neoxtemus-app',
-  },
-];
-
-const PRESET_MAP: Record<string, { steps: GateStep[]; label: string }> = {
-  nemyo: { steps: NEMYO_STEPS, label: 'Nemyo Gate' },
-  neoxtemus: { steps: NEOXTEMUS_STEPS, label: 'Neoxtemus Gate' },
-};
+export interface GateExecutionResult {
+  preset: string;
+  label: string;
+  overallVerdict: 'PASS' | 'FAIL';
+  results: GateStepResult[];
+  reportPath: string;
+  verdictPath: string;
+  totalMs: number;
+}
 
 /**
  * Artifact policy: reject release binaries/installers in the repo
@@ -258,31 +130,28 @@ function generateReport(
   return md;
 }
 
-export async function gateCommand(opts: {
-  preset?: string;
+/** Run a gate suite (declarative `suites/<preset>.yaml`) without `process.exit` — for API / runner. */
+export async function executeGateSuite(opts: {
+  preset: string;
+  frameworkRoot?: string;
   outDir?: string;
   skipIntegration?: boolean;
-}): Promise<void> {
-  const preset = opts.preset ?? 'nemyo';
-  const presetConfig = PRESET_MAP[preset];
-  if (!presetConfig) {
-    console.error(`Unknown preset: ${preset}. Available: ${AVAILABLE_PRESETS.join(', ')}`);
-    process.exit(2);
-  }
-
-  const { steps, label } = presetConfig;
-  const outDir = resolve(process.cwd(), opts.outDir ?? '.neoxten-out');
-  const frameworkRoot = process.cwd();
+}): Promise<GateExecutionResult> {
+  const preset = opts.preset;
+  const frameworkRoot = opts.frameworkRoot ?? process.cwd();
+  const suite = loadGateSuite(frameworkRoot, preset);
+  const { steps, displayName: label } = suite;
+  const outDir = resolve(frameworkRoot, opts.outDir ?? '.neoxten-out');
   const results: GateStepResult[] = [];
   const gateStart = Date.now();
 
-  console.log(`\n  ${label} — running ${steps.length} validation steps\n`);
-
   for (const step of steps) {
     const stepStart = Date.now();
-    console.log(`  [${results.length + 1}/${steps.length}] ${step.name}...`);
 
-    const skipIntegration = opts.skipIntegration || process.env.NEMYO_SKIP_INTEGRATION === '1' || process.env.NEMYO_SKIP_INTEGRATION === 'true';
+    const skipIntegration =
+      opts.skipIntegration ||
+      process.env.NEMYO_SKIP_INTEGRATION === '1' ||
+      process.env.NEMYO_SKIP_INTEGRATION === 'true';
     if (step.type === 'flutter_integration' && skipIntegration) {
       results.push({
         name: step.name,
@@ -293,7 +162,6 @@ export async function gateCommand(opts: {
         artifactDir: null,
         error: null,
       });
-        console.log(`           SKIP (--skip-integration or NEMYO_SKIP_INTEGRATION)`);
       continue;
     }
 
@@ -319,8 +187,6 @@ export async function gateCommand(opts: {
             : null,
         });
 
-        const tag = verdict.verdict === 'PASS' ? 'PASS' : 'FAIL';
-        console.log(`           ${tag} (${verdict.runId}, ${flowCount} flows)`);
       } catch (e) {
         const err = e instanceof Error ? e.message : String(e);
         results.push({
@@ -332,7 +198,6 @@ export async function gateCommand(opts: {
           artifactDir: null,
           error: err,
         });
-        console.log(`           FAIL (infrastructure: ${err.slice(0, 80)})`);
       }
     } else if (step.type === 'flutter') {
       try {
@@ -357,7 +222,6 @@ export async function gateCommand(opts: {
           artifactDir: null,
           error: null,
         });
-        console.log(`           PASS`);
       } catch (e) {
         const err = e instanceof Error ? (e as { stderr?: string }).stderr ?? e.message : String(e);
         results.push({
@@ -369,7 +233,6 @@ export async function gateCommand(opts: {
           artifactDir: null,
           error: typeof err === 'string' ? err.slice(0, 500) : String(err),
         });
-        console.log(`           FAIL`);
       }
     } else if (step.type === 'flutter_integration') {
       try {
@@ -396,7 +259,6 @@ export async function gateCommand(opts: {
           artifactDir: null,
           error: null,
         });
-        console.log(`           PASS`);
       } catch (e) {
         const err = e instanceof Error ? (e as { stderr?: string }).stderr ?? e.message : String(e);
         results.push({
@@ -408,7 +270,6 @@ export async function gateCommand(opts: {
           artifactDir: null,
           error: typeof err === 'string' ? err.slice(0, 500) : String(err),
         });
-        console.log(`           FAIL`);
       }
     } else if (step.type === 'cargo') {
       try {
@@ -442,7 +303,6 @@ export async function gateCommand(opts: {
           artifactDir: null,
           error: null,
         });
-        console.log(`           PASS (${passMatches.length} crate(s))`);
       } catch (e) {
         const err = e instanceof Error ? (e as { stdout?: string }).stdout ?? e.message : String(e);
         results.push({
@@ -454,7 +314,6 @@ export async function gateCommand(opts: {
           artifactDir: null,
           error: typeof err === 'string' ? err.slice(0, 1000) : String(err),
         });
-        console.log(`           FAIL`);
       }
     } else if (step.type === 'policy') {
       const policyRoot = resolve(frameworkRoot, step.policyRoot ?? '.');
@@ -471,7 +330,6 @@ export async function gateCommand(opts: {
           ? null
           : `Disallowed release artifacts found:\n${result.violations.map((v) => `  - ${v}`).join('\n')}\nSet NEOXTEN_BUILD_NOW=1 to override.`,
       });
-      console.log(`           ${result.passed ? 'PASS' : 'FAIL'}${result.violations.length > 0 ? ` (${result.violations.length} violations)` : ''}`);
     }
   }
 
@@ -508,10 +366,43 @@ export async function gateCommand(opts: {
     'utf-8',
   );
 
-  console.log(`\n  -- ${label}: ${overallVerdict} --`);
-  console.log(`  Report: ${reportPath}`);
-  console.log(`  Verdict: ${verdictPath}`);
-  console.log(`  Duration: ${(totalMs / 1000).toFixed(1)}s\n`);
+  return {
+    preset,
+    label,
+    overallVerdict,
+    results,
+    reportPath,
+    verdictPath,
+    totalMs,
+  };
+}
 
-  process.exit(overallVerdict === 'PASS' ? 0 : 1);
+export async function gateCommand(opts: {
+  preset?: string;
+  outDir?: string;
+  skipIntegration?: boolean;
+}): Promise<void> {
+  const preset = opts.preset ?? 'nemyo';
+  const frameworkRoot = process.cwd();
+  let result: GateExecutionResult;
+  try {
+    result = await executeGateSuite({
+      preset,
+      frameworkRoot,
+      outDir: opts.outDir,
+      skipIntegration: opts.skipIntegration,
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error(`Unknown or invalid suite "${preset}": ${msg}`);
+    console.error('Built-in suites: see suites/*.yaml (e.g. nemyo, neoxtemus, operator)');
+    process.exit(2);
+  }
+
+  console.log(`\n  -- ${result.label}: ${result.overallVerdict} --`);
+  console.log(`  Report: ${result.reportPath}`);
+  console.log(`  Verdict: ${result.verdictPath}`);
+  console.log(`  Duration: ${(result.totalMs / 1000).toFixed(1)}s\n`);
+
+  process.exit(result.overallVerdict === 'PASS' ? 0 : 1);
 }
