@@ -5,6 +5,8 @@
  * The public run() contract is backward-compatible: same options, same verdict.
  */
 import { resolve, dirname } from 'path';
+import { readFileSync, existsSync } from 'fs';
+import { createHash } from 'crypto';
 import { generateRunId } from '../utils/run-id.js';
 import { buildVerdict, type Verdict } from './verdict.js';
 import { createArtifactDirs, writeJson, appendLog, type ArtifactPaths } from './artifact-manager.js';
@@ -24,6 +26,12 @@ import { PageObserver } from '../observer/index.js';
 import { EvidenceCollector } from '../evidence/collector.js';
 import { execSync } from 'child_process';
 import { writeRunManifestToRunDir } from '../operator/manifest/build.js';
+import {
+  assembleHumanStyleManifestExtras,
+  buildVisualBaselineFindings,
+} from '../operator/findings/assemble-manifest-extras.js';
+import { loadExploratoryCharter, buildExploratoryMetaFromCharter } from '../operator/exploratory/charter.js';
+import { emptyLayoutMetrics } from '../observer/layout-metrics-types.js';
 
 const DEFAULT_OUT_DIR = '.neoxten-out';
 
@@ -106,10 +114,74 @@ export async function run(options: RunOptions): Promise<RunResult> {
 
   const persistManifest = (verdict: Verdict) => {
     try {
+      const summary = evidence.summarize();
+      const configAbs = resolve(options.configPath);
+      const configDir = dirname(configAbs);
+      const charter = loadExploratoryCharter(configAbs, config.exploratoryCharter);
+      let exploratoryMeta: import('../operator/findings/schema.js').ExploratoryMeta | undefined;
+      let explorationRel: string | undefined;
+      if (charter) {
+        const pathnames = summary.observationSnapshots.map((s) => {
+          try {
+            return new URL(s.url).pathname;
+          } catch {
+            return s.url;
+          }
+        });
+        explorationRel = 'exploration-map.json';
+        writeJson(resolve(artifacts.runDir, explorationRel), {
+          charter_id: charter.charter_id,
+          visited_pathnames: [...new Set(pathnames)],
+          step_boundaries: summary.timeline.filter((t) => t.type === 'step_boundary').length,
+          generatedAt: new Date().toISOString(),
+        });
+        exploratoryMeta = buildExploratoryMetaFromCharter(charter, pathnames, explorationRel);
+      }
+
+      writeJson(resolve(artifacts.runDir, 'layout-metrics.json'), {
+        generatedAt: new Date().toISOString(),
+        snapshots: summary.observationSnapshots.map((s, i) => ({
+          index: i,
+          url: s.url,
+          layoutMetrics: s.layoutMetrics ?? emptyLayoutMetrics(),
+        })),
+      });
+
+      const extraFindings: import('../operator/findings/schema.js').Finding[] = [];
+      if (verdict.verdict === 'PASS' && verdict.exitCode === 0 && config.visualBaseline?.baselineImagePath) {
+        const basePath = resolve(configDir, config.visualBaseline.baselineImagePath);
+        const finalPath = resolve(artifacts.screenshots, 'final.png');
+        if (existsSync(basePath) && existsSync(finalPath)) {
+          const baseSha = createHash('sha256').update(readFileSync(basePath)).digest('hex');
+          const curSha = createHash('sha256').update(readFileSync(finalPath)).digest('hex');
+          extraFindings.push(
+            ...buildVisualBaselineFindings(
+              artifacts.runDir,
+              'screenshots/final.png',
+              basePath,
+              curSha,
+              baseSha,
+            ),
+          );
+        }
+      }
+
+      const extras = assembleHumanStyleManifestExtras(
+        verdict,
+        summary,
+        artifacts.runDir,
+        exploratoryMeta,
+        extraFindings,
+      );
       writeRunManifestToRunDir({
         runDir: artifacts.runDir,
         verdict,
-        configPath: resolve(options.configPath),
+        configPath: configAbs,
+        evidenceTimeline: summary.timeline,
+        findings: extras.findings,
+        retestHints: extras.retestHints,
+        exploratoryMeta: extras.exploratoryMeta,
+        validationClosure: extras.validationClosure,
       });
     } catch {
       /* best effort — manifest must not break runs */
@@ -153,7 +225,15 @@ export async function run(options: RunOptions): Promise<RunResult> {
       evidence.stageStart('flows');
       for (const flow of config.flows) {
         addLog(`Executing flow: ${flow.name}`);
-        const flowResult = await executeFlow(driver, flow);
+        const flowResult = await executeFlow(driver, flow, async (i) => {
+          evidence.addStepBoundary(`flow:${flow.name}:step:${i}`);
+          try {
+            const snap = await observer!.observe();
+            evidence.addObservation(snap, `flow:${flow.name}:step:${i}`);
+          } catch {
+            /* page may be transitioning */
+          }
+        });
         if (!flowResult.passed) {
           const failScreenshot = resolve(artifacts.screenshots, `step-${flowResult.failedStepIndex}-fail.png`);
           await driver.captureScreenshot(failScreenshot);
@@ -188,6 +268,7 @@ export async function run(options: RunOptions): Promise<RunResult> {
           });
           writeJson(artifacts.verdict, verdict);
           writeEvidence();
+          persistManifest(verdict);
           await driver.close();
           return { verdict, artifacts };
         }
@@ -307,6 +388,7 @@ export async function run(options: RunOptions): Promise<RunResult> {
       });
       writeJson(artifacts.verdict, verdict);
       writeEvidence();
+      persistManifest(verdict);
       await driver.close();
       return { verdict, artifacts };
     }

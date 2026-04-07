@@ -1,16 +1,10 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, devices } from '@playwright/test';
+import { DASHBOARD_OPERATOR_PORT } from './e2e/dashboard-constants';
 
 const repoRoot = path.dirname(fileURLToPath(import.meta.url));
 const uiRoot = path.join(repoRoot, 'ui');
-
-/**
- * Loopback port reserved for this harness only. Avoids:
- * - `loadAppConfig()` reading the real user's app.json (8787+ scan → 8790…) while Vite still proxies :8787
- * - clashes with a dev operator on 8787 when we pin the same port for serve + proxy
- */
-const DASHBOARD_OPERATOR_PORT = 47_987;
 
 /**
  * Dashboard UI + Control API (Vite preview proxies /api → operator port via NEOXTEN_OPERATOR_API_PORT).

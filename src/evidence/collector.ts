@@ -20,7 +20,8 @@ export type TimelineEntryType =
   | 'note'
   | 'gate_result'
   | 'stage_start'
-  | 'stage_end';
+  | 'stage_end'
+  | 'step_boundary';
 
 export interface TimelineEntry {
   type: TimelineEntryType;
@@ -43,6 +44,8 @@ export interface EvidenceSummary {
   totalActions: number;
   failedActions: number;
   totalDurationMs: number;
+  /** Page snapshots recorded via addObservation — for layout / UX findings. */
+  observationSnapshots: PageSnapshot[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -55,6 +58,7 @@ export class EvidenceCollector {
   private consoleErrors: string[] = [];
   private actionResults: ActionResult[] = [];
   private notes: string[] = [];
+  private observationSnapshots: PageSnapshot[] = [];
   private startTime = Date.now();
 
   /* ---- Recording methods ---- */
@@ -75,6 +79,7 @@ export class EvidenceCollector {
   }
 
   addObservation(snapshot: PageSnapshot, label?: string): void {
+    this.observationSnapshots.push(snapshot);
     this.timeline.push({
       type: 'observation',
       timestamp: snapshot.timestamp,
@@ -90,6 +95,16 @@ export class EvidenceCollector {
         consoleErrors: snapshot.consoleErrors.length,
         visibleTextLength: snapshot.visibleText.length,
       },
+    });
+  }
+
+  /** Marks a logical step for human-style timeline alignment (flows, gates). */
+  addStepBoundary(label: string, data?: Record<string, unknown>): void {
+    this.timeline.push({
+      type: 'step_boundary',
+      timestamp: new Date().toISOString(),
+      label,
+      data,
     });
   }
 
@@ -173,6 +188,7 @@ export class EvidenceCollector {
       totalActions: this.actionResults.length,
       failedActions: this.actionResults.filter((r) => !r.success).length,
       totalDurationMs: Date.now() - this.startTime,
+      observationSnapshots: [...this.observationSnapshots],
     };
   }
 }

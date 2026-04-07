@@ -55,7 +55,16 @@
     "package:prepare": "npm run build && npm run build --prefix ui && node scripts/prepare-windows-bundle.mjs",
     "package:windows": "tauri build --bundles nsis",
     "validate:windows-bundle": "node scripts/validate-windows-bundle.mjs",
-    "test:packaging-smoke": "npm run build && npm run build --prefix ui && node scripts/prepare-windows-bundle.mjs && node scripts/validate-windows-bundle.mjs"
+    "test:packaging-smoke": "npm run build && npm run build --prefix ui && node scripts/prepare-windows-bundle.mjs && node scripts/validate-windows-bundle.mjs",
+    "test:velarune-icon-pack-batch1": "npm run build && node dist/__tests__/velarune-icon-pack-batch1.test.js",
+    "test:velarune-icon-batch2": "npm run build && npx playwright test -c playwright.velarune-batch2.config.ts",
+    "test:velarune-icon-batch3": "npm run build && npx playwright test -c playwright.velarune-batch3.config.ts",
+    "test:velarune-icon-batch4": "npm run build && npx playwright test -c playwright.velarune-batch4.config.ts",
+    "test:velarune-icon-batch5": "npm run build && npx playwright test -c playwright.velarune-batch5.config.ts",
+    "test:velarune-icon-batch6": "npm run build && npx playwright test -c playwright.velarune-batch6.config.ts",
+    "test:velarune-icon-batch7": "npm run build && npx playwright test -c playwright.velarune-batch7.config.ts",
+    "test:velarune-icon-batch8": "npm run build && npx playwright test -c playwright.velarune-batch8.config.ts",
+    "test:velarune-dashboard-entry": "npm run build && npx playwright test -c playwright.velarune-entry.config.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

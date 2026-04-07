@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "NeoXten RunManifest",
-  "description": "Canonical manifest for Control Plane ingest (verdict + artifacts + env snapshot)",
+  "description": "Canonical manifest for Control Plane ingest (verdict + artifacts + env snapshot). v2026.2 adds findings, retest hints, exploratory meta, validation closure.",
   "type": "object",
   "required": [
     "schemaVersion",
@@ -13,7 +13,7 @@
     "artifacts"
   ],
   "properties": {
-    "schemaVersion": { "type": "string", "const": "2026.1" },
+    "schemaVersion": { "type": "string", "enum": ["2026.1", "2026.2"] },
     "runId": { "type": "string" },
     "ingestedAt": { "type": "string", "format": "date-time" },
     "completedAt": { "type": "string", "format": "date-time" },
@@ -48,6 +48,14 @@
               "trace",
               "har",
               "video",
+              "dom_snapshot",
+              "a11y_report",
+              "visual_diff",
+              "layout_metrics",
+              "navigation_graph",
+              "exploration_map",
+              "ux_report",
+              "design_token_diff",
               "other"
             ]
           },
@@ -56,7 +64,60 @@
         }
       }
     },
-    "reproducibleCommand": { "type": "string" }
+    "reproducibleCommand": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "retestHints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check_id", "rationale"],
+        "properties": {
+          "check_id": { "type": "string" },
+          "rationale": { "type": "string" },
+          "required": { "type": "boolean" },
+          "related_finding_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "exploratoryMeta": {
+      "type": "object",
+      "required": ["charter_id"],
+      "properties": {
+        "charter_id": { "type": "string" },
+        "goal": { "type": "string" },
+        "time_budget_minutes": { "type": "number" },
+        "coverage_pct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "must_touch_pending": { "type": "array", "items": { "type": "string" } },
+        "exploration_map_path": { "type": "string" }
+      }
+    },
+    "validationClosure": {
+      "type": "object",
+      "required": [
+        "verdict_ok",
+        "blocking_findings_count",
+        "pending_required_retests",
+        "open_promoted_issues_blockers",
+        "high_confidence_suspicion_present",
+        "operator_review_satisfied",
+        "advisory_findings_count",
+        "accepted_debt"
+      ],
+      "properties": {
+        "verdict_ok": { "type": "boolean" },
+        "blocking_findings_count": { "type": "integer" },
+        "pending_required_retests": { "type": "integer" },
+        "open_promoted_issues_blockers": { "type": "integer" },
+        "high_confidence_suspicion_present": { "type": "boolean" },
+        "operator_review_satisfied": { "type": "boolean" },
+        "advisory_findings_count": { "type": "integer" },
+        "accepted_debt": { "type": "boolean" },
+        "accepted_debt_finding_ids": { "type": "array", "items": { "type": "string" } }
+      }
+    }
   },
   "additionalProperties": false
 }

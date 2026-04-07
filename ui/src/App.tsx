@@ -59,11 +59,29 @@ function ViewFallback() {
 }
 
 /** Avoid `opFetch` against relative `/api/*` before Tauri sets `setOperatorApiBase` (asset server returns HTML). */
-function OperatorHttpGate(props: { ready: boolean; children: React.ReactNode }) {
+function OperatorHttpGate(props: {
+  ready: boolean;
+  error: string | null;
+  children: React.ReactNode;
+}) {
+  if (props.error) {
+    return (
+      <div className="p-8 text-sm" data-testid="operator-http-error">
+        <p className="text-red-400 font-medium mb-2">Local operator did not start</p>
+        <pre className="text-zinc-400 whitespace-pre-wrap text-xs mb-4">{props.error}</pre>
+        <p className="text-zinc-500 text-xs">
+          Packaged app: check{" "}
+          <code className="text-zinc-400">%LOCALAPPDATA%\NeoXten\logs\operator-serve.stderr.log</code> for Node errors.
+          Dev: run <code className="text-zinc-400">npm run build</code> then{" "}
+          <code className="text-zinc-400">npm run operator:serve</code> from the repo root.
+        </p>
+      </div>
+    );
+  }
   if (!props.ready) {
     return (
       <div className="p-8 text-sm text-zinc-500" data-testid="operator-http-wait">
-        Connecting to local operator…
+        Connecting to local operator… (first start can take up to a minute)
       </div>
     );
   }
@@ -161,7 +179,7 @@ export default function App() {
           {view === "import" && <Import onNavigate={handleNavigate} />}
         </Suspense>
         {view === "op_mission" && (
-          <OperatorHttpGate ready={operatorHttpReady}>
+          <OperatorHttpGate ready={operatorHttpReady} error={operatorServiceError}>
             <OperatorMissionControl
               onOpenRun={(id) => {
                 setOperatorRunId(id);
@@ -172,7 +190,7 @@ export default function App() {
           </OperatorHttpGate>
         )}
         {view === "op_runs" && (
-          <OperatorHttpGate ready={operatorHttpReady}>
+          <OperatorHttpGate ready={operatorHttpReady} error={operatorServiceError}>
             <OperatorRunsList
               onOpenRun={(id) => {
                 setOperatorRunId(id);
@@ -182,7 +200,7 @@ export default function App() {
           </OperatorHttpGate>
         )}
         {view === "op_run_detail" && operatorRunId && (
-          <OperatorHttpGate ready={operatorHttpReady}>
+          <OperatorHttpGate ready={operatorHttpReady} error={operatorServiceError}>
             <OperatorRunDetail
               runDbId={operatorRunId}
               onBack={() => setView("op_runs")}
@@ -190,12 +208,12 @@ export default function App() {
           </OperatorHttpGate>
         )}
         {view === "op_issues" && (
-          <OperatorHttpGate ready={operatorHttpReady}>
+          <OperatorHttpGate ready={operatorHttpReady} error={operatorServiceError}>
             <OperatorIssuesList />
           </OperatorHttpGate>
         )}
         {view === "op_patches" && (
-          <OperatorHttpGate ready={operatorHttpReady}>
+          <OperatorHttpGate ready={operatorHttpReady} error={operatorServiceError}>
             <OperatorPatchesView />
           </OperatorHttpGate>
         )}

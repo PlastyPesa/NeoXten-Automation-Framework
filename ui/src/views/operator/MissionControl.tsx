@@ -20,6 +20,7 @@ export function OperatorMissionControl(props: {
   const [runs, setRuns] = useState<RunRow[]>([]);
   const [issues, setIssues] = useState<{ id: string; status: string; title: string }[]>([]);
   const [err, setErr] = useState<string | null>(null);
+  const [closurePreview, setClosurePreview] = useState<Record<string, unknown> | null>(null);
 
   const load = useCallback(async () => {
     setErr(null);
@@ -28,8 +29,19 @@ export function OperatorMissionControl(props: {
         opFetch<{ runs: RunRow[] }>("/api/runs"),
         opFetch<{ issues: { id: string; status: string; title: string }[] }>("/api/issues"),
       ]);
-      setRuns(r.runs.slice(0, 8));
+      const slice = r.runs.slice(0, 8);
+      setRuns(slice);
       setIssues(i.issues.filter((x) => x.status === "open").slice(0, 6));
+      if (slice[0]?.id) {
+        try {
+          const c = await opFetch<Record<string, unknown>>(`/api/runs/${slice[0].id}/validation-closure`);
+          setClosurePreview(c);
+        } catch {
+          setClosurePreview(null);
+        }
+      } else {
+        setClosurePreview(null);
+      }
     } catch (e) {
       setErr(e instanceof Error ? e.message : String(e));
     }
@@ -56,6 +68,19 @@ export function OperatorMissionControl(props: {
           <Button onClick={() => void load()}>Refresh</Button>
         </div>
       </div>
+
+      {closurePreview && (
+        <Card>
+          <h2 className="text-sm font-medium text-zinc-300 uppercase tracking-wide mb-2">
+            Latest run — validation closure
+          </h2>
+          <p className="text-xs text-zinc-500 font-mono">
+            blocking: {String(closurePreview.blocking_findings_count)} · pending required retests:{" "}
+            {String(closurePreview.pending_required_retests)} · suspicion:{" "}
+            {String(closurePreview.high_confidence_suspicion_present)}
+          </p>
+        </Card>
+      )}
 
       {err && (
         <Card className="border-red-500/30 text-red-300 text-sm">

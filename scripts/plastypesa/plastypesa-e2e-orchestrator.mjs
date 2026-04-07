@@ -18,6 +18,7 @@ import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bootstrapPlastyPesaEnv } from './env-bootstrap.mjs';
+import { getAdminPlaywrightProcessEnv } from './admin-playwright-env.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const NEOXTEN_ROOT = resolve(__dirname, '../..');
@@ -106,6 +107,7 @@ async function main() {
     }
     verdict.phases.push({ id: 'api', status: code === 0 ? 'passed' : 'failed', exitCode: code });
     if (code !== 0) {
+      anyFailed = true;
       verdict.overall = 'FAIL';
     }
   }
@@ -136,6 +138,7 @@ async function main() {
   } else {
     const code = await runShell('npx playwright test', adminRoot, {
       PLASTYPESA_ADMIN_BASE_URL: process.env.PLASTYPESA_ADMIN_BASE_URL || '',
+      ...getAdminPlaywrightProcessEnv(),
     });
     verdict.phases.push({ id: 'admin', status: code === 0 ? 'passed' : 'failed', exitCode: code });
     if (code !== 0) anyFailed = true;
@@ -162,7 +165,7 @@ async function main() {
     verdict.phases.push({ id: 'mobile', status: 'skipped', reason: 'previous phase failed' });
   } else {
     const code = await runShell(
-      `flutter test integration_test/smoke_test.dart -d ${deviceId} --reporter expanded`,
+      `flutter test integration_test/smoke_test.dart integration_test/app_journey_test.dart -d ${deviceId} --reporter expanded --dart-define=INTEGRATION_TEST=true`,
       mobileRoot,
     );
     verdict.phases.push({

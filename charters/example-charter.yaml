@@ -1,0 +1,6 @@
+# Example exploratory charter (optional `exploratoryCharter` in neoxten.yaml)
+charter_id: example-smoke
+goal: Quick pass over primary surfaces; coverage is a first-class outcome.
+must_touch:
+  - /
+time_budget_minutes: 15

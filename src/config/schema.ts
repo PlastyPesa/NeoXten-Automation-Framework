@@ -1,7 +1,19 @@
 import { z } from 'zod';
 
 export const FlowStepSchema = z.object({
-  action: z.enum(['click', 'type', 'navigate', 'wait', 'assert', 'setInputFiles', 'evaluate', 'sendToBackground', 'bringToForeground', 'getTestState']),
+  action: z.enum([
+    'click',
+    'type',
+    'navigate',
+    'wait',
+    'assert',
+    'setInputFiles',
+    'evaluate',
+    'selectOption',
+    'sendToBackground',
+    'bringToForeground',
+    'getTestState',
+  ]),
   selector: z.string().optional(),
   text: z.string().optional(),
   url: z.string().optional(),
@@ -11,6 +23,12 @@ export const FlowStepSchema = z.object({
   files: z.array(z.string()).optional(),
   /** JS expression for evaluate (run in page context) */
   expression: z.string().optional(),
+  /** For action selectOption: match by option label text */
+  optionLabel: z.string().optional(),
+  /** For action selectOption: match by option value attribute */
+  optionValue: z.string().optional(),
+  /** For action selectOption: zero-based index among all option elements */
+  optionIndex: z.number().int().nonnegative().optional(),
   /** CSS property name for type: 'css' assertions */
   property: z.string().optional(),
   /** Expected value for css/attribute assertions */
@@ -144,6 +162,13 @@ export const ProjectConfigSchema = z.discriminatedUnion('type', [
 
 export type AssistantConfig = z.infer<typeof AssistantConfigSchema>;
 
+export const VisualBaselineConfigSchema = z.object({
+  /** Stable id for reporting (e.g. marketing-home). */
+  id: z.string(),
+  /** PNG path relative to the neoxten config file directory. */
+  baselineImagePath: z.string(),
+});
+
 export const NeoxtenConfigSchema = z.object({
   project: ProjectConfigSchema,
   flows: z.array(FlowSchema).default([]),
@@ -152,6 +177,10 @@ export const NeoxtenConfigSchema = z.object({
   artifacts: ArtifactsSchema.optional(),
   /** Command to run before launch (e.g. node scripts/clean-neoxtemus-state.js). Runs with cwd = config dir. */
   preRun: z.string().optional(),
+  /** Optional exploratory charter YAML path (relative to config dir). */
+  exploratoryCharter: z.string().optional(),
+  /** Compare final screenshot hash to an approved golden PNG in the repo. */
+  visualBaseline: VisualBaselineConfigSchema.optional(),
 });
 
 export type NeoxtenConfig = z.infer<typeof NeoxtenConfigSchema>;

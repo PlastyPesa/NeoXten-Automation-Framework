@@ -11,10 +11,14 @@ interface IssueRow {
   severity: string;
   fingerprint: string;
   updatedAt: string;
+  classification?: string | null;
 }
+
+type IssueFilter = "all" | "failures" | "design" | "promoted";
 
 export function OperatorIssuesList() {
   const [issues, setIssues] = useState<IssueRow[]>([]);
+  const [filter, setFilter] = useState<IssueFilter>("all");
 
   const load = useCallback(async () => {
     const r = await opFetch<{ issues: IssueRow[] }>("/api/issues");
@@ -30,6 +34,18 @@ export function OperatorIssuesList() {
     await load();
   };
 
+  const visible = issues.filter((iss) => {
+    const c = iss.classification ?? "";
+    if (filter === "all") return true;
+    if (filter === "failures") return !c || c === "";
+    if (filter === "design") return c === "design_system_auto" || c === "design_system_promoted";
+    if (filter === "promoted")
+      return (
+        c === "promoted_finding" || c === "design_system_promoted" || c === "design_system_auto"
+      );
+    return true;
+  });
+
   return (
     <div className="space-y-6" data-testid="operator-issues">
       <div className="flex items-center justify-between">
@@ -38,12 +54,44 @@ export function OperatorIssuesList() {
           Refresh
         </Button>
       </div>
+      <div className="flex flex-wrap gap-2">
+        {(
+          [
+            ["all", "All"],
+            ["failures", "Run / gate failures"],
+            ["design", "Design quality"],
+            ["promoted", "Promoted (any)"],
+          ] as const
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setFilter(key)}
+            className={`px-3 py-1.5 rounded-lg text-xs ${
+              filter === key ? "bg-white/15 text-white" : "text-zinc-500 hover:text-zinc-300"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <div className="space-y-3">
-        {issues.map((iss) => (
+        {visible.map((iss) => (
           <Card key={iss.id}>
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-sm text-white">{iss.title}</p>
+                {iss.classification === "promoted_finding" && (
+                  <p className="text-[10px] text-violet-300 mt-0.5">Promoted from run finding</p>
+                )}
+                {iss.classification === "design_system_promoted" && (
+                  <p className="text-[10px] text-fuchsia-300 mt-0.5">Design — promoted (manual)</p>
+                )}
+                {iss.classification === "design_system_auto" && (
+                  <p className="text-[10px] text-fuchsia-300/90 mt-0.5">
+                    Design — auto triage (proven token drift; NEOXTEN_AUTO_PROMOTE_PROVEN_DESIGN)
+                  </p>
+                )}
                 <p className="text-[10px] font-mono text-zinc-600 mt-1">{iss.fingerprint.slice(0, 16)}…</p>
               </div>
               <div className="flex flex-col items-end gap-2">
@@ -60,6 +108,9 @@ export function OperatorIssuesList() {
             </div>
           </Card>
         ))}
+        {visible.length === 0 && (
+          <p className="text-sm text-zinc-600">No issues in this filter.</p>
+        )}
       </div>
     </div>
   );

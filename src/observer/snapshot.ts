@@ -6,6 +6,8 @@
  * Designed to be cheap enough to call before/after every action.
  */
 import type { Page } from 'playwright';
+import type { PageLayoutMetrics } from './layout-metrics-types.js';
+import { emptyLayoutMetrics } from './layout-metrics-types.js';
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -54,6 +56,9 @@ export interface PageSnapshot {
   consoleErrors: string[];
   pendingRequests: number;
   networkIdle: boolean;
+
+  /** Measured layout / polish metrics (B.1); missing on legacy snapshots. */
+  layoutMetrics?: PageLayoutMetrics;
 }
 
 /* ------------------------------------------------------------------ */
@@ -142,6 +147,161 @@ export async function takeSnapshot(
     /* ---- visible text ---- */
     const visibleText = (document.body?.innerText ?? '').trim().slice(0, 5000);
 
+    /* ---- B.1 layout metrics (deterministic in-browser measurements) ---- */
+    const collectLayoutMetrics = (): PageLayoutMetrics => {
+      const de = document.documentElement;
+      const body = document.body;
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const scrollOverflowX = Math.max(0, de.scrollWidth - de.clientWidth);
+      const scrollOverflowY = Math.max(0, de.scrollHeight - de.clientHeight);
+      const horizontalOverflowPx = Math.max(0, de.scrollWidth - vw);
+      const rootStyle = getComputedStyle(de);
+      const rootOverflowXHiddenClipRisk =
+        horizontalOverflowPx > 8 && (rootStyle.overflowX === 'hidden' || rootStyle.overflow === 'hidden');
+      let bodyVerticalClipRisk = false;
+      if (body) {
+        const bs = getComputedStyle(body);
+        bodyVerticalClipRisk =
+          (bs.overflowY === 'hidden' || bs.overflow === 'hidden') && de.scrollHeight > vh + 12;
+      }
+
+      type Box = { x: number; y: number; w: number; h: number; area: number };
+      const interactableSelector =
+        'button, a[href], [role="button"], input[type="submit"], input[type="button"]';
+      const boxEls = Array.from(document.querySelectorAll(interactableSelector)).filter(isVisible).slice(0, 48);
+      const boxes: Box[] = [];
+      for (const el of boxEls) {
+        const r = el.getBoundingClientRect();
+        if (r.width < 2 || r.height < 2) continue;
+        if (r.bottom < 0 || r.top > vh || r.right < 0 || r.left > vw) continue;
+        boxes.push({
+          x: r.left,
+          y: r.top,
+          w: r.width,
+          h: r.height,
+          area: r.width * r.height,
+        });
+      }
+      const intersectRatio = (a: Box, b: Box): number => {
+        const x1 = Math.max(a.x, b.x);
+        const y1 = Math.max(a.y, b.y);
+        const x2 = Math.min(a.x + a.w, b.x + b.w);
+        const y2 = Math.min(a.y + a.h, b.y + b.h);
+        if (x2 <= x1 || y2 <= y1) return 0;
+        const ia = (x2 - x1) * (y2 - y1);
+        const minA = Math.min(a.area, b.area);
+        return minA > 0 ? ia / minA : 0;
+      };
+      let maxInteractableOverlapRatio = 0;
+      let overlapPairCount = 0;
+      const OVERLAP_MIN = 0.13;
+      for (let i = 0; i < boxes.length; i++) {
+        for (let j = i + 1; j < boxes.length; j++) {
+          const ratio = intersectRatio(boxes[i]!, boxes[j]!);
+          if (ratio >= OVERLAP_MIN) {
+            overlapPairCount++;
+            maxInteractableOverlapRatio = Math.max(maxInteractableOverlapRatio, ratio);
+          }
+        }
+      }
+
+      const container = document.querySelector('main') ?? body;
+      const gridDeviationSamplesPx: number[] = [];
+      if (container) {
+        const GRID = 8;
+        const kids = Array.from(container.children).slice(0, 16);
+        for (const el of kids) {
+          const r = el.getBoundingClientRect();
+          if (r.width < 24) continue;
+          const leftMod = Math.abs((((r.left % GRID) + GRID) % GRID));
+          const dev = Math.min(leftMod, GRID - leftMod);
+          if (dev > 2) gridDeviationSamplesPx.push(Math.round(dev));
+        }
+      }
+      const gridMisalignedBlockCount = gridDeviationSamplesPx.length;
+
+      const headingEls = Array.from(document.querySelectorAll('h1,h2,h3,h4,h5,h6')).filter(isVisible);
+      const hMeta = headingEls.map((el) => {
+        const cs = getComputedStyle(el);
+        const fs = parseFloat(cs.fontSize) || 0;
+        const fw = parseInt(cs.fontWeight, 10) || 400;
+        return { tag: el.tagName, fs, fw, y: el.getBoundingClientRect().top };
+      });
+      const h1s = hMeta.filter((h) => h.tag === 'H1');
+      const visibleH1Count = h1s.length;
+      const multipleHeavyH1 = h1s.length >= 2 && h1s.every((h) => h.fs >= 17);
+      const h2s = hMeta.filter((h) => h.tag === 'H2');
+      const h3s = hMeta.filter((h) => h.tag === 'H3');
+      const minH2 = h2s.length ? Math.min(...h2s.map((h) => h.fs)) : 0;
+      const maxH3 = h3s.length ? Math.max(...h3s.map((h) => h.fs)) : 0;
+      const hierarchyLevelInversion = minH2 > 0 && maxH3 > 0 && maxH3 >= minH2 * 0.97;
+
+      const foldMaxY = vh * 0.9;
+      const btnEls = Array.from(
+        document.querySelectorAll('button, [role="button"], input[type="submit"], input[type="button"]'),
+      ).filter(isVisible);
+      type BtnM = { area: number; inFold: boolean; primary: boolean };
+      const btnMeta: BtnM[] = [];
+      for (const el of btnEls) {
+        const r = el.getBoundingClientRect();
+        const area = r.width * r.height;
+        if (area < 80) continue;
+        const inFold = r.top < foldMaxY && r.bottom > 0 && r.left < vw && r.right > 0;
+        const primary =
+          (el instanceof HTMLButtonElement && el.type === 'submit') ||
+          (el instanceof HTMLInputElement && el.type === 'submit') ||
+          !!el.getAttribute('data-primary') ||
+          /primary|cta|submit/i.test(el.className) ||
+          /primary|cta/i.test(el.getAttribute('data-testid') ?? '');
+        btnMeta.push({ area, inFold, primary });
+      }
+      const inFoldBtns = btnMeta.filter((b) => b.inFold);
+      const viewportActionableCount = inFoldBtns.length;
+      const primaries = inFoldBtns.filter((b) => b.primary);
+      const primaryMax = primaries.length ? Math.max(...primaries.map((b) => b.area)) : 0;
+      const secondaries = inFoldBtns.filter((b) => !b.primary);
+      const secondaryMax = secondaries.length ? Math.max(...secondaries.map((b) => b.area)) : 0;
+      const weakPrimaryVsSecondary =
+        primaryMax > 0 && secondaryMax > 0 && primaryMax < secondaryMax * 0.42;
+      const noPrimaryControlInFold = inFoldBtns.length >= 2 && primaries.length === 0;
+      let competingCtaCount = 0;
+      if (inFoldBtns.length >= 2) {
+        const areas = inFoldBtns.map((b) => b.area).sort((a, b) => b - a);
+        if (areas[0]! > 400 && areas[1]! > 400 && areas[1]! >= areas[0]! * 0.72) competingCtaCount = 2;
+      }
+
+      let genericErrorBannerText = false;
+      document.querySelectorAll('[role="alert"], [role="status"], .error, [class*="error"]').forEach((el) => {
+        const t = (el.textContent || '').trim();
+        if (t.length > 0 && t.length < 100) {
+          if (/^(error|errors?)$/i.test(t)) genericErrorBannerText = true;
+          if (/^something went wrong\.?$/i.test(t)) genericErrorBannerText = true;
+          if (/^an error occurred\.?$/i.test(t)) genericErrorBannerText = true;
+        }
+      });
+
+      return {
+        scrollOverflowX,
+        scrollOverflowY,
+        horizontalOverflowPx,
+        rootOverflowXHiddenClipRisk,
+        bodyVerticalClipRisk,
+        maxInteractableOverlapRatio,
+        overlapPairCount,
+        gridMisalignedBlockCount,
+        gridDeviationSamplesPx,
+        visibleH1Count,
+        multipleHeavyH1,
+        hierarchyLevelInversion,
+        weakPrimaryVsSecondary,
+        noPrimaryControlInFold,
+        competingCtaCount,
+        genericErrorBannerText,
+        viewportActionableCount,
+      };
+    };
+
     return {
       buttons,
       inputs,
@@ -152,6 +312,7 @@ export async function takeSnapshot(
       hasModal,
       hasErrorDialog,
       visibleText,
+      layoutMetrics: collectLayoutMetrics(),
     };
   }).catch(() => ({
     buttons: [] as ReturnType<typeof Array.from>,
@@ -163,6 +324,7 @@ export async function takeSnapshot(
     hasModal: false,
     hasErrorDialog: false,
     visibleText: '',
+    layoutMetrics: emptyLayoutMetrics(),
   }));
 
   return {
@@ -182,5 +344,6 @@ export async function takeSnapshot(
     consoleErrors: extra?.consoleErrors ?? [],
     pendingRequests: extra?.pendingRequests ?? 0,
     networkIdle: (extra?.pendingRequests ?? 0) === 0,
+    layoutMetrics: (domData as { layoutMetrics?: PageLayoutMetrics }).layoutMetrics,
   };
 }

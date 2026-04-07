@@ -1,14 +1,16 @@
 /// Factory Bridge — manages the Factory Core Node.js child process.
 ///
-/// Spawns `node dist/cli/index.js` as a child process.
+/// Spawns bundled `node` + `dist/cli/index.js` from `resources/neoxten-runtime` (or dev repo root).
 /// Sends commands via stdin (JSON lines).
 /// Reads NDJSON events from stdout and relays them to the Tauri event system.
 
 use std::io::{BufRead, BufReader, Write};
+use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter};
 
+use crate::product_paths;
 use crate::types::FactoryEvent;
 
 pub struct FactoryBridge {
@@ -29,8 +31,20 @@ impl FactoryBridge {
             return Err("factory process already running".into());
         }
 
-        let mut child = Command::new("node")
-            .args(["dist/cli/index.js", "factory", "run", "--spec", "pending"])
+        let node: PathBuf = product_paths::resolved_node_exe()?;
+        let root = product_paths::resolved_framework_root()?;
+        let cli = root.join("dist").join("cli").join("index.js");
+        if !cli.is_file() {
+            return Err(format!("factory CLI missing: {}", cli.display()));
+        }
+
+        let mut child = Command::new(&node)
+            .current_dir(&root)
+            .arg(&cli)
+            .args(["factory", "run", "--spec", "pending"])
+            .env("NEOXTEN_FRAMEWORK_ROOT", &root)
+            .env("NEOXTEN_DATA_DIR", product_paths::product_data_dir())
+            .env("NEOXTEN_OPERATOR_HOME", product_paths::operator_home())
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())

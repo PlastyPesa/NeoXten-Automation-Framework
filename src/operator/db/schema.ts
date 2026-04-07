@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const workspaces = sqliteTable('workspaces', {
   id: text('id').primaryKey(),
@@ -57,11 +57,27 @@ export const runs = sqliteTable(
     createdAt: text('created_at').notNull(),
     /** Issue fingerprint for clustering (§9) */
     failureFingerprint: text('failure_fingerprint'),
+    validationClosureJson: text('validation_closure_json'),
   },
   (t) => [
     index('runs_workspace_completed').on(t.workspaceId, t.completedAt),
     index('runs_neoxten_run_id').on(t.neoxtenRunId),
   ],
+);
+
+export const findings = sqliteTable(
+  'findings',
+  {
+    id: text('id').primaryKey(),
+    runDbId: text('run_db_id')
+      .notNull()
+      .references(() => runs.id, { onDelete: 'cascade' }),
+    payloadJson: text('payload_json').notNull(),
+    fingerprint: text('fingerprint'),
+    promotionState: text('promotion_state').notNull().default('run_only'),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [index('findings_run_idx').on(t.runDbId)],
 );
 
 export const runArtifacts = sqliteTable(
@@ -124,6 +140,29 @@ export const patchProposals = sqliteTable('patch_proposals', {
   updatedAt: text('updated_at').notNull(),
 });
 
+export const retestItems = sqliteTable(
+  'retest_items',
+  {
+    id: text('id').primaryKey(),
+    runDbId: text('run_db_id').references(() => runs.id, { onDelete: 'cascade' }),
+    issueId: text('issue_id').references(() => issues.id, { onDelete: 'cascade' }),
+    patchProposalId: text('patch_proposal_id').references(() => patchProposals.id, {
+      onDelete: 'cascade',
+    }),
+    checkId: text('check_id').notNull(),
+    rationale: text('rationale').notNull(),
+    required: integer('required', { mode: 'boolean' }).notNull().default(true),
+    status: text('status').notNull().default('pending'),
+    waiveReason: text('waive_reason'),
+    relatedFindingIdsJson: text('related_finding_ids_json'),
+    createdAt: text('created_at').notNull(),
+  },
+  (t) => [
+    index('retest_items_run').on(t.runDbId),
+    index('retest_items_patch').on(t.patchProposalId),
+  ],
+);
+
 export const explainBindings = sqliteTable('explain_bindings', {
   id: text('id').primaryKey(),
   entityType: text('entity_type').notNull(),
@@ -133,3 +172,19 @@ export const explainBindings = sqliteTable('explain_bindings', {
   renderedJson: text('rendered_json').notNull(),
   createdAt: text('created_at').notNull(),
 });
+
+export const visualBaselines = sqliteTable(
+  'visual_baselines',
+  {
+    id: text('id').primaryKey(),
+    workspaceId: text('workspace_id')
+      .notNull()
+      .references(() => workspaces.id),
+    projectId: text('project_id').references(() => projects.id),
+    baselineKey: text('baseline_key').notNull(),
+    contentSha256: text('content_sha256').notNull(),
+    approvedRunDbId: text('approved_run_db_id'),
+    updatedAt: text('updated_at').notNull(),
+  },
+  (t) => [uniqueIndex('visual_baselines_ws_key').on(t.workspaceId, t.baselineKey)],
+);

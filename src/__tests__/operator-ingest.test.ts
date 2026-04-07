@@ -9,7 +9,13 @@ import { openOperatorDb } from '../operator/db/client.js';
 import { ingestRunManifest, parseManifestFromPath } from '../operator/ingest/service.js';
 import { buildVerdict } from '../core/verdict.js';
 import { writeRunManifestToRunDir } from '../operator/manifest/build.js';
-import { runs as runsTable, issues as issuesTable } from '../operator/db/schema.js';
+import {
+  runs as runsTable,
+  issues as issuesTable,
+  findings as findingsTable,
+} from '../operator/db/schema.js';
+import { assembleHumanStyleManifestExtras } from '../operator/findings/assemble-manifest-extras.js';
+import type { EvidenceSummary } from '../evidence/collector.js';
 
 async function testIngestRoundTrip() {
   const home = mkdtempSync(join(tmpdir(), 'neoxten-op-test-'));
@@ -28,11 +34,27 @@ async function testIngestRoundTrip() {
     logExcerpts: ['selector timeout'],
   });
   writeFileSync(join(runDir, 'verdict.json'), JSON.stringify(verdict), 'utf-8');
+  const emptySummary: EvidenceSummary = {
+    timeline: [],
+    screenshots: [],
+    consoleErrors: [],
+    actionResults: [],
+    notes: [],
+    totalActions: 0,
+    failedActions: 0,
+    totalDurationMs: 0,
+    observationSnapshots: [],
+  };
+  const extras = assembleHumanStyleManifestExtras(verdict, emptySummary, runDir);
   writeRunManifestToRunDir({
     runDir,
     verdict,
     configPath: join(home, 'neoxten.yaml'),
     suiteId: 'operator',
+    evidenceTimeline: emptySummary.timeline,
+    findings: extras.findings,
+    retestHints: extras.retestHints,
+    validationClosure: extras.validationClosure,
   });
 
   const { db } = openOperatorDb(home);
@@ -50,6 +72,9 @@ async function testIngestRoundTrip() {
 
   const issuesRows = db.select().from(issuesTable).all();
   if (issuesRows.length !== 1) throw new Error(`expected 1 issue, got ${issuesRows.length}`);
+
+  const findingRows = db.select().from(findingsTable).all();
+  if (findingRows.length < 1) throw new Error(`expected ≥1 ingested finding, got ${findingRows.length}`);
 }
 
 async function testScanDataTestIds() {

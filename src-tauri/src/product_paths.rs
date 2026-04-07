@@ -41,8 +41,16 @@ pub fn init_bundled_paths_for_app(app: &AppHandle) {
         }
     }
     if let Ok(exe) = std::env::current_exe() {
-        if let Some(parent) = exe.parent() {
-            let _ = try_init_bundled_resources_dir(&parent.join("resources"));
+        let mut dir = exe.parent().map(PathBuf::from);
+        for _ in 0..10 {
+            let Some(ref d) = dir else {
+                break;
+            };
+            let resources = d.join("resources");
+            if try_init_bundled_resources_dir(&resources) {
+                return;
+            }
+            dir = d.parent().map(PathBuf::from);
         }
     }
 }

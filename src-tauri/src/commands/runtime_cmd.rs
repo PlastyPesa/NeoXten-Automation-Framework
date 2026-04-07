@@ -96,6 +96,7 @@ fn run_packaged_cli_output(args: &[&str]) -> Result<std::process::Output, String
         return Err(format!("CLI missing: {}", cli.display()));
     }
     Command::new(&node)
+        .current_dir(&root)
         .arg(&cli)
         .args(args)
         .env("NEOXTEN_FRAMEWORK_ROOT", &root)
@@ -165,8 +166,9 @@ fn detect_healthy_port() -> Option<u16> {
     None
 }
 
+/// Async so the ~45s health wait does not block the webview main thread (Windows "Not Responding").
 #[tauri::command]
-pub fn operator_ensure_running(state: State<'_, OperatorServiceChild>) -> Result<serde_json::Value, String> {
+pub async fn operator_ensure_running(state: State<'_, OperatorServiceChild>) -> Result<serde_json::Value, String> {
     if let Some(port) = detect_healthy_port() {
         return Ok(json!({
             "ok": true,
@@ -216,7 +218,8 @@ pub fn operator_ensure_running(state: State<'_, OperatorServiceChild>) -> Result
         .open(log_dir.join("operator-serve.stderr.log"));
 
     let mut cmd = Command::new(&node);
-    cmd.arg(&cli)
+    cmd.current_dir(&root)
+        .arg(&cli)
         .arg("operator")
         .arg("serve")
         .env("NEOXTEN_DATA_DIR", &data)
@@ -242,7 +245,7 @@ pub fn operator_ensure_running(state: State<'_, OperatorServiceChild>) -> Result
     let lock_path = product_paths::service_lock_path();
     let deadline = Instant::now() + Duration::from_secs(45);
     while Instant::now() < deadline {
-        std::thread::sleep(Duration::from_millis(300));
+        tokio::time::sleep(Duration::from_millis(300)).await;
         if let Ok(raw) = std::fs::read_to_string(&lock_path) {
             if let Ok(v) = serde_json::from_str::<serde_json::Value>(&raw) {
                 if let Some(p) = v.get("port").and_then(|x| x.as_u64()) {

@@ -160,6 +160,26 @@ export class PlaywrightWebDriver implements UIDriver {
           await page.evaluate(expression);
           return { success: true };
         }
+        case 'selectOption': {
+          if (!step.selector) return { success: false, error: 'Missing selector for selectOption' };
+          const loc = page.locator(step.selector).first();
+          const label = (step as { optionLabel?: string }).optionLabel;
+          const val = (step as { optionValue?: string }).optionValue;
+          const idx = (step as { optionIndex?: number }).optionIndex;
+          if (label != null && label !== '') {
+            await loc.selectOption({ label }, { timeout });
+          } else if (val != null && val !== '') {
+            await loc.selectOption(val, { timeout });
+          } else if (idx != null) {
+            await loc.selectOption({ index: idx }, { timeout });
+          } else {
+            return {
+              success: false,
+              error: 'selectOption requires optionLabel, optionValue, or optionIndex',
+            };
+          }
+          return { success: true };
+        }
         case 'getTestState': {
           const state = await page.evaluate(() => {
             const fn = (window as unknown as Record<string, unknown>).__NEOXTEMUS_TEST_STATE__;

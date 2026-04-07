@@ -1,9 +1,15 @@
+use crate::product_paths;
 use crate::types::SpecValidationResult;
+use std::path::PathBuf;
 use std::process::Command;
 
 #[tauri::command]
 pub async fn validate_spec(spec_path: String) -> Result<SpecValidationResult, String> {
-    let output = Command::new("node")
+    let node: PathBuf = product_paths::resolved_node_exe()?;
+    let root = product_paths::resolved_framework_root()?;
+    let escaped = spec_path.replace('\\', "\\\\").replace('\'', "\\'");
+    let output = Command::new(&node)
+        .current_dir(&root)
         .args(["-e", &format!(
             r#"
             const {{ validateSpec }} = require('./dist/factory/spec/validator.js');
@@ -17,8 +23,11 @@ pub async fn validate_spec(spec_path: String) -> Result<SpecValidationResult, St
                 errors: result.errors ? result.errors.map(e => e.message) : []
             }}));
             "#,
-            spec_path.replace('\\', "\\\\").replace('\'', "\\'")
+            escaped
         )])
+        .env("NEOXTEN_FRAMEWORK_ROOT", &root)
+        .env("NEOXTEN_DATA_DIR", product_paths::product_data_dir())
+        .env("NEOXTEN_OPERATOR_HOME", product_paths::operator_home())
         .output()
         .map_err(|e| format!("spawn error: {}", e))?;
 

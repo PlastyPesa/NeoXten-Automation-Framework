@@ -13,6 +13,7 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bootstrapPlastyPesaEnv } from './env-bootstrap.mjs';
+import { getAdminPlaywrightProcessEnv } from './admin-playwright-env.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const NEOXTEN_ROOT = resolve(__dirname, '../..');
@@ -89,7 +90,10 @@ async function main() {
 
   mkdirSync(resolve(NEOXTEN_ROOT, '.neoxten-out'), { recursive: true });
 
-  const neoxtenEnv = { PLASTYPESA_NEOXTEN_ROOT: NEOXTEN_ROOT };
+  const neoxtenEnv = {
+    PLASTYPESA_NEOXTEN_ROOT: NEOXTEN_ROOT,
+    ...getAdminPlaywrightProcessEnv(),
+  };
 
   console.log('\n=== [1/4] Admin: toggle sort-proof & save ===\n');
   let code = await runShell(
@@ -144,7 +148,7 @@ async function main() {
     console.log('\n=== [3/4] Device: Home UI (expect visible=' + vis + ') ===\n');
     const flutterArgs = [
       'test',
-      'integration_test/sort_proof_visibility_e2e_test.dart',
+      'integration_test/manual/sort_proof_visibility_e2e_test.dart',
       '-d',
       deviceId,
       '--dart-define=INTEGRATION_TEST=true',

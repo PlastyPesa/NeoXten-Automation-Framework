@@ -8,12 +8,16 @@ import {
   runArtifacts,
   issues,
   issueRuns,
+  findings as findingsTable,
+  retestItems,
 } from '../db/schema.js';
 import { RunManifestSchema, type RunManifest } from '../manifest/schema.js';
+import { FindingSchema, RetestHintSchema } from '../findings/schema.js';
 import { getDefaultWorkspaceId } from '../db/client.js';
 import type { Verdict } from '../../core/verdict.js';
 import { computeFailureFingerprint } from './fingerprint.js';
 import { getBlobRoot } from '../paths.js';
+import { maybeAutoPromoteProvenDesignFindings } from './design-auto-promote.js';
 
 function verdictStatus(v: Verdict): 'passed' | 'failed' | 'infra_failed' {
   if (v.exitCode === 0) return 'passed';
@@ -81,6 +85,9 @@ export function ingestRunManifest(
       completedAt: manifest.completedAt,
       createdAt: now,
       failureFingerprint: fp,
+      validationClosureJson: manifest.validationClosure
+        ? JSON.stringify(manifest.validationClosure)
+        : null,
     })
     .run();
 
@@ -106,6 +113,41 @@ export function ingestRunManifest(
         sha256: a.sha256 ?? null,
         bytes: a.bytes ?? null,
         blobKey,
+      })
+      .run();
+  }
+
+  for (const raw of manifest.findings ?? []) {
+    const f = FindingSchema.parse(raw);
+    db.insert(findingsTable)
+      .values({
+        id: f.id,
+        runDbId,
+        payloadJson: JSON.stringify(f),
+        fingerprint: f.fingerprint ?? null,
+        promotionState: f.promotion_state,
+        createdAt: now,
+      })
+      .run();
+  }
+
+  for (const raw of manifest.retestHints ?? []) {
+    const h = RetestHintSchema.parse(raw);
+    db.insert(retestItems)
+      .values({
+        id: randomUUID(),
+        runDbId,
+        issueId: null,
+        patchProposalId: null,
+        checkId: h.check_id,
+        rationale: h.rationale,
+        required: h.required,
+        status: 'pending',
+        waiveReason: null,
+        relatedFindingIdsJson: h.related_finding_ids
+          ? JSON.stringify(h.related_finding_ids)
+          : null,
+        createdAt: now,
       })
       .run();
   }
@@ -153,6 +195,14 @@ export function ingestRunManifest(
       .values({ issueId: issueId!, runDbId })
       .run();
   }
+
+  maybeAutoPromoteProvenDesignFindings(db, {
+    workspaceId,
+    projectId: opts.projectId ?? null,
+    manifest,
+    runDbId,
+    now,
+  });
 
   return { runDbId, issueId };
 }

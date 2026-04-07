@@ -10,6 +10,10 @@ import {
   runArtifacts,
   projects,
   patchProposals,
+  findings as findingsTable,
+  retestItems,
+  issueRuns,
+  explainBindings,
 } from '../db/schema.js';
 import { desc, eq } from 'drizzle-orm';
 import {
@@ -20,7 +24,16 @@ import { RunManifestSchema } from '../manifest/schema.js';
 import { executeGateSuite } from '../../cli/commands/gate.js';
 import { scanDataTestIds } from '../code-map/scan.js';
 import { readdirSync, readFileSync, existsSync } from 'fs';
-import { randomUUID } from 'crypto';
+import { randomUUID, createHash } from 'crypto';
+import {
+  RetestHintSchema,
+  FindingSchema,
+  type Finding,
+  type ValidationClosureSummary,
+} from '../findings/schema.js';
+import { planRetestFromChangedFilesAndFindings } from '../retest/planner.js';
+import { explainFindingStrictJson } from '../findings/narrative.js';
+import { recordVisualBaseline } from '../baselines/store.js';
 import { getProductPathSnapshot, type ProductPathSnapshot } from '../../runtime/product-paths.js';
 import { writeServiceLock, clearServiceLock } from '../../runtime/service-lock.js';
 import { loadAppConfig, saveAppConfig } from '../../runtime/app-config.js';
@@ -147,6 +160,222 @@ export async function createOperatorApp(
     },
   );
 
+  app.get<{ Params: { id: string } }>('/api/runs/:id/findings', async (req, reply) => {
+    const row = db.select().from(runs).where(eq(runs.id, req.params.id)).limit(1).all();
+    if (!row.length) {
+      reply.code(404).send({ error: 'not_found' });
+      return;
+    }
+    const rows = db
+      .select()
+      .from(findingsTable)
+      .where(eq(findingsTable.runDbId, req.params.id))
+      .all();
+    const findings = rows.map((r) => JSON.parse(r.payloadJson) as Finding);
+    return { findings };
+  });
+
+  app.get<{ Params: { id: string } }>('/api/runs/:id/validation-closure', async (req, reply) => {
+    const row = db.select().from(runs).where(eq(runs.id, req.params.id)).limit(1).all();
+    if (!row.length) {
+      reply.code(404).send({ error: 'not_found' });
+      return;
+    }
+    const r = row[0]!;
+    if (r.validationClosureJson) {
+      return JSON.parse(r.validationClosureJson) as ValidationClosureSummary;
+    }
+    try {
+      const manifest = JSON.parse(r.manifestJson) as { validationClosure?: ValidationClosureSummary };
+      if (manifest.validationClosure) return manifest.validationClosure;
+    } catch {
+      /* fall through */
+    }
+    reply.code(404).send({ error: 'no_closure' });
+  });
+
+  app.get<{ Params: { id: string } }>('/api/runs/:id/retest-items', async (req, reply) => {
+    const row = db.select().from(runs).where(eq(runs.id, req.params.id)).limit(1).all();
+    if (!row.length) {
+      reply.code(404).send({ error: 'not_found' });
+      return;
+    }
+    const rows = db
+      .select()
+      .from(retestItems)
+      .where(eq(retestItems.runDbId, req.params.id))
+      .all();
+    return { retestItems: rows };
+  });
+
+  app.get<{ Params: { id: string } }>('/api/findings/:id/narrative', async (req, reply) => {
+    const row = db.select().from(findingsTable).where(eq(findingsTable.id, req.params.id)).limit(1).all();
+    if (!row.length) {
+      reply.code(404).send({ error: 'not_found' });
+      return;
+    }
+    const finding = JSON.parse(row[0]!.payloadJson) as Finding;
+    const parsed = FindingSchema.parse(finding);
+    return explainFindingStrictJson(parsed);
+  });
+
+  app.patch<{
+    Params: { id: string };
+    Body: { promotionState?: string; mergePayload?: Record<string, unknown> };
+  }>('/api/findings/:id', async (req, reply) => {
+    const row = db.select().from(findingsTable).where(eq(findingsTable.id, req.params.id)).limit(1).all();
+    if (!row.length) {
+      reply.code(404).send({ error: 'not_found' });
+      return;
+    }
+    const cur = row[0]!;
+    let payload = JSON.parse(cur.payloadJson) as Record<string, unknown>;
+    if (req.body.mergePayload) {
+      payload = { ...payload, ...req.body.mergePayload };
+    }
+    if (req.body.promotionState) {
+      payload.promotion_state = req.body.promotionState;
+    }
+    const parsed = FindingSchema.parse(payload);
+    db.update(findingsTable)
+      .set({
+        payloadJson: JSON.stringify(parsed),
+        promotionState: parsed.promotion_state,
+        fingerprint: parsed.fingerprint ?? cur.fingerprint,
+      })
+      .where(eq(findingsTable.id, req.params.id))
+      .run();
+    return { ok: true, finding: parsed };
+  });
+
+  app.post<{ Params: { runId: string; findingId: string } }>(
+    '/api/runs/:runId/findings/:findingId/promote',
+    async (req, reply) => {
+      const runRow = db.select().from(runs).where(eq(runs.id, req.params.runId)).limit(1).all();
+      if (!runRow.length) {
+        reply.code(404).send({ error: 'run_not_found' });
+        return;
+      }
+      const fRow = db
+        .select()
+        .from(findingsTable)
+        .where(eq(findingsTable.id, req.params.findingId))
+        .limit(1)
+        .all();
+      if (!fRow.length || fRow[0]!.runDbId !== req.params.runId) {
+        reply.code(404).send({ error: 'finding_not_found' });
+        return;
+      }
+      const finding = JSON.parse(fRow[0]!.payloadJson) as Finding;
+      const workspaceId = getDefaultWorkspaceId(db);
+      const now = new Date().toISOString();
+      const fp =
+        finding.fingerprint ??
+        `neo-fp-${createHash('sha256').update(finding.id + finding.title).digest('hex').slice(0, 24)}`;
+      const issueId = randomUUID();
+      const classification =
+        finding.kind === 'design_system' ? 'design_system_promoted' : 'promoted_finding';
+      db.insert(issues)
+        .values({
+          id: issueId,
+          workspaceId,
+          projectId: runRow[0]!.projectId,
+          fingerprint: fp,
+          status: 'triage',
+          severity: finding.severity === 'blocker' ? 'high' : 'medium',
+          title: finding.title,
+          classification,
+          codeBridgeJson: null,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .run();
+      db.insert(issueRuns).values({ issueId, runDbId: req.params.runId }).run();
+      const narrative = explainFindingStrictJson(finding);
+      const ih = createHash('sha256').update(JSON.stringify(narrative)).digest('hex').slice(0, 24);
+      db.insert(explainBindings)
+        .values({
+          id: randomUUID(),
+          entityType: 'finding',
+          entityKey: finding.id,
+          templateSlug: narrative.template_slug,
+          inputsHash: ih,
+          renderedJson: JSON.stringify(narrative),
+          createdAt: now,
+        })
+        .run();
+      const promoted = FindingSchema.parse({ ...finding, promotion_state: 'promoted' });
+      db.update(findingsTable)
+        .set({
+          promotionState: promoted.promotion_state,
+          payloadJson: JSON.stringify(promoted),
+        })
+        .where(eq(findingsTable.id, finding.id))
+        .run();
+      return { ok: true, issueId };
+    },
+  );
+
+  app.patch<{
+    Params: { id: string };
+    Body: { status: string; waiveReason?: string };
+  }>('/api/retest-items/:id', async (req, reply) => {
+    const row = db.select().from(retestItems).where(eq(retestItems.id, req.params.id)).limit(1).all();
+    if (!row.length) {
+      reply.code(404).send({ error: 'not_found' });
+      return;
+    }
+    const st = req.body.status;
+    if (!['pending', 'passed', 'waived'].includes(st)) {
+      reply.code(400).send({ error: 'invalid_status' });
+      return;
+    }
+    db.update(retestItems)
+      .set({
+        status: st,
+        waiveReason: st === 'waived' ? req.body.waiveReason ?? 'waived' : null,
+      })
+      .where(eq(retestItems.id, req.params.id))
+      .run();
+    return { ok: true };
+  });
+
+  app.get<{ Params: { id: string } }>('/api/patches/:id/retest-items', async (req, reply) => {
+    const row = db.select().from(patchProposals).where(eq(patchProposals.id, req.params.id)).limit(1).all();
+    if (!row.length) {
+      reply.code(404).send({ error: 'not_found' });
+      return;
+    }
+    const rows = db
+      .select()
+      .from(retestItems)
+      .where(eq(retestItems.patchProposalId, req.params.id))
+      .all();
+    return { retestItems: rows };
+  });
+
+  app.post<{
+    Body: {
+      baselineKey: string;
+      contentSha256: string;
+      projectId?: string | null;
+      approvedRunDbId?: string | null;
+    };
+  }>('/api/baselines/record', async (req, reply) => {
+    const { baselineKey, contentSha256 } = req.body ?? {};
+    if (!baselineKey || !contentSha256) {
+      reply.code(400).send({ error: 'baselineKey and contentSha256 required' });
+      return;
+    }
+    const id = recordVisualBaseline(db, {
+      baselineKey,
+      contentSha256,
+      projectId: req.body.projectId,
+      approvedRunDbId: req.body.approvedRunDbId,
+    });
+    return { ok: true, id };
+  });
+
   app.get('/api/issues', async () => {
     const workspaceId = getDefaultWorkspaceId(db);
     const rows = db
@@ -239,6 +468,8 @@ export async function createOperatorApp(
       authorKind?: string;
       projectId?: string | null;
       state?: string;
+      changedFiles?: string[];
+      linkedRunDbId?: string | null;
     };
   }>('/api/patches', async (req, reply) => {
     const { baseSha, unifiedDiff } = req.body ?? {};
@@ -263,7 +494,40 @@ export async function createOperatorApp(
         updatedAt: now,
       })
       .run();
-    return { ok: true, id };
+
+    const changed = req.body.changedFiles ?? [];
+    let linkedFindings: Finding[] = [];
+    if (req.body.linkedRunDbId) {
+      const fr = db
+        .select()
+        .from(findingsTable)
+        .where(eq(findingsTable.runDbId, req.body.linkedRunDbId))
+        .all();
+      linkedFindings = fr.map((r) => JSON.parse(r.payloadJson) as Finding);
+    }
+    const hints = planRetestFromChangedFilesAndFindings(changed, linkedFindings);
+    for (const h of hints) {
+      const parsed = RetestHintSchema.parse(h);
+      db.insert(retestItems)
+        .values({
+          id: randomUUID(),
+          runDbId: null,
+          issueId: null,
+          patchProposalId: id,
+          checkId: parsed.check_id,
+          rationale: parsed.rationale,
+          required: parsed.required,
+          status: 'pending',
+          waiveReason: null,
+          relatedFindingIdsJson: parsed.related_finding_ids
+            ? JSON.stringify(parsed.related_finding_ids)
+            : null,
+          createdAt: now,
+        })
+        .run();
+    }
+
+    return { ok: true, id, retestHintsCreated: hints.length };
   });
 
   app.get('/api/explain/:slug', async (req, reply) => {
@@ -437,7 +701,7 @@ export async function startOperatorApi(opts: StartOperatorApiOptions): Promise<v
   const boundPort =
     typeof addr === 'object' && addr && 'port' in addr ? (addr as { port: number }).port : opts.port;
 
-  console.error(`NeoXten Operator API listening on http://${host}:${boundPort}`);
+  console.log(`NeoXten Operator API listening on http://${host}:${boundPort}`);
 
   const lockEnabled =
     opts.manageServiceLock !== false && process.env.NEOXTEN_OPERATOR_NO_LOCK !== '1';
