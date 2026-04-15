@@ -1,10 +1,33 @@
 import { z } from 'zod';
 
+const HumanInputStepFields = {
+  /** Enable slower, more human-like interaction pacing for this step. */
+  humanize: z.boolean().optional(),
+  /** Optional pause before action execution. */
+  preDelayMs: z.number().optional(),
+  /** Optional pause after action execution. */
+  postDelayMs: z.number().optional(),
+  /** Base delay between typed characters when humanize is enabled. */
+  typingDelayMs: z.number().optional(),
+  /** Random +/- variance added to typingDelayMs. */
+  typingVarianceMs: z.number().optional(),
+  /** Mouse movement interpolation steps before click/type. */
+  mouseMoveSteps: z.number().optional(),
+  /** Pause after hover and before click when humanize is enabled. */
+  hoverBeforeClickMs: z.number().optional(),
+  /** Wheel delta chunk size for humanized scroll. */
+  scrollStepPx: z.number().optional(),
+  /** Click hold delay in ms for humanized clicks. */
+  clickDelayMs: z.number().optional(),
+};
+
 export const FlowStepSchema = z.object({
   action: z.enum([
     'click',
     'type',
     'navigate',
+    'scroll',
+    'screenshot',
     'wait',
     'assert',
     'setInputFiles',
@@ -37,6 +60,13 @@ export const FlowStepSchema = z.object({
   attribute: z.string().optional(),
   /** Expected element count for type: 'count' assertions */
   count: z.number().optional(),
+  /** Optional scroll direction for action scroll */
+  direction: z.enum(['up', 'down']).optional(),
+  /** Optional pixel distance for action scroll */
+  pixels: z.number().optional(),
+  /** Optional screenshot label */
+  label: z.string().optional(),
+  ...HumanInputStepFields,
 });
 
 export const FlowSchema = z.object({

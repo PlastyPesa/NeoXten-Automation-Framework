@@ -50,6 +50,8 @@
     "test:plastypesa-europe": "node scripts/plastypesa-europe-run.mjs",
     "verify:plastypesa-sort-proof-pilot": "node scripts/plastypesa/verify-sort-proof-pilot.mjs",
     "test:plastypesa-e2e": "node scripts/plastypesa/plastypesa-e2e-orchestrator.mjs",
+    "test:plastypesa-admin-app-reflection": "node scripts/plastypesa/plastypesa-admin-app-reflection.mjs",
+    "test:plastypesa-localization": "node scripts/plastypesa/plastypesa-localization-audit.mjs",
     "test:plastypesa-e2e:sort-proof-visibility": "node scripts/plastypesa/plastypesa-sort-proof-visibility-e2e.mjs",
     "desktop:dev": "tauri dev",
     "package:prepare": "npm run build && npm run build --prefix ui && node scripts/prepare-windows-bundle.mjs",
@@ -79,6 +81,7 @@
     "js-yaml": "^4.1.0",
     "playwright": "^1.49.0",
     "puppeteer-core": "^24.38.0",
+    "tesseract.js": "^7.0.0",
     "uuid": "^10.0.0",
     "zod": "3.23.8"
   },

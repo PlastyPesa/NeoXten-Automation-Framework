@@ -27,10 +27,8 @@ Defined in **`release-pack-config.mjs`**:
 2. `public-routes` — public home payloads  
 3. `user-profile` — profile + completion %  
 4. `impact-report` — impact payload sanity  
-5. `weekly-challenge` — status + completion idempotence  
-6. `sort-proof` — config / validation / disabled behavior (no Anthropic unless `PLASTYPESA_SORT_PROOF_E2E=1`)  
-7. `challenges-progress` — `/challenges/active` progress fields + `/challenges/check-progress` validation + SORT path  
-8. `regression-core` — leaderboard, winners wall (incl. stability), reward-history + transaction list consistency, badges  
+5. `sort-proof` — config / validation / disabled behavior (no Anthropic unless `PLASTYPESA_SORT_PROOF_E2E=1`)  
+6. `regression-core` — leaderboard, winners wall (incl. stability), reward-history + transaction list consistency, badges  
 
 ## CI
 

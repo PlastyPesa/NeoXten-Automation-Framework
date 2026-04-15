@@ -54,38 +54,42 @@ flows:
             if (user.lifetimeStats.totalPoints < 0) throw new Error('lifetimeStats.totalPoints is negative');
           })()
 
-  # ── Ads watch count endpoint works ──
-  - name: ads_watch_count_works
+  # ── Bonus Quiz Vault status endpoint works ──
+  - name: bonus_quiz_vault_status_works
     steps:
       - action: evaluate
         expression: |
           (async () => {
             if (!window.__plastyToken) throw new Error('No auth token');
-            const today = new Date().toISOString().split('T')[0];
-            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/ads/watch/count?date=' + today, {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/bonus-quiz-vault', {
               method: 'GET',
               headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + window.__plastyToken }
             });
             const data = await r.json();
-            if (r.status !== 200) throw new Error('Ads count failed: ' + r.status + ' ' + JSON.stringify(data));
-            if (data.type !== 'success') throw new Error('Ads count not success: ' + JSON.stringify(data));
-            if (typeof data.data.perAdPoints !== 'number' || data.data.perAdPoints <= 0) throw new Error('perAdPoints invalid: ' + data.data.perAdPoints);
-            if (typeof data.data.maxPerDay !== 'number' || data.data.maxPerDay <= 0) throw new Error('maxPerDay invalid: ' + data.data.maxPerDay);
-            if (typeof data.data.remaining !== 'number') throw new Error('remaining invalid');
-            if (typeof data.data.count !== 'number') throw new Error('count invalid');
+            if (r.status !== 200) throw new Error('Bonus Quiz Vault fetch failed: ' + r.status + ' ' + JSON.stringify(data));
+            if (data.type !== 'success') throw new Error('Bonus Quiz Vault response not success: ' + JSON.stringify(data));
+            if (!data.data || typeof data.data.available !== 'boolean') throw new Error('available flag missing');
+            if (data.data.available) {
+              if (!data.data.quiz || !Array.isArray(data.data.quiz.questions) || data.data.quiz.questions.length < 1) {
+                throw new Error('quiz payload missing when vault is available');
+              }
+            }
+            if (data.data.requiresDailyQuiz !== undefined && typeof data.data.requiresDailyQuiz !== 'boolean') {
+              throw new Error('requiresDailyQuiz must be boolean when present');
+            }
           })()
 
-  # ── Ads watch count requires auth ──
-  - name: ads_watch_count_requires_auth
+  # ── Bonus Quiz Vault status requires auth ──
+  - name: bonus_quiz_vault_status_requires_auth
     steps:
       - action: evaluate
         expression: |
           (async () => {
-            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/ads/watch/count?date=2026-03-15', {
+            const r = await fetch('https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/home/bonus-quiz-vault', {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' }
             });
-            if (r.status === 200) throw new Error('SECURITY: ads/watch/count returned 200 without auth');
+            if (r.status === 200) throw new Error('SECURITY: bonus-quiz-vault returned 200 without auth');
             if (r.status !== 403 && r.status !== 401) throw new Error('Expected 401 or 403, got ' + r.status);
           })()
 

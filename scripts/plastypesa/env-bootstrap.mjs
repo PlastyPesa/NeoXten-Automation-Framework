@@ -6,6 +6,7 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { populateCredentialEnv } from './credential-registry.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -54,4 +55,6 @@ export function bootstrapPlastyPesaEnv() {
       /* ignore */
     }
   }
+
+  populateCredentialEnv();
 }

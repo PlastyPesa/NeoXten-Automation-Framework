@@ -10,18 +10,30 @@
  */
 import type { PageSnapshot } from '../observer/snapshot.js';
 
+interface HumanizedActionOptions {
+  humanize?: boolean;
+  preDelayMs?: number;
+  postDelayMs?: number;
+  typingDelayMs?: number;
+  typingVarianceMs?: number;
+  mouseMoveSteps?: number;
+  hoverBeforeClickMs?: number;
+  scrollStepPx?: number;
+  clickDelayMs?: number;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Action definitions                                                 */
 /* ------------------------------------------------------------------ */
 
-export interface ClickAction {
+export interface ClickAction extends HumanizedActionOptions {
   type: 'click';
   selector: string;
   timeout?: number;
   force?: boolean;
 }
 
-export interface TypeAction {
+export interface TypeAction extends HumanizedActionOptions {
   type: 'type';
   selector: string;
   text: string;
@@ -64,7 +76,7 @@ export interface AssertAction {
   count?: number;
 }
 
-export interface ScrollAction {
+export interface ScrollAction extends HumanizedActionOptions {
   type: 'scroll';
   /** Selector to scroll into view, or omit for page scroll */
   selector?: string;

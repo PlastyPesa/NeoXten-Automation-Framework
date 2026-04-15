@@ -35,6 +35,7 @@ Desktop.ini
 *.tmp.yaml
 *.tmp.json
 *.bak
+.local/
 
 # Environment / secrets (should never exist here)
 .env
@@ -71,3 +72,7 @@ playwright-report/
 
 # Ad-hoc screenshots / proof files (do not commit)
 .validation-ui-proof.png
+.velarune-studio-e2e-data/
+response.txt
+screen.png
+screen*.xml

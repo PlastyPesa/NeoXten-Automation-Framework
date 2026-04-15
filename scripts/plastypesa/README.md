@@ -8,6 +8,10 @@ See **`PLASTYPESA_E2E.md`**. Entry: `npm run test:plastypesa-e2e` (NeoXten root)
 
 **Sort-proof admin ↔ API ↔ device (single flow):** **`PLASTYPESA_SORT_PROOF_VISIBILITY_E2E.md`** — `npm run test:plastypesa-e2e:sort-proof-visibility`.
 
+### Localization audit (static + browser + ADB device)
+
+See **`PLASTYPESA_LOCALIZATION_AUDIT.md`**. Entry: `npm run test:plastypesa-localization`.
+
 ## Run
 
 From the NeoXten repo root:

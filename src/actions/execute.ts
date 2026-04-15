@@ -11,6 +11,11 @@
 import type { Page } from 'playwright';
 import { resolve } from 'path';
 import type { PageObserver } from '../observer/index.js';
+import {
+  performClick as performHumanClick,
+  performScroll as performHumanScroll,
+  performType as performHumanType,
+} from '../drivers/human-input.js';
 import type {
   Action,
   ActionResult,
@@ -111,20 +116,20 @@ async function performAction(
 async function performClick(page: Page, action: ClickAction): Promise<string | undefined> {
   const timeout = action.timeout ?? 10000;
   const loc = page.locator(action.selector).first();
-  await loc.waitFor({ state: 'visible', timeout });
-  await loc.click({ timeout, force: action.force });
+  await performHumanClick(page, loc, action, {
+    timeout,
+    force: action.force,
+  });
   return undefined;
 }
 
 async function performType(page: Page, action: TypeAction): Promise<string | undefined> {
   const timeout = action.timeout ?? 10000;
   const loc = page.locator(action.selector).first();
-  await loc.waitFor({ state: 'visible', timeout });
-  if (action.append) {
-    await loc.pressSequentially(action.text, { delay: 30 });
-  } else {
-    await loc.fill(action.text, { timeout });
-  }
+  await performHumanType(page, loc, action.text, action, {
+    timeout,
+    append: action.append,
+  });
   return undefined;
 }
 
@@ -237,13 +242,14 @@ async function performAssert(page: Page, action: AssertAction): Promise<string |
 }
 
 async function performScroll(page: Page, action: ScrollAction): Promise<string | undefined> {
-  if (action.selector) {
-    await page.locator(action.selector).first().scrollIntoViewIfNeeded();
-    return undefined;
-  }
   const pixels = action.pixels ?? 300;
-  const delta = action.direction === 'up' ? -pixels : pixels;
-  await page.mouse.wheel(0, delta);
+  await performHumanScroll(
+    page,
+    action.selector,
+    action.direction === 'up' ? 'up' : 'down',
+    pixels,
+    action,
+  );
   return undefined;
 }
 

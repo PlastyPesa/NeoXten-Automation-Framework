@@ -2,6 +2,11 @@ import { chromium } from 'playwright';
 import type { Browser, BrowserContext, Page } from 'playwright';
 import type { FlowStep } from '../config/schema.js';
 import type { UIDriver, StepResult } from './base.js';
+import {
+  performClick,
+  performScroll,
+  performType,
+} from './human-input.js';
 
 export interface PlaywrightWebOptions {
   url: string;
@@ -68,16 +73,41 @@ export class PlaywrightWebDriver implements UIDriver {
       switch (step.action) {
         case 'click': {
           if (!step.selector) return { success: false, error: 'Missing selector for click' };
-          await page.locator(step.selector).first().click({ timeout });
+          await performClick(page, page.locator(step.selector).first(), step, { timeout });
           return { success: true };
         }
         case 'type': {
           if (!step.selector) return { success: false, error: 'Missing selector for type' };
-          await page.locator(step.selector).first().fill(step.text ?? '', { timeout });
+          await performType(
+            page,
+            page.locator(step.selector).first(),
+            step.text ?? '',
+            step,
+            { timeout },
+          );
           return { success: true };
         }
         case 'navigate': {
           await page.goto(step.url ?? this.options.url, { waitUntil: 'domcontentloaded', timeout });
+          return { success: true };
+        }
+        case 'scroll': {
+          const direction = (step as { direction?: 'up' | 'down' }).direction ?? 'down';
+          const pixels = (step as { pixels?: number }).pixels ?? 600;
+          await performScroll(page, step.selector, direction, Math.abs(pixels), step);
+          return { success: true };
+        }
+        case 'screenshot': {
+          const label = (step as { label?: string }).label ?? 'step';
+          const safeLabel = label.replace(/[^a-z0-9-_]+/gi, '-').toLowerCase();
+          const path = this.options.traceDir
+            ? `${this.options.traceDir}/${safeLabel}.png`
+            : undefined;
+          if (path) {
+            await page.screenshot({ path, fullPage: true });
+            return { success: true, screenshotPath: path };
+          }
+          await page.screenshot({ fullPage: true });
           return { success: true };
         }
         case 'wait': {
