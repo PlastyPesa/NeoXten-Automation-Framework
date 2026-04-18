@@ -1,0 +1,74 @@
+---
+description: NeoXten is default for all testing/verification; agent runs tests; do not push terminal work to user
+alwaysApply: true
+---
+
+# NeoXten Test-and-Commit Workflow
+
+## Default: NeoXten for everything test-related
+
+Use the **NeoXten Automation Framework first** for:
+
+- Testing and verification after changes  
+- Reproducing bugs and confirming fixes  
+- Validating flows and catching regressions  
+- Investigation when the framework can hit the API or UI under test  
+
+**Do not** ask the user to run terminal commands unless **unavoidable** (e.g. MFA, device-only actions, secrets you cannot access). If you must ask, state **exactly why** the framework cannot do it.
+
+NeoXten path: `C:\Users\Bobby\Documents\NeoXten-Automation-Framework`.  
+PlastyPesa: `plastypesa-admin.yaml`, `plastypesa-api.yaml`, `plastypesa-e2e.yaml`, `plastypesa-europe.yaml`, `scripts/plastypesa-api-test.js`.
+
+## Testing
+
+- **Always test with NeoXten Automation Framework** — never skip it when it applies.
+- **Agent runs** `node scripts/plastypesa-api-test.js` (and other NeoXten configs as needed); **user does not**.
+
+**For backend changes:** run both (agent executes both):
+1. `npm test` (in plastypesa-backend-api)
+2. `node scripts/plastypesa-api-test.js` (in NeoXten-Automation-Framework)
+
+**For admin/frontend changes:** run NeoXten with `plastypesa-admin.yaml` (requires dev server).
+
+## Run Tests Yourself
+
+Run NeoXten tests via terminal commands. Do not instruct the user to run them.
+
+**Admin dashboard (requires dev server on port 8080):**
+```
+cd C:\Users\Bobby\Documents\NeoXten-Automation-Framework
+npm run build
+node dist/cli/index.js run --config plastypesa-admin.yaml
+```
+
+**API tests (production API Gateway):**
+
+Primary (Node regression — no browser):
+```
+cd C:\Users\Bobby\Documents\NeoXten-Automation-Framework
+npm run test:plastypesa-api
+```
+Fast gate (auth protection only): `npm run test:plastypesa-api:auth-only`
+
+Optional Playwright YAML (needs dev server): `node dist/cli/index.js run --config plastypesa-api.yaml`
+
+See `NeoXten-Automation-Framework/scripts/plastypesa/README.md`.
+
+If the admin dev server is not running, start it in the background first:
+```
+cd C:\Users\Bobby\Documents\plastypesa-admin-dashboard\lib\frontend
+npm run dev
+```
+
+## Commit Only After Tests Pass
+
+- Run NeoXten tests after each logical change.
+- **Commit only if all tests pass.**
+- If tests fail, fix the code and re-run until they pass before committing.
+
+## Terminal Commands
+
+- **Never tell the user to run terminal commands** unless:
+  - The action requires their physical presence (e.g. device setup, signing), or
+  - You cannot perform it programmatically (e.g. no tool available).
+- Execute commands yourself via the terminal tool.

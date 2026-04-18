@@ -1,0 +1,36 @@
+---
+description: Test on real ADB-connected device. Closest to human tester experience.
+alwaysApply: true
+---
+
+# Real Device Testing
+
+## ADB device is always connected
+The owner keeps a physical Android device connected via ADB at all times. Agents **must** use it for verification.
+
+## When to test on device
+- After **any** mobile app change — UI, translations, logic, navigation, ads, permissions.
+- After **any** backend change that affects what the mobile app displays (points, leaderboard, impact data, content).
+- Before declaring any mobile feature "done" or "verified."
+
+## How to test
+1. Run `adb devices` to confirm device is connected.
+2. Build and install: `flutter build apk --debug` then `adb install -r <path>`.
+3. For release verification: `flutter build apk --release` then install and test.
+4. Use `adb logcat` to capture runtime errors during testing.
+5. Take screenshots with `adb exec-out screencap -p > screenshot.png` for evidence.
+6. Test in **at least 2 languages** — English plus one other (preferably Romanian as it has the longest labels).
+
+## What to verify on device
+- All screens render without overflow, truncation, or layout breaks.
+- All strings are translated — no English leaking in non-English locale.
+- Navigation works — no dead buttons, no stuck screens.
+- Ads load where expected (app-open on launch, interstitial before quiz, banner on pages).
+- Points display correctly after earning actions.
+- Community posts/comments can be created and appear in feed.
+- Legal pages load with correct content for the selected language.
+
+## Never
+- Declare mobile work "done" without installing on the real device.
+- Skip device testing because "it works in the emulator" or "the code looks correct."
+- Ignore layout issues visible on device — if text is truncated or overlapping, it's a bug.

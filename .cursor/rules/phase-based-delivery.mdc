@@ -1,0 +1,28 @@
+---
+description: Plan → approval → one phase at a time → test → commit only if pass
+alwaysApply: true
+---
+
+# Phase-based delivery (owner workflow)
+
+Work in **strict phases**. Do not mix phases or add scope outside what was approved for the current phase.
+
+## Cycle (repeat until done)
+
+1. **Plan** — Present a concise, execution-focused plan for the next phase only.
+2. **Approval** — Wait for explicit owner approval before implementing that phase.
+3. **Implement** — Only the approved phase. No drive-by refactors or “while we’re here” changes.
+4. **Test** — Run the **relevant** automation / validation (NeoXten and repo tests per workspace rules: API suite for backend changes, admin config + dev server for dashboard changes, etc.).
+5. **Commit / push** — **Only if all relevant tests pass.** If tests fail: **stop**, report clearly, **no commit and no push**.
+6. **Next phase** — After a successful commit/push, start again at **plan** for the following phase (or the pre-agreed next phase if the full roadmap was already approved phase-by-phase).
+
+## Rules
+
+- **One phase at a time** — Do not implement Phase 2 while Phase 1 is in progress or unapproved.
+- **No re-planning** — Once a phase is approved, execute it; do not reopen the same plan unless the owner explicitly revises scope.
+- **No phase mixing** — A single PR/commit cycle should correspond to **one** phase.
+- **Failures** — Diagnose, report, fix within the **same** phase scope if the failure is caused by that phase’s changes; otherwise stop and ask.
+
+## Testing reference
+
+Follow `.cursor/rules/neoxten-test-and-commit.mdc` for **which** commands to run (e.g. `npm test` + `npm run build:lambda` + NeoXten API for backend; admin NeoXten config when the admin app changed).

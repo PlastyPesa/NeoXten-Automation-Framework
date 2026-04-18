@@ -1,0 +1,40 @@
+---
+description: NeoXten is mandatory. Extend it, create new tools, invent what's needed — never skip testing.
+alwaysApply: true
+---
+
+# Testing Innovation
+
+## NeoXten Automation Framework is mandatory
+Every project must be tested with the NeoXten Automation Framework (`C:\Users\Bobby\Documents\NeoXten-Automation-Framework`).
+
+- **Existing projects**: Use existing YAML configs and Node.js test scripts. If they don't cover new features, **extend them**.
+- **New projects**: Create new YAML configs and test scripts adapted to the new project's architecture.
+- **Never skip automation** because "there's no test for this yet" — write the test first.
+
+## Extend and adapt
+When the current automation framework doesn't cover what you need:
+
+1. **Add new test scripts** — write Node.js scripts in `scripts/` for API regression, data integrity checks, or any programmatic verification.
+2. **Add new YAML flows** — create Playwright-based browser flows for UI verification, localization audits, or end-to-end user journeys.
+3. **Modify existing configs** — update `plastypesa-api.yaml`, `plastypesa-admin.yaml`, etc. when features change.
+4. **Invent new tools** — if the framework doesn't support a test type you need (e.g., screenshot comparison, accessibility audit, performance profiling), build it. Create a new script, a new module, whatever it takes.
+
+## The standard: real user experience
+Every test should simulate what a **real human user** would experience:
+
+- API tests should call endpoints the way the app calls them — same auth, same headers, same payloads.
+- UI tests should navigate the way a user navigates — click, scroll, wait for loading, verify rendered content.
+- Localization tests should switch languages the way a user switches — and verify every visible string.
+- Device tests should use the app the way a user uses it — launch, navigate, interact, verify.
+
+## After every change
+1. Run the relevant NeoXten suite (API, admin, e2e, or all).
+2. Run repo-level tests (`npm test`, `dart analyze`, `flutter test`).
+3. If a test doesn't exist for the area you changed, **create one before declaring done**.
+4. If all tests pass, verify on the live/deployed environment as well.
+
+## Never
+- Say "tests don't cover this" as a reason to skip verification.
+- Assume passing unit tests means the feature works end-to-end.
+- Leave the automation framework stale — update it as the product evolves.

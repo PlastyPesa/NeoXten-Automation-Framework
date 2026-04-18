@@ -1,0 +1,25 @@
+---
+description: Deploy methodically. Backend first, wait, then frontend, then verify live.
+alwaysApply: true
+---
+
+# Deployment Discipline
+
+## Order
+1. **Backend first** — run `npm run build:lambda` then `npx cdk deploy`. Wait for CloudFormation to complete fully.
+2. **Frontend second** — only after backend is confirmed live. Run `npm run build` then `npx cdk deploy` the frontend stack.
+3. **Cache invalidation** — after frontend deploy completes, invalidate CloudFront (`aws cloudfront create-invalidation --distribution-id <ID> --paths "/*"`).
+4. **Live verification** — hit actual production URLs and confirm response **content**, not just status codes.
+
+## After deployment
+- Verify every public URL returns expected **content** (not just HTTP 200 — read the body).
+- For i18n changes, check **at least 3 language routes** with actual content inspection.
+- For API changes, call the endpoint and **inspect the response body**.
+- For legal/content changes, fetch from the **same endpoint the app uses** and read the full text.
+- For point/reward changes, verify the live transaction flow produces correct values.
+
+## Never
+- Deploy backend and frontend simultaneously.
+- Declare deployment successful without live content verification.
+- Assume CloudFront cache is cleared — always invalidate and verify.
+- Assume a build artifact is current — check its **timestamp** against the latest commit.
