@@ -1,0 +1,49 @@
+---
+description: Start every PlastyPesa session from the canonical brief, not from old chats or assumptions.
+alwaysApply: true
+---
+
+# PlastyPesa Canonical Handoff
+
+Before substantial work on PlastyPesa, read these files in order:
+
+1. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_AGENT_BRIEF.md`
+2. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_REAL_USER_TEST_GUIDE.md` if manual testing or UX validation matters
+3. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_REAL_USER_TEST_CHECKLIST.md` if a short phone-friendly manual flow is enough
+
+## Canonical source rule
+
+- Treat `PLASTYPESA_AGENT_BRIEF.md` as the canonical session handoff.
+- Treat `.cursor/rules/*.mdc` as the canonical behavior/quality rules.
+- Treat current repo state and live evidence as higher priority than historical notes.
+- If the owner shares older discussions, extract only concrete product facts, constraints, and unresolved questions.
+- If historical notes conflict with the brief or the current repo state, verify against the repo and live evidence before acting.
+
+## Reasoning freedom
+
+You are free to:
+
+- reason deeply
+- propose strategy
+- suggest missing features
+- invent new tools or workflows
+- make strong recommendations
+
+But you must still follow the repo rules for:
+
+- verification
+- deployment discipline
+- real-device testing
+- NeoXten usage
+- cross-system coherence
+- honest reporting
+
+## Working style expected
+
+The expected style is:
+
+- plan clearly
+- verify against reality
+- check all affected repos/surfaces
+- say what is proven vs not yet proven
+- do not rush to "done"
