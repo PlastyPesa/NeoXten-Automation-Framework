@@ -1,0 +1,71 @@
+---
+description: Admin actions must reflect in app. Changes must cascade to legal docs, all languages, and all pages.
+alwaysApply: true
+---
+
+# Cross-System Coherence
+
+## Admin dashboard ↔ Mobile app
+Every admin action must be verified from the app user's perspective:
+
+- **Announcement created in admin** → must appear in mobile app (banner, popup, or notification).
+- **Community post moderated in admin** → must disappear or update in mobile app feed.
+- **Weekly rewards configured in admin** → must display correct values in mobile app leaderboard/rewards screen.
+- **Content/legal pages updated in admin** → must render correctly inside mobile app legal screens.
+- **Learning module published in admin** → must appear in mobile app Learn tab.
+- **User flagged/banned in admin** → must reflect in that user's app experience.
+
+Never test admin and app in isolation. After any admin action, open the mobile app and verify.
+
+## Cascading changes — the ripple rule
+When ANY feature or wording changes, trace the ripple across ALL systems:
+
+### Legal documents
+If app behavior changes (new data collected, new feature, new third-party service, new ad type, points logic change):
+1. Update **Privacy Policy** — data collection, processors, retention.
+2. Update **Terms of Use** — rules, point system, rewards.
+3. Update **GDPR Compliance** — rights, deletion scope, processors.
+4. Update in **MongoDB** (the source of truth for legal content served to both web and mobile).
+5. Verify legal pages render correctly on **landing page** AND **inside mobile app**.
+
+### Translations — ALL 7 languages
+If any user-facing string changes:
+1. Update **English source** first (the canonical truth).
+2. Update all 6 other languages: **Italian, Spanish, Portuguese, Romanian, German, French**.
+3. Translations must be **accurate and natural** — not machine-translated garbage. If unsure, flag it for human review.
+4. Check for:
+   - **Hardcoded English** that bypasses the i18n system.
+   - **Mixed languages** on a single screen.
+   - **Truncation/overflow** caused by longer translations (especially German and Romanian).
+   - **Terminology consistency** — same concept must use the same word across all screens in a language.
+5. Verify translations on the **landing page** (all language routes) AND the **mobile app** (language switcher).
+
+### Landing page ↔ Mobile app consistency
+The landing page and mobile app must tell the same story:
+- Same point values for the same activities.
+- Same reward descriptions.
+- Same legal content.
+- Same feature descriptions (don't promise something on the website that the app doesn't deliver).
+
+### Backend ↔ Frontend consistency
+If backend logic changes (points calculation, reward tiers, streak rules):
+1. Update any **admin dashboard** UI that displays or configures those values.
+2. Update any **mobile app** screen that displays those values.
+3. Update any **landing page** section that describes those values.
+4. Update **legal/privacy** documents if the change affects data handling or user rights.
+
+## Brand compliance — always
+Across ALL systems, ALL languages, ALL pages:
+- **Never** use "prize," "prizes," "lottery," "gambling," "competition," "win," or "winnings."
+- **Always** use "reward," "rewards," "earn," "learning," "eco-impact," "circular economy."
+- PlastyPesa is about **saving the planet through education and recycling** — not gambling.
+- If you find brand-violating terminology anywhere during your work, fix it immediately across all languages.
+
+## The test
+Before declaring any change "done," verify this chain:
+1. Backend returns correct data (API call).
+2. Admin dashboard displays/configures it correctly (browser test).
+3. Mobile app displays it correctly (ADB device test).
+4. Landing page describes it correctly (browser test, multiple languages).
+5. Legal documents are accurate (read the actual content).
+6. All 7 languages are correct (no English leakage, no bad translations, no truncation).

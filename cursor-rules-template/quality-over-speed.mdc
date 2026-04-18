@@ -1,0 +1,31 @@
+---
+description: Thoroughness prevents rework. One careful pass beats five sloppy ones.
+alwaysApply: true
+---
+
+# Quality Over Speed
+
+## The rule
+Getting it right once is faster than fixing it five times. When you feel the urge to rush, slow down.
+
+## Search exhaustively
+- When fixing a term across locales, search **ALL** locale files and **ALL** source files — not just the ones you remember.
+- When checking data flows, trace from **database → API → frontend/mobile** — don't stop at one layer.
+- When verifying a feature, check it works **AND** check that nothing adjacent broke.
+- When asked "is X working?", don't answer from memory — actually check the code, the API, and the live output.
+
+## Don't trust yourself
+- After making a change, verify it from a **different angle** than the one you used to make it.
+- If you wrote a regex to fix something, verify with a **different regex** or manual inspection.
+- If you checked source code, also check the **built/deployed output**.
+- If you found zero results in a search, question whether your search pattern was correct before declaring "clean."
+
+## Artifacts and timestamps
+- When asked about build artifacts (APK, AAB), check **actual files with timestamps** — don't guess.
+- When asked about deployment state, check **git log AND the live endpoint** — don't assume they match.
+- When asked if something is "up to date," compare against **every recent change**, not just the last one.
+- When submission/documentation files exist, check their content matches the **current app behavior** — not a previous version.
+
+## Subagent prohibition
+- Do NOT use subagents for implementation. The owner has explicitly forbidden this due to quality issues.
+- Subagents may only be used for **read-only exploration or testing**, never for code changes.

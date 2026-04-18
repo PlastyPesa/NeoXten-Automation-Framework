@@ -1,0 +1,38 @@
+---
+description: Credentials, signing key, test accounts, and testing procedures for PlastyPesa.
+alwaysApply: true
+---
+
+# PlastyPesa Testing Credentials & Procedures
+
+## Credentials location
+All credentials are stored locally — **never commit them to git**.
+
+- **Full credentials folder:** `ALL CREDENTIALS FOR PLASTYPESA 15-03-2026/` (in the admin-dashboard repo root)
+  - `Admin Dasboard Login.txt` — admin web login
+  - `Plastypesa User Login in mobile app.txt` — test user app login
+  - `plastypesa-upload.jks` — Android signing key (keystore)
+  - `AWS Acces key created 15032026.txt` — AWS access key
+  - `Gemini Api Key created on 15032026.txt` — Gemini API key
+  - `MongoDB User ci_runner@admin password.txt` — MongoDB CI credentials
+  - `new JWT secret created on 15032026.txt` — JWT secret
+  - `new session secret 15032026 65a686.txt` — session secret
+  - `Plasty Pesa Backend Gmail app password.txt` — email service password
+  - `Plasypesa Sandbox API Key Tremendou.txt` — Tremendous sandbox key
+  - `PlastyPesa_App_Developer_accessKeys.csv` — AWS developer keys
+
+- **Quick-reference credentials:** `.local/plastypesa-test-credentials.md` (gitignored) — admin login + app user login for fast access.
+
+- **Real user test guide:** `DOCS/PLASTYPESA_REAL_USER_TEST_GUIDE.md` — full testing procedure written for human testers. Agents must follow the same flow.
+
+## What agents must do with credentials
+1. Read `.local/plastypesa-test-credentials.md` to get admin and app logins.
+2. Use the admin login to test the dashboard at `https://plastypesa.com/login`.
+3. Use the app user login to test the mobile app via ADB device.
+4. Use the signing key (`plastypesa-upload.jks`) when building release APK/AAB.
+5. **Never** paste credentials into committed files, PR descriptions, or chat logs.
+
+## Automation
+- **NeoXten** (`NeoXten-Automation-Framework`): `npm run test:plastypesa-api`, `plastypesa-admin.yaml`
+- **Repo tests:** `npm test` (backend), `dart analyze` + `flutter test` (mobile)
+- See `neoxten-test-and-commit.mdc` for full commands.

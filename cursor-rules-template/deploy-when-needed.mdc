@@ -1,0 +1,26 @@
+---
+description: Agent deploys backend/API when changes require it; do not ask the owner to deploy.
+alwaysApply: true
+---
+
+# Deploy when needed (no “please deploy” handoffs)
+
+When a change **only takes effect after deployment** (e.g. PlastyPesa **Lambda/API** in `plastypesa-backend-api`), the agent must **run deployment itself** after tests pass—**do not** end the task with “you need to deploy” unless deployment is **impossible** from this environment.
+
+## What to do
+
+1. After `npm test` and `npm run build:lambda` succeed, **deploy** using the repo’s normal path (typically AWS CDK from `plastypesa-backend-api`, e.g. `npx cdk deploy` / stack name the project uses). Prefer whatever is documented in that repo’s README or existing scripts.
+2. If deploy **fails**, report the **command output** and what blocked it (credentials, MFA, wrong profile, approval prompts).
+3. Only ask the owner to deploy when something **cannot** be automated here: **missing AWS/session**, **manual approval**, **secrets not available**, or **physical MFA**—and say **exactly** why the agent cannot run it.
+
+## What not to do
+
+- Do not treat “merge + push” as sufficient when the **running API** must change for the feature to work.
+- Do not default to telling the owner to deploy as a **routine** closing step.
+
+## Mobile / admin
+
+- **Mobile**: store release / Play Console steps may still need the owner; backend behavior changes still require **API deploy** first.
+- **Admin dashboard**: static hosting or separate pipeline—deploy the **same way** the project already uses when the change must go live.
+
+This rule exists so shipping stays **agent-complete** whenever the toolchain allows it.

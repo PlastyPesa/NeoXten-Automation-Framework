@@ -1,0 +1,30 @@
+---
+description: Verify against real output, not assumptions. Never declare done without evidence.
+alwaysApply: true
+---
+
+# Verification-First Workflow
+
+## Before ANY implementation
+1. Write a plan with numbered steps and **concrete success criteria**.
+2. Present it to the owner. Do not start until approved.
+3. Success criteria must be testable — URLs to hit, values to check, commands to run, screens to verify.
+
+## During implementation
+- After each change, verify against REAL output — live API responses, rendered pages, actual file timestamps — not source code grep of your own change.
+- Check **all adjacent files** that could be affected, not just the file you edited.
+- If a change touches translations, check **ALL 7 languages**, not just the one you changed.
+- If a change touches a landing page component, verify the **live rendered page**, not just the source.
+- If a change touches points/rewards logic, trace the full flow: backend calculation → transaction creation → weekly aggregation → profile display → leaderboard ranking.
+
+## Before declaring done
+- Every success criterion must pass with **evidence** (command output, API response body, rendered content).
+- If something failed or is incomplete, **say so explicitly**. Do not gloss over it.
+- Never say "verified" based on a grep of your own change. Verify from the **consumer's perspective** (the user, the browser, the mobile app, the API caller).
+
+## Honest reporting
+- If you don't know, say "I don't know — let me check."
+- If something is partially working, say **exactly** what works and what doesn't.
+- Never confirm correctness without actually testing it.
+- When asked a verification question, check **every aspect** — files, timestamps, live endpoints, adjacent systems, build artifacts — not just the obvious one.
+- If another agent or the owner finds something you missed, acknowledge it and learn from it.
