@@ -13,6 +13,16 @@ When a change **only takes effect after deployment** (e.g. PlastyPesa **Lambda/A
 2. If deploy **fails**, report the **command output** and what blocked it (credentials, MFA, wrong profile, approval prompts).
 3. Only ask the owner to deploy when something **cannot** be automated here: **missing AWS/session**, **manual approval**, **secrets not available**, or **physical MFA**—and say **exactly** why the agent cannot run it.
 
+## Build → deploy → prove (do not skip prove)
+
+A backend deploy is **not complete** until you've shown the new code path running live. The 3-step sequence is non-negotiable:
+
+1. **Rebuild the bundle if the stack ships from a build artifact**, not source. For PlastyPesa specifically, `lib/app-stack.js` ships the Lambda from `aws_lambda.Code.fromAsset("lib/lambda/dist")`, so you **must** run `npm run build:lambda` before `npx cdk deploy`. Editing `lib/lambda/backend/...` and skipping the rebuild silently deploys old code — `cdk deploy --hotswap` will report success and the live Lambda will keep running the previous bundle. **Lesson learned 2026-04-24, Phase 6 normalization pass.** Always check the stack file (`lib/*-stack.js`) for the asset path and ensure it's freshly rebuilt before deploying.
+2. **Deploy** (`npx cdk deploy --hotswap` or full `npx cdk deploy` per stack convention). Capture the stack output.
+3. **Prove with a live smoke test**: hit the changed endpoint(s) directly against the deployed environment with a payload that exercises the new code path, and assert the new behavior is observable (e.g. new field present, new value persisted, new log line in CloudWatch). For PlastyPesa, the cheapest proof is `curl`/`Invoke-RestMethod` against `https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api/...` with a real-shaped payload, plus a follow-up read (admin API or direct DB check via `plastypesa-backend-api/.local/get-user-country.js` style helpers) to confirm the persisted side. Only after the smoke test passes is the deploy "successful".
+
+If any of those 3 steps fails or is skipped, the deploy is **not** done and must not be reported as complete.
+
 ## What not to do
 
 - Do not treat “merge + push” as sufficient when the **running API** must change for the feature to work.
