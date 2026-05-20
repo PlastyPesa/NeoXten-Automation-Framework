@@ -33,6 +33,7 @@ import * as communityFeed from './suites/community-feed.mjs';
 import * as adminAnnouncements from './suites/admin-announcements.mjs';
 import * as challengesProgress from './suites/challenges-progress.mjs';
 import * as ecoCatalog from './suites/eco-catalog.mjs';
+import * as ecoScan from './suites/eco-scan.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -47,6 +48,7 @@ const ALL_SUITES = [
   { id: 'community-feed', mod: communityFeed },
   { id: 'admin-announcements', mod: adminAnnouncements },
   { id: 'eco-catalog', mod: ecoCatalog },
+  { id: 'eco-scan', mod: ecoScan },
 ];
 
 function resolveSuites(cfg) {
