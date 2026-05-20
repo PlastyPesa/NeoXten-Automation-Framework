@@ -31,6 +31,11 @@ import * as sortProof from './suites/sort-proof.mjs';
 import * as regressionCore from './suites/regression-core.mjs';
 import * as communityFeed from './suites/community-feed.mjs';
 import * as adminAnnouncements from './suites/admin-announcements.mjs';
+import * as challengesProgress from './suites/challenges-progress.mjs';
+import * as ecoCatalog from './suites/eco-catalog.mjs';
+
+/** Optional until `/challenges/*` routes are deployed to prod (404 today). */
+const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
 
 const ALL_SUITES = [
   { id: 'auth-baseline', mod: authBaseline },
@@ -41,7 +46,26 @@ const ALL_SUITES = [
   { id: 'regression-core', mod: regressionCore },
   { id: 'community-feed', mod: communityFeed },
   { id: 'admin-announcements', mod: adminAnnouncements },
+  { id: 'eco-catalog', mod: ecoCatalog },
 ];
+
+function resolveSuites(cfg) {
+  let suites = ALL_SUITES;
+  if (cfg.authOnly) {
+    return suites.filter((s) => s.id === 'auth-baseline');
+  }
+  if (cfg.suiteFilter.length > 0) {
+    const pool = [...ALL_SUITES, ...OPTIONAL_SUITES];
+    const set = new Set(cfg.suiteFilter);
+    suites = pool.filter((s) => set.has(s.id));
+    const unknown = cfg.suiteFilter.filter((x) => !pool.some((s) => s.id === x));
+    if (unknown.length) {
+      console.warn('Unknown suite ids (ignored):', unknown.join(', '));
+    }
+    return suites;
+  }
+  return suites;
+}
 
 export async function runPlastyPesaApiSuite() {
   bootstrapPlastyPesaEnv();
@@ -65,17 +89,7 @@ export async function runPlastyPesaApiSuite() {
     authSource: auth.authSource,
   };
 
-  let suites = ALL_SUITES;
-  if (cfg.authOnly) {
-    suites = ALL_SUITES.filter((s) => s.id === 'auth-baseline');
-  } else if (cfg.suiteFilter.length > 0) {
-    const set = new Set(cfg.suiteFilter);
-    suites = ALL_SUITES.filter((s) => set.has(s.id));
-    const unknown = cfg.suiteFilter.filter((x) => !ALL_SUITES.some((s) => s.id === x));
-    if (unknown.length) {
-      console.warn('Unknown suite ids (ignored):', unknown.join(', '));
-    }
-  }
+  const suites = resolveSuites(cfg);
 
   console.log('\n=== PlastyPesa API Suite ===\n');
   console.log(`API: ${cfg.apiBase}`);
