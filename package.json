@@ -50,6 +50,8 @@
     "test:plastypesa-europe": "node scripts/plastypesa-europe-run.mjs",
     "verify:plastypesa-sort-proof-pilot": "node scripts/plastypesa/verify-sort-proof-pilot.mjs",
     "test:plastypesa-e2e": "node scripts/plastypesa/plastypesa-e2e-orchestrator.mjs",
+    "test:plastypesa-device-login": "node scripts/plastypesa/device-login-e2e.mjs",
+    "test:plastypesa-device-shell-walk": "node scripts/plastypesa/logged-in-shell-walk.mjs",
     "test:plastypesa-admin-app-reflection": "node scripts/plastypesa/plastypesa-admin-app-reflection.mjs",
     "test:plastypesa-localization": "node scripts/plastypesa/plastypesa-localization-audit.mjs",
     "test:plastypesa-e2e:sort-proof-visibility": "node scripts/plastypesa/plastypesa-sort-proof-visibility-e2e.mjs",

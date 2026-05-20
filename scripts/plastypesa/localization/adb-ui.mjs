@@ -281,6 +281,30 @@ export async function swipeUp(options = {}) {
   await sleep(options.afterMs ?? 1000);
 }
 
+/** Scroll content upward (finger moves down) — reveals fields above the fold. */
+export async function swipeDown(options = {}) {
+  const deviceId = options.deviceId || getAdbDevice();
+  const size = getDisplaySize(deviceId);
+  const x = Math.round(size.width / 2);
+  const startY = Math.round(size.height * 0.32);
+  const endY = Math.round(size.height * 0.78);
+  const duration = options.durationMs ?? 650;
+  adb(
+    [
+      'shell',
+      'input',
+      'swipe',
+      `${x}`,
+      `${startY}`,
+      `${x}`,
+      `${endY}`,
+      `${duration}`,
+    ],
+    { deviceId },
+  );
+  await sleep(options.afterMs ?? 1000);
+}
+
 export function forceStopAndLaunchApp(options = {}) {
   const deviceId = options.deviceId || getAdbDevice();
   const packageName = options.packageName ?? 'com.app.plasty_pesa';

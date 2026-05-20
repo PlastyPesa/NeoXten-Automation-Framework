@@ -11,7 +11,8 @@
  *   PLASTYPESA_E2E_SKIP_MOBILE=1
  *   PLASTYPESA_ADMIN_ROOT — path to admin frontend (package with playwright)
  *   PLASTYPESA_MOBILE_ROOT — path to Flutter app root
- *   PLASTYPESA_ANDROID_DEVICE — adb serial (default: first authorized device)
+ *   PLASTYPESA_E2E_FLUTTER_DEVICE_LOGIN=1 — pass API + mobile creds into Flutter via
+ *     `--dart-define-from-file` for cold-install session priming (optional; experimental).
  */
 import { spawnSync, spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
@@ -19,6 +20,8 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { bootstrapPlastyPesaEnv } from './env-bootstrap.mjs';
 import { getAdminPlaywrightProcessEnv } from './admin-playwright-env.mjs';
+import { getConfig } from './config.mjs';
+import { loadMobileAppUserCredentials } from './credential-registry.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const NEOXTEN_ROOT = resolve(__dirname, '../..');
@@ -33,6 +36,40 @@ function defaultMobileRoot() {
   const env = process.env.PLASTYPESA_MOBILE_ROOT;
   if (env) return resolve(env);
   return resolve(NEOXTEN_ROOT, '../plastypesa-mobile-app');
+}
+
+function writeFlutterE2eDartDefineFile() {
+  let email = (process.env.PLASTYPESA_TEST_EMAIL || '').trim();
+  let password = process.env.PLASTYPESA_TEST_PASSWORD || '';
+  if (!email || !password) {
+    try {
+      const m = loadMobileAppUserCredentials();
+      email = email || m.email;
+      password = password || m.password;
+    } catch {
+      /* registry optional */
+    }
+  }
+  const { apiBase } = getConfig();
+  if (!email || !password || !apiBase) {
+    return null;
+  }
+  const p = resolve(NEOXTEN_ROOT, '.neoxten-out/flutter-e2e-define.json');
+  writeFileSync(
+    p,
+    `${JSON.stringify(
+      {
+        PLASTYPESA_API_BASE: apiBase,
+        PLASTYPESA_TEST_EMAIL: email,
+        PLASTYPESA_TEST_PASSWORD: password,
+        INTEGRATION_TEST: 'true',
+      },
+      null,
+      0,
+    )}\n`,
+    'utf8',
+  );
+  return p;
 }
 
 function getAdbDevice() {
@@ -164,8 +201,15 @@ async function main() {
   } else if (anyFailed && process.env.PLASTYPESA_E2E_CONTINUE_ON_FAIL !== '1') {
     verdict.phases.push({ id: 'mobile', status: 'skipped', reason: 'previous phase failed' });
   } else {
+    const definePath =
+      process.env.PLASTYPESA_E2E_FLUTTER_DEVICE_LOGIN === '1'
+        ? writeFlutterE2eDartDefineFile()
+        : null;
+    const defineArg = definePath
+      ? ` --dart-define-from-file="${definePath.replace(/\\/g, '/')}"`
+      : ' --dart-define=INTEGRATION_TEST=true';
     const code = await runShell(
-      `flutter test integration_test/smoke_test.dart integration_test/app_journey_test.dart -d ${deviceId} --reporter expanded --dart-define=INTEGRATION_TEST=true`,
+      `flutter test integration_test/smoke_test.dart integration_test/app_journey_test.dart -d ${deviceId} --reporter expanded${defineArg}`,
       mobileRoot,
     );
     verdict.phases.push({
