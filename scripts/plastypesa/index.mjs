@@ -35,6 +35,7 @@ import * as challengesProgress from './suites/challenges-progress.mjs';
 import * as ecoCatalog from './suites/eco-catalog.mjs';
 import * as ecoScan from './suites/eco-scan.mjs';
 import * as ecoScanConfig from './suites/eco-scan-config.mjs';
+import * as circularEconomy from './suites/circular-economy.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -52,6 +53,11 @@ const ALL_SUITES = [
   { id: 'eco-scan', mod: ecoScan },
   // P5 — Recognition v2 rollout envelope exposed at GET /api/eco-scan/config
   { id: 'eco-scan-config', mod: ecoScanConfig },
+  // P6 — High-value streams + circular-economy narrative: HVS catalog
+  // rows are present and (post-publish) linked to circular-economy
+  // learning modules; the public learn list exposes the new isSponsored
+  // / sponsoredBy fields for the mobile Sponsored badge.
+  { id: 'circular-economy', mod: circularEconomy },
 ];
 
 function resolveSuites(cfg) {
