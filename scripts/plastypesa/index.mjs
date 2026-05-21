@@ -36,6 +36,7 @@ import * as ecoCatalog from './suites/eco-catalog.mjs';
 import * as ecoScan from './suites/eco-scan.mjs';
 import * as ecoScanConfig from './suites/eco-scan-config.mjs';
 import * as circularEconomy from './suites/circular-economy.mjs';
+import * as b2bImpact from './suites/b2b-impact.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -58,6 +59,10 @@ const ALL_SUITES = [
   // learning modules; the public learn list exposes the new isSponsored
   // / sponsoredBy fields for the mobile Sponsored badge.
   { id: 'circular-economy', mod: circularEconomy },
+  // P7 — B2B impact API. Verifies auth gate at the perimeter and
+  // (optionally, when PLASTYPESA_B2B_TOKEN is set) asserts the
+  // k-anonymity contract and no-PII guarantee on a live response.
+  { id: 'b2b-impact', mod: b2bImpact },
 ];
 
 function resolveSuites(cfg) {
