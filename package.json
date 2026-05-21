@@ -47,6 +47,7 @@
     "test:plastypesa-api": "node scripts/plastypesa-api-test.js",
     "test:plastypesa-api:release-pack": "node scripts/plastypesa-release-pack.mjs",
     "test:plastypesa-api:auth-only": "node scripts/plastypesa-api-auth-only.mjs",
+    "test:plastypesa-bench": "node scripts/plastypesa/scan-latency-bench.mjs",
     "test:plastypesa-europe": "node scripts/plastypesa-europe-run.mjs",
     "verify:plastypesa-sort-proof-pilot": "node scripts/plastypesa/verify-sort-proof-pilot.mjs",
     "test:plastypesa-e2e": "node scripts/plastypesa/plastypesa-e2e-orchestrator.mjs",

@@ -34,6 +34,7 @@ import * as adminAnnouncements from './suites/admin-announcements.mjs';
 import * as challengesProgress from './suites/challenges-progress.mjs';
 import * as ecoCatalog from './suites/eco-catalog.mjs';
 import * as ecoScan from './suites/eco-scan.mjs';
+import * as ecoScanConfig from './suites/eco-scan-config.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -49,6 +50,8 @@ const ALL_SUITES = [
   { id: 'admin-announcements', mod: adminAnnouncements },
   { id: 'eco-catalog', mod: ecoCatalog },
   { id: 'eco-scan', mod: ecoScan },
+  // P5 — Recognition v2 rollout envelope exposed at GET /api/eco-scan/config
+  { id: 'eco-scan-config', mod: ecoScanConfig },
 ];
 
 function resolveSuites(cfg) {
