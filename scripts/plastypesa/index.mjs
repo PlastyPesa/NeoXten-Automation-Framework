@@ -37,6 +37,7 @@ import * as ecoScan from './suites/eco-scan.mjs';
 import * as ecoScanConfig from './suites/eco-scan-config.mjs';
 import * as circularEconomy from './suites/circular-economy.mjs';
 import * as b2bImpact from './suites/b2b-impact.mjs';
+import * as gdpr from './suites/gdpr.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -63,6 +64,11 @@ const ALL_SUITES = [
   // (optionally, when PLASTYPESA_B2B_TOKEN is set) asserts the
   // k-anonymity contract and no-PII guarantee on a live response.
   { id: 'b2b-impact', mod: b2bImpact },
+  // P8 — GDPR self-service (Article 17 erasure + Article 20 portability).
+  // Auth perimeter on the four /api/user/me/gdpr/* endpoints, plus the
+  // OTP-gate behaviour on export and delete. The destructive delete
+  // path itself is never run live by this suite.
+  { id: 'gdpr', mod: gdpr },
 ];
 
 function resolveSuites(cfg) {
