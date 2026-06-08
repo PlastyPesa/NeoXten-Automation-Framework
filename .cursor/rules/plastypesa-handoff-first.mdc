@@ -7,13 +7,14 @@ alwaysApply: true
 
 Before substantial work on PlastyPesa, read these files in order:
 
-1. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_AGENT_BRIEF.md`
-2. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_REAL_USER_TEST_GUIDE.md` if manual testing or UX validation matters
-3. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_REAL_USER_TEST_CHECKLIST.md` if a short phone-friendly manual flow is enough
+1. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_MASTER_BRIEF.md` — the whole picture (all repos, current state, goal, prioritized plan).
+2. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_AGENT_HANDOFF.md` — the canonical session handoff.
+3. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_BUILD_AND_VERIFY_PLAN.md` — live roadmap, proof ledger, worklist, open defects/blockers, and the Phase-5 manual-test exercise list (use when manual testing or UX validation matters).
+4. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_START_HERE.md` — the rest of the canon.
 
 ## Canonical source rule
 
-- Treat `PLASTYPESA_AGENT_BRIEF.md` as the canonical session handoff.
+- Treat `PLASTYPESA_AGENT_HANDOFF.md` (with `PLASTYPESA_MASTER_BRIEF.md` for the full picture) as the canonical session handoff.
 - Treat `.cursor/rules/*.mdc` as the canonical behavior/quality rules.
 - Treat current repo state and live evidence as higher priority than historical notes.
 - If the owner shares older discussions, extract only concrete product facts, constraints, and unresolved questions.
