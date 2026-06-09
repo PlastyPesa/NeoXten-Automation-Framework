@@ -7,14 +7,15 @@ alwaysApply: true
 
 Before substantial work on PlastyPesa, read these files in order:
 
-1. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_MASTER_BRIEF.md` — the whole picture (all repos, current state, goal, prioritized plan).
-2. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_AGENT_HANDOFF.md` — the canonical session handoff.
-3. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_BUILD_AND_VERIFY_PLAN.md` — live roadmap, proof ledger, worklist, open defects/blockers, and the Phase-5 manual-test exercise list (use when manual testing or UX validation matters).
-4. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_START_HERE.md` — the rest of the canon.
+1. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_SUPERVISOR_HANDOFF.md` — the canonical session handoff: current state, in-flight agent tasks, all locked decisions, worklist, external waits.
+2. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_STRATEGY_NORTH_STAR.md` — Kenya-first strategy, markets, locked reward model, compliance guardrails.
+3. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_FOUNDERS_SEASON_LAUNCH.md` — launch framing (30-day recognition-first season, go-live countdown, day-30 cash gate).
+4. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_BUILD_AND_VERIFY_PLAN.md` — live roadmap, proof ledger, worklist, open defects/blockers.
+5. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_START_HERE.md` — the rest of the canon (full read order + reference docs).
 
 ## Canonical source rule
 
-- Treat `PLASTYPESA_AGENT_HANDOFF.md` (with `PLASTYPESA_MASTER_BRIEF.md` for the full picture) as the canonical session handoff.
+- Treat `PLASTYPESA_SUPERVISOR_HANDOFF.md` as the canonical session handoff (current state + locked decisions). It supersedes the retired `PLASTYPESA_AGENT_HANDOFF.md`.
 - Treat `.cursor/rules/*.mdc` as the canonical behavior/quality rules.
 - Treat current repo state and live evidence as higher priority than historical notes.
 - If the owner shares older discussions, extract only concrete product facts, constraints, and unresolved questions.
