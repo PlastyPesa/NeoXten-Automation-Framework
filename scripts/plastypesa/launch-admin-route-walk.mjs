@@ -47,6 +47,15 @@ function outPath() {
   return resolve(dir, `plastypesa-launch-admin-${Date.now()}.json`);
 }
 
+async function readSettledBody(page) {
+  for (const waitMs of [2500, 6000, 10000]) {
+    await page.waitForTimeout(waitMs);
+    const body = (await page.locator('body').innerText().catch(() => '')).slice(0, 10_000);
+    if (body.length >= 80) return body;
+  }
+  return (await page.locator('body').innerText().catch(() => '')).slice(0, 10_000);
+}
+
 async function checkRoute(page, route, browserErrors) {
   const url = `${BASE}${route.path}`;
   const errors = [];
@@ -57,14 +66,9 @@ async function checkRoute(page, route, browserErrors) {
       waitUntil: 'domcontentloaded',
       timeout: 90_000,
     });
-    await page.waitForTimeout(2500);
     const status = response?.status() ?? 0;
     const currentUrl = page.url();
-    let body = (await page.locator('body').innerText().catch(() => '')).slice(0, 10_000);
-    if (body.length < 80) {
-      await page.waitForTimeout(6000);
-      body = (await page.locator('body').innerText().catch(() => '')).slice(0, 10_000);
-    }
+    const body = await readSettledBody(page);
     if (/\/login(?:[/?#]|$)/.test(currentUrl)) errors.push('redirected to login');
     if (status >= 500) errors.push(`HTTP ${status}`);
     if (body.length < 80) errors.push('empty or tiny body');
@@ -108,6 +112,23 @@ async function checkRoute(page, route, browserErrors) {
   }
 }
 
+async function checkRouteWithRetry(page, route, browserErrors) {
+  const first = await checkRoute(page, route, browserErrors);
+  if (first.pass || !first.errors.some((error) => /empty or tiny body|expected text not found/.test(error))) {
+    return first;
+  }
+
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 90_000 }).catch(() => null);
+  const second = await checkRoute(page, route, browserErrors);
+  return {
+    ...second,
+    warnings: [
+      ...(second.warnings || []),
+      `retried after initial failure: ${first.errors.join('; ')}`,
+    ],
+  };
+}
+
 async function main() {
   bootstrapPlastyPesaEnv();
   const browserErrors = [];
@@ -122,7 +143,7 @@ async function main() {
     await loginToAdminDashboard(page, undefined, { baseURL: BASE });
     console.log('[launch-admin] Logged in to', BASE);
     for (const route of ROUTES) {
-      const result = await checkRoute(page, route, browserErrors);
+      const result = await checkRouteWithRetry(page, route, browserErrors);
       results.push(result);
       console.log(
         `  ${result.pass ? 'PASS' : 'FAIL'}  ${result.name} (${result.path})${

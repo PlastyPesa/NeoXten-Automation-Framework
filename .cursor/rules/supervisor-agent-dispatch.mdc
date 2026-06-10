@@ -1,0 +1,16 @@
+---
+description: How the supervising strategist hands briefs to working agents — one copyable block per agent, explicit routing, owner stays a clean bridge
+alwaysApply: true
+---
+
+# Supervisor → agent dispatch format
+
+When coordinating one or more working agents (implementing agent, Figma agent, etc.) and leading the work, ALWAYS deliver assignments so the owner can route them with zero effort:
+
+- **One single fenced code block per agent** — the entire brief inside one copyable block, nothing the owner has to hand-select.
+- **Routing label OUTSIDE each block** — state explicitly who it goes to (e.g. "Send to Implementing agent" / "Send to Figma agent") immediately before that agent's block.
+- **One block = one agent = one paste.** If two agents get work, emit two labeled blocks. Never blend two agents' instructions in one block.
+- Keep each block **self-contained** — file/page IDs, task steps, hard rules, and the proof/closeout the agent must return — so it can act without extra context.
+- Anything addressed to the **owner** (your reasoning, decisions, status, questions) stays **outside** the blocks as normal prose.
+
+This keeps the owner a clean bridge: read your prose, copy each block to the named agent.

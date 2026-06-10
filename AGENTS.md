@@ -2,6 +2,14 @@
 
 This repo is used to test PlastyPesa like a real user.
 
+## Start Here (cross-account handoff)
+
+Before doing PlastyPesa work, read the **master brief** — it has the whole picture (all 5 repos, current state, the owner's goal, competitor/UX research, the professional UI/UX bar, the NeoXten testing workflow, and the prioritized plan to finish):
+
+- `C:\Users\Bobby\Documents\plastypesa-admin-dashboard\DOCS\PLASTYPESA_MASTER_BRIEF.md`
+
+Then `DOCS\PLASTYPESA_START_HERE.md` in the admin-dashboard repo for the rest of the canon. This survives Cursor profile/account switches because it lives in git, not in chat history.
+
 ## Ground Truth
 
 - Work from the live PlastyPesa repos and the user's current instructions.
