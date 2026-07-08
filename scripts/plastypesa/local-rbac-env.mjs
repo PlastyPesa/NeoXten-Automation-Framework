@@ -28,6 +28,7 @@ export const BACKEND_ORIGIN = `http://127.0.0.1:${PORT}`;
 export const ADMIN_EMAIL = 'rbac-admin@test.local';
 export const ADMIN_PASSWORD = 'RbacAdminPass123!';
 export const SUBJECT_EMAIL = 'rbac-subject@test.local';
+export const SUBJECT_PASSWORD = 'RbacSubjectPass123!';
 export const SUBJECT_LAST_NAME = 'Subjectson';
 
 async function seed(db) {
@@ -53,6 +54,7 @@ async function seed(db) {
     {
       _id: subjectId,
       email: SUBJECT_EMAIL,
+      password: SUBJECT_PASSWORD,
       firstName: 'Jane',
       lastName: SUBJECT_LAST_NAME,
       role: ['user'],
@@ -90,6 +92,23 @@ async function seed(db) {
       updatedAt: now,
     },
   ]);
+
+  // Poisoned announcement row: legacy fan-out wrote senderId: "" which used
+  // to crash the ADMIN branch of POST /api/notification/my ($toObjectId on
+  // empty string → PlanExecutor error → 500, found live 2026-07-08).
+  await db.collection('notifications').insertOne({
+    title: 'Legacy announcement',
+    message: 'poisoned row for admin aggregation regression',
+    type: 'ANNOUNCEMENT',
+    receiverId: String(subjectId),
+    senderId: '',
+    usersInvolved: [],
+    readByUsers: [],
+    createdAt: now,
+    createdAt_EP: Math.floor(now.getTime() / 1000),
+    updatedAt: now,
+    updatedAt_EP: Math.floor(now.getTime() / 1000),
+  });
 
   const flaggedPostId = new ObjectId();
   await db.collection('community_posts').insertOne({
@@ -190,6 +209,7 @@ export async function startLocalRbacEnv({ quietBackend = false } = {}) {
     adminEmail: ADMIN_EMAIL,
     adminPassword: ADMIN_PASSWORD,
     subjectEmail: SUBJECT_EMAIL,
+    subjectPassword: SUBJECT_PASSWORD,
     subjectLastName: SUBJECT_LAST_NAME,
     ...seeded,
     async stop() {

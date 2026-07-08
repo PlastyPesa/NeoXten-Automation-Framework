@@ -249,6 +249,48 @@ export async function run(ctx, runner) {
     if (r2.status !== 200) throw new Error(`summary after re-enable: ${r2.status}`);
   });
 
+  // ---- Admin notifications 500 regression (2026-07-08 live defect) ------
+  // Seed contains a legacy ANNOUNCEMENT row with senderId: "" that used to
+  // crash the admin-only store lookup ($toObjectId with no onError).
+  await runner.test('admin_notifications_survive_empty_senderId_row', async () => {
+    const r = await fetch(api(ctx, '/notification/my'), {
+      method: 'POST',
+      headers: authHeaders(ctx.adminToken),
+      body: JSON.stringify({ page: 1 }),
+    });
+    const { body, text } = await jsonOf(r);
+    if (r.status !== 200) throw new Error(`Expected 200, got ${r.status}: ${text.slice(0, 200)}`);
+    const rows = body?.data || [];
+    if (!rows.some((n) => n.title === 'Legacy announcement')) {
+      throw new Error('poisoned announcement row missing from admin list');
+    }
+  });
+
+  await runner.test('user_notifications_unaffected_by_senderId_fix', async () => {
+    // Control: the non-admin path (mobile app) must keep returning the same
+    // announcement row with 200.
+    const subjLogin = await fetch(api(ctx, '/auth/login'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: ctx.subjectEmail, password: ctx.subjectPassword }),
+    });
+    const subjBody = await subjLogin.json().catch(() => null);
+    if (subjLogin.status !== 200 || !subjBody?.token) {
+      throw new Error(`subject login failed: ${subjLogin.status}`);
+    }
+    const r = await fetch(api(ctx, '/notification/my'), {
+      method: 'POST',
+      headers: authHeaders(subjBody.token),
+      body: JSON.stringify({ page: 1 }),
+    });
+    const { body, text } = await jsonOf(r);
+    if (r.status !== 200) throw new Error(`Expected 200, got ${r.status}: ${text.slice(0, 200)}`);
+    const rows = body?.data || [];
+    if (!rows.some((n) => n.title === 'Legacy announcement')) {
+      throw new Error('user lost their announcement row');
+    }
+  });
+
   // ---- Owner lockout protection -----------------------------------------
   await runner.test('staff_endpoints_cannot_disable_admin_account', async () => {
     const r = await fetch(api(ctx, `/admin/staff/operators/${ctx.adminUserId}/disable`), {
