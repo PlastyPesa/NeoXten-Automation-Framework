@@ -45,6 +45,8 @@
     "test:store-pipelines": "node dist/factory/__tests__/store-pipelines.test.js",
     "test:system-validation": "node dist/factory/__tests__/system-validation.test.js",
     "test:plastypesa-api": "node scripts/plastypesa-api-test.js",
+    "test:plastypesa-admin-rbac": "node scripts/plastypesa-admin-rbac-local.js",
+    "test:plastypesa-admin-rbac-dashboard": "node scripts/plastypesa-admin-rbac-dashboard.mjs",
     "test:plastypesa-api:release-pack": "node scripts/plastypesa-release-pack.mjs",
     "test:plastypesa-api:auth-only": "node scripts/plastypesa-api-auth-only.mjs",
     "test:plastypesa-bench": "node scripts/plastypesa/scan-latency-bench.mjs",
@@ -98,6 +100,8 @@
     "@types/node": "^22.10.0",
     "drizzle-kit": "^0.31.10",
     "jimp": "^1.6.0",
+    "mongodb": "^7.5.0",
+    "mongodb-memory-server": "^11.2.0",
     "typescript": "^5.9.3"
   },
   "engines": {
