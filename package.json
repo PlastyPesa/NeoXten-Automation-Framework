@@ -48,6 +48,8 @@
     "test:plastypesa-admin-rbac": "node scripts/plastypesa-admin-rbac-local.js",
     "test:plastypesa-admin-rbac-dashboard": "node scripts/plastypesa-admin-rbac-dashboard.mjs",
     "test:plastypesa-api:release-pack": "node scripts/plastypesa-release-pack.mjs",
+    "test:plastypesa-launch-sync": "node scripts/plastypesa-launch-sync.mjs",
+    "test:plastypesa-landing-sync": "node scripts/plastypesa-landing-sync.mjs",
     "test:plastypesa-api:auth-only": "node scripts/plastypesa-api-auth-only.mjs",
     "test:plastypesa-bench": "node scripts/plastypesa/scan-latency-bench.mjs",
     "test:plastypesa-europe": "node scripts/plastypesa-europe-run.mjs",

@@ -38,6 +38,7 @@ import * as ecoScanConfig from './suites/eco-scan-config.mjs';
 import * as circularEconomy from './suites/circular-economy.mjs';
 import * as b2bImpact from './suites/b2b-impact.mjs';
 import * as gdpr from './suites/gdpr.mjs';
+import * as launchSync from './suites/launch-sync.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -69,6 +70,9 @@ const ALL_SUITES = [
   // OTP-gate behaviour on export and delete. The destructive delete
   // path itself is never run live by this suite.
   { id: 'gdpr', mod: gdpr },
+  // Phase B — recognition-first launch sync: prizes payload, legal masters,
+  // landing-data, market config (admin token optional; skips without it).
+  { id: 'launch-sync', mod: launchSync },
 ];
 
 function resolveSuites(cfg) {
