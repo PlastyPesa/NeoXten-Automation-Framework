@@ -39,6 +39,7 @@ import * as circularEconomy from './suites/circular-economy.mjs';
 import * as b2bImpact from './suites/b2b-impact.mjs';
 import * as gdpr from './suites/gdpr.mjs';
 import * as launchSync from './suites/launch-sync.mjs';
+import * as dailyQuizContinuity from './suites/daily-quiz-continuity.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -73,6 +74,9 @@ const ALL_SUITES = [
   // Phase B — recognition-first launch sync: prizes payload, legal masters,
   // landing-data, market config (admin token optional; skips without it).
   { id: 'launch-sync', mod: launchSync },
+  // Phase E — daily-quiz continuity: exactly one ACTIVE automated daily
+  // quiz, fresh within 36h; fails loudly when automation stops publishing.
+  { id: 'daily-quiz-continuity', mod: dailyQuizContinuity },
 ];
 
 function resolveSuites(cfg) {
