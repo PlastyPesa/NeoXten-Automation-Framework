@@ -2,14 +2,14 @@
 /**
  * PlastyPesa landing launch-sync check (Playwright, rendered pages).
  *
- * Phase B recognition-first contract on the RENDERED landing page:
+ * Phase 5 market-isolated contract on the RENDERED landing page:
  *   - no "[value TBD]" / "[date TBD]" / "[pts]" placeholders anywhere
- *   - no active cash/voucher promise (no €70/€20 amounts while recognition
- *     mode is ON server-side)
+ *   - Europe remains recognition-only with no cash amount
+ *   - Kenya renders the API-backed KES 10,000 schedule and Reliability Wall
  *   - no brand-violating words (prize/lottery/gambling/win) in any language
  *   - reward section renders the recognition tiers (Champion of the Week)
  *
- * Runs against all 7 language routes.
+ * Runs Europe and Kenya against all 7 language routes.
  *
  * Env:
  *   PLASTYPESA_LANDING_BASE — default https://plastypesa.com
@@ -18,22 +18,33 @@
  *     force the prize payload into recognition mode (0 amounts). Use this to
  *     prove the FRONTEND recognition rendering path before the backend
  *     recognition-mode deploy goes live. Never needed against prod post-deploy.
+ *   PLASTYPESA_SIMULATE_PHASE5=1 — intercept the new public market/Wall APIs
+ *     with production-shaped data so the local frontend can be proved before
+ *     the backend deployment. Never use this for post-deploy live proof.
  *
  * Exit code 1 on any failure.
  */
 import { chromium } from 'playwright';
 
 const SIMULATE_RECOGNITION = process.env.PLASTYPESA_SIMULATE_RECOGNITION === '1';
+const SIMULATE_PHASE5 = process.env.PLASTYPESA_SIMULATE_PHASE5 === '1';
 
 const BASE = (process.env.PLASTYPESA_LANDING_BASE || 'https://plastypesa.com').replace(/\/$/, '');
-const LANGS = [
-  ['en', '/'],
-  ['it', '/it'],
-  ['es', '/es'],
-  ['pt', '/pt'],
-  ['ro', '/ro'],
-  ['de', '/de'],
-  ['fr', '/fr'],
+const ROUTES = [
+  ['en', 'EU', '/'],
+  ['it', 'EU', '/it'],
+  ['es', 'EU', '/es'],
+  ['pt', 'EU', '/pt'],
+  ['ro', 'EU', '/ro'],
+  ['de', 'EU', '/de'],
+  ['fr', 'EU', '/fr'],
+  ['en', 'KE', '/ke'],
+  ['it', 'KE', '/it/ke'],
+  ['es', 'KE', '/es/ke'],
+  ['pt', 'KE', '/pt/ke'],
+  ['ro', 'KE', '/ro/ke'],
+  ['de', 'KE', '/de/ke'],
+  ['fr', 'KE', '/fr/ke'],
 ];
 
 // Brand words per language (word-boundary; avoids false hits inside longer words).
@@ -72,10 +83,22 @@ function promissoryBrandHit(body) {
 
 const PLACEHOLDER_RE = /\[(value|date|pts|data|fecha|Datum|dat[aă])[^\]]*\]|\bTBD\b/i;
 const CASH_PROMISE_RE = /€\s?70|70\s?€|EUR\s?70|€\s?20|20\s?€|EUR\s?20/i;
+const KENYA_CASH_RE = /\b(?:KES|KSh)\b/i;
+const KENYA_TOTAL_RE = /10(?:[.,\s\u00a0])?000/;
+const I18N_KEY_RE = /\b(?:fnd|wall|hero|cta|faq)_[a-z0-9_]+\b/i;
+const KENYA_TITLE_NAMES = {
+  en: 'Kenya',
+  it: 'Kenya',
+  es: 'Kenia',
+  pt: 'Quénia',
+  ro: 'Kenya',
+  de: 'Kenia',
+  fr: 'Kenya',
+};
 
 const failures = [];
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage();
+const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
 if (SIMULATE_RECOGNITION) {
   await page.route('**/api/home/landing-data*', async (route) => {
@@ -98,22 +121,121 @@ if (SIMULATE_RECOGNITION) {
   console.log('  (simulating recognition-mode landing-data payload)');
 }
 
-for (const [lang, path] of LANGS) {
-  await page
+if (SIMULATE_PHASE5) {
+  await page.route('**/market-rewards/public/markets/*', async (route) => {
+    const marketCode = new URL(route.request().url()).pathname.split('/').pop()?.toUpperCase();
+    const isKenya = marketCode === 'KE';
+    await route.fulfill({
+      status: isKenya || marketCode === 'EU' ? 200 : 404,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        type: isKenya || marketCode === 'EU' ? 'success' : 'error',
+        data: {
+          marketCode,
+          cashEnabled: isKenya,
+          recognitionOnly: !isKenya,
+          currency: isKenya ? 'KES' : null,
+          rewardTiers: {
+            schedule: isKenya
+              ? [
+                  { rankFrom: 1, rankTo: 1, amount: 4500 },
+                  { rankFrom: 2, rankTo: 2, amount: 2500 },
+                  { rankFrom: 3, rankTo: 3, amount: 1600 },
+                  { rankFrom: 4, rankTo: 10, amount: 200 },
+                ]
+              : [],
+            recipientCount: isKenya ? 10 : 5,
+            weeklyTotal: isKenya ? 10000 : 0,
+            feesPaidSeparately: isKenya,
+          },
+          claimWindowDays: isKenya ? 7 : null,
+          minApprovedSortProofs: isKenya ? 1 : null,
+        },
+      }),
+    });
+  });
+  await page.route('**/market-rewards/champions*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        type: 'success',
+        data: [
+          {
+            marketCode: 'KE',
+            weekStart: '2026-07-06T00:00:00.000Z',
+            weekEnd: '2026-07-12T23:59:59.999Z',
+            snapshotAt: '2026-07-12T23:59:59.999Z',
+            totalParticipants: 24,
+            champions: [
+              {
+                slot: 1,
+                rank: 1,
+                ecoHandle: 'VerifiedEco742',
+                weeklyPoints: 12400,
+                rewarded: true,
+                rewardPending: false,
+                rewardAmount: 4500,
+                currency: 'KES',
+                paidAt: '2026-07-13T10:00:00.000Z',
+                paymentReferencePrefix: 'MPES',
+              },
+            ],
+          },
+        ],
+      }),
+    }),
+  );
+  console.log('  (simulating Phase 5 public market APIs)');
+}
+
+for (const [lang, market, path] of ROUTES) {
+  const response = await page
     .goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 60000 })
-    .catch(() => {});
+    .catch(() => null);
   await page.waitForTimeout(2500);
   const body = await page.locator('body').innerText();
   const brandHit = promissoryBrandHit(body);
+  const pageFacts = await page.evaluate(() => ({
+    lang: document.documentElement.lang,
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href') || '',
+    canonicalCount: document.querySelectorAll('link[rel="canonical"]').length,
+    title: document.title,
+  }));
   const checks = [
+    ['http_200', response?.status() === 200, null, `status ${response?.status() ?? 'navigation failed'}`],
     ['no_placeholders', !PLACEHOLDER_RE.test(body), PLACEHOLDER_RE],
     ['no_promissory_brand_words', !brandHit, null, brandHit],
-    ['no_cash_amount_promise', !CASH_PROMISE_RE.test(body), CASH_PROMISE_RE],
+    ['no_stale_euro_promise', !CASH_PROMISE_RE.test(body), CASH_PROMISE_RE],
+    ['no_i18n_key_leakage', !I18N_KEY_RE.test(body), I18N_KEY_RE],
+    ['html_language_matches_route', pageFacts.lang.toLowerCase().startsWith(lang), null, `lang="${pageFacts.lang}"`],
+    ['no_mobile_horizontal_overflow', pageFacts.overflow <= 1, null, `overflow ${pageFacts.overflow}px`],
+    ['one_canonical', pageFacts.canonicalCount === 1, null, `${pageFacts.canonicalCount} canonical links`],
+    ['canonical_matches_route', pageFacts.canonical === `https://plastypesa.com${path}`, null, pageFacts.canonical],
+    [
+      'market_aware_title',
+      market === 'KE'
+        ? pageFacts.title.includes(KENYA_TITLE_NAMES[lang])
+        : !Object.values(KENYA_TITLE_NAMES).some((name) => pageFacts.title.includes(name)),
+      null,
+      pageFacts.title,
+    ],
+    ['eu_has_no_kes_schedule', market !== 'EU' || !KENYA_CASH_RE.test(body), KENYA_CASH_RE],
+    ['ke_has_kes_schedule', market !== 'KE' || KENYA_CASH_RE.test(body), null],
+    ['ke_has_weekly_total', market !== 'KE' || KENYA_TOTAL_RE.test(body), null],
+    [
+      'populated_reliability_wall_renders',
+      !SIMULATE_PHASE5 ||
+        market !== 'KE' ||
+        (body.includes('VerifiedEco742') && body.includes('MPES')),
+      null,
+    ],
     ['page_rendered', body.length > 2000, null],
   ];
   for (const [name, ok, re, detail] of checks) {
     if (ok) {
-      console.log(`  PASS  [${lang}] ${name}`);
+      console.log(`  PASS  [${lang}/${market}] ${name}`);
     } else {
       const m = re ? body.match(re) : null;
       const ctx = m
@@ -121,8 +243,8 @@ for (const [lang, path] of LANGS) {
         : detail
           ? ` -> "${detail}"`
           : ` (body ${body.length} chars)`;
-      console.log(`  FAIL  [${lang}] ${name}${ctx}`);
-      failures.push(`[${lang}] ${name}${ctx}`);
+      console.log(`  FAIL  [${lang}/${market}] ${name}${ctx}`);
+      failures.push(`[${lang}/${market}] ${name}${ctx}`);
     }
   }
 }

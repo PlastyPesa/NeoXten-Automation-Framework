@@ -71,6 +71,85 @@ flows:
             }
           })()
 
+  - name: account_deletion_all_languages
+    steps:
+      - action: navigate
+        url: http://localhost:8080/account-deletion
+        timeout: 15000
+      - action: wait
+        timeout: 1000
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (!body.includes('Delete your PlastyPesa account') ||
+                !body.includes('support@plastypesa.com') ||
+                !body.includes('up to 7 years') ||
+                !body.includes('up to 90 days')) {
+              throw new Error('English account-deletion contract is incomplete: ' + body.substring(0, 800));
+            }
+          })()
+      - action: navigate
+        url: http://localhost:8080/it/account-deletion
+      - action: wait
+        timeout: 750
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (!body.includes('Elimina il tuo account PlastyPesa')) throw new Error('Italian account-deletion page did not render');
+          })()
+      - action: navigate
+        url: http://localhost:8080/es/account-deletion
+      - action: wait
+        timeout: 750
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (!body.includes('Elimina tu cuenta de PlastyPesa')) throw new Error('Spanish account-deletion page did not render');
+          })()
+      - action: navigate
+        url: http://localhost:8080/de/account-deletion
+      - action: wait
+        timeout: 750
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (!body.includes('Dein PlastyPesa-Konto löschen')) throw new Error('German account-deletion page did not render');
+          })()
+      - action: navigate
+        url: http://localhost:8080/fr/account-deletion
+      - action: wait
+        timeout: 750
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (!body.includes('Supprimer votre compte PlastyPesa')) throw new Error('French account-deletion page did not render');
+          })()
+      - action: navigate
+        url: http://localhost:8080/pt/account-deletion
+      - action: wait
+        timeout: 750
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (!body.includes('Eliminar a tua conta PlastyPesa')) throw new Error('Portuguese account-deletion page did not render');
+          })()
+      - action: navigate
+        url: http://localhost:8080/ro/account-deletion
+      - action: wait
+        timeout: 750
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (!body.includes('Șterge-ți contul PlastyPesa')) throw new Error('Romanian account-deletion page did not render');
+          })()
+
   # ── Protected pages (should redirect to login or show auth gate) ──
   - name: dashboard_requires_auth
     steps:
@@ -99,6 +178,23 @@ flows:
             }
             if (!isLoginPage && !hasLoginForm) {
               throw new Error('Dashboard did not redirect to login or show an auth gate. Current URL: ' + href);
+            }
+          })()
+
+  - name: account_deletion_visual_final
+    steps:
+      - action: navigate
+        url: http://localhost:8080/ro/account-deletion
+        timeout: 15000
+      - action: wait
+        timeout: 750
+      - action: evaluate
+        expression: |
+          (() => {
+            const body = document.body.innerText || '';
+            if (!body.includes('Șterge-ți contul PlastyPesa') ||
+                !body.includes('support@plastypesa.com')) {
+              throw new Error('Final Romanian account-deletion proof did not render');
             }
           })()
 

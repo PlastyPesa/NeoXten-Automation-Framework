@@ -9,7 +9,10 @@ function sleep(ms) {
 }
 
 export function getAdminBaseUrl() {
-  return process.env.PLASTYPESA_ADMIN_BASE_URL || 'http://127.0.0.1:8080';
+  // Production API CORS explicitly allows the dashboard's localhost dev origin.
+  // Keep one canonical hostname so authenticated XHRs are not blocked by the
+  // browser treating 127.0.0.1 as a different origin.
+  return process.env.PLASTYPESA_ADMIN_BASE_URL || 'http://localhost:8080';
 }
 
 export function getAdminApiBaseUrl() {
@@ -157,19 +160,29 @@ export async function loginToAdminDashboard(
 
 export async function adminApi(page, path, options = {}) {
   const token = await page.evaluate(() => {
-    return document.cookie
+    const encoded = document.cookie
       .split(';')
       .map((entry) => entry.trim())
       .find((entry) => entry.startsWith('accessToken='))
       ?.split('=')
       .slice(1)
       .join('=') || '';
+    const decoded = decodeURIComponent(encoded);
+    // react-cookie JSON-serializes strings in document.cookie. Browser hooks
+    // deserialize them automatically; this direct API helper must do the same.
+    try {
+      return JSON.parse(decoded);
+    } catch {
+      return decoded;
+    }
   });
-  const response = await fetch(new URL(path, options.baseURL || getAdminApiBaseUrl()), {
+  const apiBase = String(options.baseURL || getAdminApiBaseUrl()).replace(/\/$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  const response = await fetch(`${apiBase}${normalizedPath}`, {
     method: options.method || 'GET',
     headers: {
       ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${decodeURIComponent(token)}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
   });

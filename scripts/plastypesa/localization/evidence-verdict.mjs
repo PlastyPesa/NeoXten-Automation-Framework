@@ -15,8 +15,22 @@ function pushFinding(report, severity, source, path, message) {
   }
   report._seen.add(key);
   report.findings.push({ severity, source, path, message });
-  if (severity === 'high') {
+  if (severity === 'high' || severity === 'medium') {
     report.overall = 'FAIL';
+  }
+}
+
+function requireFresh(report, source, evidence) {
+  const timestamp = evidence?.generatedAt || evidence?.finishedAt || evidence?.startedAt;
+  const ageMs = timestamp ? Date.now() - Date.parse(timestamp) : Number.POSITIVE_INFINITY;
+  if (!Number.isFinite(ageMs) || ageMs < 0 || ageMs > 6 * 60 * 60 * 1000) {
+    pushFinding(
+      report,
+      'high',
+      source,
+      'generatedAt',
+      `${source} evidence is missing a valid timestamp or is older than 6 hours`,
+    );
   }
 }
 
@@ -59,6 +73,7 @@ function main() {
   const web = safeReadJson(resolve(outDir, 'web-audit.json'));
   if (web) {
     addSource(report, 'web-audit', 'loaded');
+    requireFresh(report, 'web-audit', web);
     for (const finding of web.findings || []) {
       pushFinding(
         report,
@@ -88,21 +103,25 @@ function main() {
     }
   } else {
     addSource(report, 'web-audit', 'missing');
+    pushFinding(report, 'high', 'web-audit', 'source', 'Required web audit is missing');
   }
 
   const ocr = safeReadJson(resolve(outDir, 'ocr-audit.json'));
   if (ocr) {
     addSource(report, 'ocr-audit', 'loaded');
+    requireFresh(report, 'ocr-audit', ocr);
     for (const finding of ocr.findings || []) {
       pushFinding(report, finding.severity, 'ocr-audit', finding.path, finding.message);
     }
   } else {
     addSource(report, 'ocr-audit', 'missing');
+    pushFinding(report, 'high', 'ocr-audit', 'source', 'Required OCR audit is missing');
   }
 
   const mobile = safeReadJson(resolve(outDir, 'mobile-adb-visible.json'));
   if (mobile) {
     addSource(report, 'mobile-adb-visible', mobile.result || 'loaded');
+    requireFresh(report, 'mobile-adb-visible', mobile);
     if (mobile.result && mobile.result !== 'PASS') {
       pushFinding(
         report,
@@ -112,8 +131,9 @@ function main() {
         `Visible mobile walkthrough failed with result ${mobile.result}`,
       );
     }
-    for (const step of mobile.steps || []) {
-      if (step.ok === false) {
+    if (mobile.result !== 'PASS') {
+      for (const step of mobile.steps || []) {
+        if (step.ok !== false) continue;
         pushFinding(
           report,
           'medium',
@@ -125,11 +145,25 @@ function main() {
     }
   } else {
     addSource(report, 'mobile-adb-visible', 'missing');
+    pushFinding(
+      report,
+      'high',
+      'mobile-adb-visible',
+      'source',
+      'Required visible mobile walkthrough is missing',
+    );
   }
 
-  const reflection = safeReadJson(resolve(outDir, 'admin-app-reflection.json'));
-  if (reflection) {
+  const reflectionEnabled =
+    process.env.PLASTYPESA_LOCALIZATION_ENABLE_ADMIN_APP_REFLECTION === '1';
+  const reflection = reflectionEnabled
+    ? safeReadJson(resolve(outDir, 'admin-app-reflection.json'))
+    : null;
+  if (!reflectionEnabled) {
+    addSource(report, 'admin-app-reflection', 'skipped');
+  } else if (reflection) {
     addSource(report, 'admin-app-reflection', reflection.result || 'loaded');
+    requireFresh(report, 'admin-app-reflection', reflection);
     if (reflection.result && reflection.result !== 'PASS') {
       pushFinding(
         report,
@@ -139,20 +173,15 @@ function main() {
         `Admin-to-app reflection failed with result ${reflection.result}`,
       );
     }
-    if (reflection.expectedTitle || reflection.expectedMessage) {
-      const backendCopy = [reflection.expectedTitle, reflection.expectedMessage]
-        .filter(Boolean)
-        .join(' | ');
-      pushFinding(
-        report,
-        'medium',
-        'backend-banner-payload',
-        reflection.campaignId || 'active-in-app-banner',
-        `Backend localized banner payload observed: ${backendCopy}`,
-      );
-    }
   } else {
     addSource(report, 'admin-app-reflection', 'missing');
+    pushFinding(
+      report,
+      'high',
+      'admin-app-reflection',
+      'source',
+      'Admin-to-app reflection was enabled but its evidence is missing',
+    );
   }
 
   const persistedReport = {

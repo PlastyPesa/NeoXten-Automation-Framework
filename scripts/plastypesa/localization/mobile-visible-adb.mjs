@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { readFileSync } from 'node:fs';
 import {
+  adb,
   buildTextCandidates,
   captureStepArtifacts,
   forceStopAndLaunchApp,
@@ -112,6 +113,31 @@ async function clearSystemUiAndRelaunch(report, action = 'dismiss-system-ui-over
     detail: 'cleared system overlays and relaunched app',
   });
   await sleep(4500);
+}
+
+async function resetToGuestLanguagePicker(report) {
+  adb(['shell', 'pm', 'clear', APP_PACKAGE], { deviceId: report.deviceId });
+  forceStopAndLaunchApp({ deviceId: report.deviceId, packageName: APP_PACKAGE });
+  recordAdbStep(report, {
+    action: 'reset-guest-state',
+    ok: true,
+    detail: 'cleared test app data and relaunched at first-run language selection',
+  });
+  await sleep(5000);
+  const skippedOnboarding = await tapText(['Skip'], {
+    deviceId: report.deviceId,
+    timeoutMs: 5000,
+    afterMs: 1500,
+    label: 'reset-guest-skip-onboarding',
+    packageName: APP_PACKAGE,
+  });
+  recordAdbStep(report, {
+    action: 'reset-guest-skip-onboarding',
+    ok: skippedOnboarding,
+    detail: skippedOnboarding
+      ? 'advanced from first-run education slides to language selection'
+      : 'onboarding skip was not present',
+  });
 }
 
 function buildBannerMatchCandidates(value) {
@@ -536,6 +562,7 @@ async function main() {
       if (loggedIn) {
         await runAuthenticatedWalkthrough(report);
       } else {
+        await resetToGuestLanguagePicker(report);
         await runGuestWalkthrough(report);
       }
     }

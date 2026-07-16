@@ -83,6 +83,19 @@ function countPkgNodes(nodes) {
   return nodes.filter((n) => n.packageName === PKG).length;
 }
 
+function clearFocusedField(deviceId) {
+  adb(
+    [
+      'shell',
+      'input',
+      'keyevent',
+      '123',
+      ...Array.from({ length: 96 }, () => '67'),
+    ],
+    { deviceId },
+  );
+}
+
 /** Flutter often needs several seconds before uiautomator exposes the real tree. */
 async function waitForFlutterSurface(deviceId, minNodes = 6, timeoutMs = 50_000) {
   const started = Date.now();
@@ -263,7 +276,20 @@ async function main() {
     }
   }
 
+  // Text candidates can match the decorative "Welcome Back" heading before
+  // Flutter exposes the editable semantics. Re-anchor on the actual first
+  // non-password EditText immediately before entering the credential.
+  const emailFieldDump = dumpUiHierarchy(deviceId, 'email-final-anchor');
+  const emailFieldBounds = findFirstPlainEditBounds(
+    parseUiNodes(emailFieldDump.xml),
+  );
+  if (!emailFieldBounds) {
+    console.error('[device-login-e2e] Email EditText unavailable before input.');
+    process.exit(2);
+  }
+  tapBounds(emailFieldBounds, { deviceId });
   await sleep(500);
+  clearFocusedField(deviceId);
   await typeText(mobile.email, { deviceId, perCharacter: true, charDelayMs: 28 });
   await sleep(800);
 
@@ -292,8 +318,11 @@ async function main() {
   }
   // Password: prefer typing — many devices block paste into password fields.
   console.log('[device-login-e2e] Entering password via per-character input.');
+  clearFocusedField(deviceId);
   await typeText(mobile.password, { deviceId, perCharacter: true, charDelayMs: 35 });
   await sleep(600);
+  adb(['shell', 'input', 'keyevent', '4'], { deviceId });
+  await sleep(700);
 
   // PrimaryButton often lacks a11y text — scroll then try label match + center tap.
   await swipeUp({ deviceId });

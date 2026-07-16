@@ -148,8 +148,8 @@ function renderMarkdown(report) {
 
 async function collectPageReport(page, lang, route, screenshotsDir) {
   const urlPath = pathForLocale(route, lang);
-  const url = new URL(urlPath, process.env.PLASTYPESA_ADMIN_BASE_URL || 'http://127.0.0.1:8080').toString();
-  await page.goto(process.env.PLASTYPESA_ADMIN_BASE_URL || 'http://127.0.0.1:8080', {
+  const url = new URL(urlPath, process.env.PLASTYPESA_ADMIN_BASE_URL || 'https://plastypesa.com').toString();
+  await page.goto(process.env.PLASTYPESA_ADMIN_BASE_URL || 'https://plastypesa.com', {
     waitUntil: 'domcontentloaded',
     timeout: 120000,
   });
@@ -199,7 +199,7 @@ async function collectPageReport(page, lang, route, screenshotsDir) {
 
 async function verifyLanguageSwitcher(page, baseURL) {
   await page.goto(baseURL, { waitUntil: 'domcontentloaded', timeout: 120000 });
-  await page.getByRole('button', { name: /Change language/i }).click();
+  await page.getByRole('button', { name: /Change language/i }).first().click();
   await page.getByRole('button', { name: LANGUAGE_NAMES.es, exact: true }).click();
   await page.waitForURL(/\/es\/?$/, { timeout: 30000 });
   return page.url();
@@ -211,7 +211,7 @@ async function main() {
   const frontendRoot = defaultAdminFrontendRoot();
   const outDir = getLocalizationOutDir();
   const screenshotsDir = ensureDir(resolve(outDir, 'web-screenshots'));
-  const baseURL = process.env.PLASTYPESA_ADMIN_BASE_URL || 'http://127.0.0.1:8080';
+  const baseURL = process.env.PLASTYPESA_ADMIN_BASE_URL || 'https://plastypesa.com';
 
   const server = await ensureWebServer(frontendRoot, baseURL);
   const browser = await chromium.launch({ headless: true });

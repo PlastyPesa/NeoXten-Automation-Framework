@@ -47,9 +47,11 @@ function runShell(command, cwd, env = {}) {
   });
 }
 
-function runShellCapture(command, cwd, env = {}) {
+function runShellCapture(command, cwd, env = {}, options = {}) {
   return new Promise((resolvePromise) => {
     let output = '';
+    let forcedSuccess = false;
+    let completionTimer = null;
     const child = spawn(command, {
       cwd,
       env: { ...process.env, ...env },
@@ -57,17 +59,41 @@ function runShellCapture(command, cwd, env = {}) {
       shell: true,
     });
 
+    const detectCompletedTest = () => {
+      if (
+        !options.successPattern ||
+        completionTimer ||
+        !output.includes(options.successPattern)
+      ) {
+        return;
+      }
+      completionTimer = setTimeout(() => {
+        forcedSuccess = true;
+        if (process.platform === 'win32') {
+          spawnSync('taskkill', ['/PID', `${child.pid}`, '/T', '/F'], {
+            stdio: 'ignore',
+          });
+        } else {
+          child.kill('SIGTERM');
+        }
+      }, options.successGraceMs ?? 5000);
+    };
     child.stdout.on('data', (chunk) => {
       const text = chunk.toString();
       output += text;
       process.stdout.write(text);
+      detectCompletedTest();
     });
     child.stderr.on('data', (chunk) => {
       const text = chunk.toString();
       output += text;
       process.stderr.write(text);
+      detectCompletedTest();
     });
-    child.on('close', (code) => resolvePromise({ code: code ?? 1, output }));
+    child.on('close', (code) => {
+      if (completionTimer) clearTimeout(completionTimer);
+      resolvePromise({ code: forcedSuccess ? 0 : (code ?? 1), output });
+    });
     child.on('error', () => resolvePromise({ code: 1, output }));
   });
 }
@@ -150,8 +176,10 @@ async function main() {
     const visibleMobileMode =
       process.env.PLASTYPESA_LOCALIZATION_MOBILE_VISIBLE === '0' ? 'false' : 'true';
     const mobileRun = await runShellCapture(
-      `flutter drive --no-pub --driver=test_driver/integration_test.dart --target=integration_test/localization_audit_test.dart -d ${deviceId} --dart-define=INTEGRATION_TEST=true --dart-define=LOCALIZATION_VISIBLE_MODE=${visibleMobileMode}`,
+      `flutter test --no-pub integration_test/localization_audit_test.dart -d ${deviceId} --dart-define=INTEGRATION_TEST=true --dart-define=LOCALIZATION_VISIBLE_MODE=${visibleMobileMode}`,
       mobileRoot,
+      {},
+      { successPattern: 'All tests passed!' },
     );
     const sawFailureBanner = mobileRun.output.includes('Some tests failed.');
     const code = sawFailureBanner ? 1 : mobileRun.code;

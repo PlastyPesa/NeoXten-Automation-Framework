@@ -22,6 +22,7 @@ export const PUBLIC_WEB_ROUTES = [
   { id: 'privacy-policy', path: '/privacy-policy', localized: true },
   { id: 'terms-of-use', path: '/terms-of-use', localized: true },
   { id: 'gdpr-compliance', path: '/gdpr-compliance', localized: true },
+  { id: 'account-deletion', path: '/account-deletion', localized: true },
   { id: 'collector-signup', path: '/collector-signup', localized: false },
 ];
 

@@ -13,6 +13,7 @@ import {
   dumpUiHierarchy,
   getAdbDevice,
   parseUiNodes,
+  pressKey,
   sleep,
   tapBounds,
   tapText,
@@ -36,10 +37,12 @@ function bottomNavButtons(nodes) {
     .filter(
       (node) =>
         node.packageName === PKG &&
-        node.className === 'android.widget.Button' &&
         node.clickable &&
         node.bounds &&
-        node.bounds.top >= minTop,
+        node.bounds.top >= minTop &&
+        /^(Home|Learn|Scan|Community|Profile)(?:&#10;|\n|$)/i.test(
+          node.text || node.contentDesc || '',
+        ),
     )
     .sort((a, b) => a.bounds.left - b.bounds.left);
 }
@@ -63,15 +66,17 @@ const NAV_LABELS = new Set([
   'Profile',
 ]);
 
-const EXPECTED_TAB_PATTERNS = [
-  [/PlastyPesa|Eco actions|Sort Plastics by Grade|Top 5 weekly reward/i],
-  [/Learn|Daily tip|Scan\s*&\s*Learn|Sorting Academy|recycling expert/i],
-  [/Daily Quiz|Previous quizzes|Eco Quiz/i],
-  [/Leaderboard|weekly top 5|This week's rewards|Lifetime/i],
-  [/Activity|Points Breakdown|History|Badges/i],
-  [/Community|Share with the community|post|feed/i],
-  [/Profile|Account|Settings|Privacy|Legal|Lunar/i],
-];
+const EXPECTED_TAB_PATTERNS = {
+  Home: [/PlastyPesa|Earn points today|week is in motion|Weekly|Lifetime/i],
+  Learn: [/Learn|Daily tip|Scan\s*&\s*Learn|Sorting Academy|recycling expert/i],
+  Scan: [/Scan|plastic|material/i],
+  Community: [/Community|Share with the community|post|feed/i],
+  Profile: [/Profile|Account|Settings|Privacy|Legal|Lunar/i],
+};
+
+function navLabel(node) {
+  return (node.text || node.contentDesc || '').split(/&#10;|\n/)[0].trim();
+}
 
 function bodyText(text) {
   return text.filter((entry) => {
@@ -168,8 +173,27 @@ async function main() {
     process.exit(2);
   }
 
-  for (let i = 0; i < nav.length; i += 1) {
-    const button = nav[i];
+  const targetLabels = nav.map(navLabel);
+  for (let i = 0; i < targetLabels.length; i += 1) {
+    const targetLabel = targetLabels[i];
+    let currentDump = dumpUiHierarchy(deviceId, `launch-mobile-nav-${i}`);
+    let currentNav = bottomNavButtons(parseUiNodes(currentDump.xml));
+    if (!currentNav.some((node) => navLabel(node) === targetLabel)) {
+      await pressKey(4, { deviceId, afterMs: 1400 });
+      currentDump = dumpUiHierarchy(deviceId, `launch-mobile-nav-back-${i}`);
+      currentNav = bottomNavButtons(parseUiNodes(currentDump.xml));
+    }
+    const button = currentNav.find((node) => navLabel(node) === targetLabel);
+    if (!button) {
+      results.push({
+        tabIndex: i,
+        button: targetLabel,
+        pass: false,
+        errors: ['navigation target unavailable'],
+        dump: currentDump.localPath,
+      });
+      continue;
+    }
     tapBounds(button.bounds, { deviceId });
     await sleep(3000);
     const dump = dumpUiHierarchy(deviceId, `launch-mobile-tab-${i}`);
@@ -180,15 +204,19 @@ async function main() {
     const errors = [];
     const nonNavText = bodyText(text);
     const joinedBodyText = nonNavText.join('\n');
+    const label = targetLabel;
     if (text.length < 4) errors.push('too little visible text');
     if (nonNavText.length < 1) errors.push('no visible body content');
-    if (!EXPECTED_TAB_PATTERNS[i]?.some((pattern) => pattern.test(joinedBodyText))) {
+    if (!EXPECTED_TAB_PATTERNS[label]?.some((pattern) => pattern.test(joinedBodyText))) {
       errors.push('expected tab content not visible');
+    }
+    if (text.some((entry) => /\b[a-z][a-z0-9]+(?:_[a-z0-9]+){2,}\b/.test(entry))) {
+      errors.push('untranslated key exposed in device semantics');
     }
     if (text.some((entry) => /exception|error|crash/i.test(entry))) errors.push('visible error text');
     results.push({
       tabIndex: i,
-      button: button.text || button.contentDesc || '',
+      button: label,
       bounds: button.bounds,
       pass: errors.length === 0,
       errors,
