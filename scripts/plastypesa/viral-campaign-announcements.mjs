@@ -4,12 +4,11 @@
  *   1) Referral launch boost — 2000 + 2000 until 2026-08-11
  *   2) First Eco Guardian — KES 20,000 (125k lifetime + 30 approved sorts)
  *
- * Optional: --pin-referral sets the singleton pinned banner (referral countdown)
- * until 2026-08-11 23:59:59 UTC (only ONE pinned banner at a time in the app).
+ * Optional pinned (singleton — shows on EVERY cold start until dismiss or end date):
+ *   --pin-cold-start  both viral messages in one card (recommended)
+ *   --pin-referral    referral countdown only
  *
- *   node scripts/plastypesa/viral-campaign-announcements.mjs           # dry run
- *   node scripts/plastypesa/viral-campaign-announcements.mjs --send    # deliver blasts
- *   node scripts/plastypesa/viral-campaign-announcements.mjs --send --pin-referral
+ *   node scripts/plastypesa/viral-campaign-announcements.mjs --send --pin-cold-start
  */
 import { readFileSync } from 'node:fs';
 
@@ -59,6 +58,21 @@ const PINNED_REFERRAL = {
   },
 };
 
+/** Both campaigns in one card — only way to show referral + Eco Guardian every cold start (one pinned slot). */
+const PINNED_COLD_START = {
+  active: true,
+  title: 'Kenya founding season — two ways to earn big',
+  message: `Invite a friend before ${BOOST_END_LABEL} — you both earn 2000 bonus points (Profile → share your link).\n\nFirst Eco Guardian: KES 20,000 for the first learner to reach 125,000 lifetime points and 30 approved sort-at-home photos. Sorting proof counts — tap First Eco Guardian on Home for your progress.`,
+  endsAt: BOOST_END_ISO,
+  inAppBanner: {
+    bannerDurationSec: 30,
+    bannerScope: 'app_wide',
+    bannerPosition: 'center',
+    bannerStyle: 'premium',
+    bannerId: 'pinned-viral-kenya-founding-2026-08-11',
+  },
+};
+
 const credentials = readFileSync(
   'C:/Users/Bobby/Documents/plastypesa-admin-dashboard/.local/plastypesa-test-credentials.md',
   'utf8',
@@ -99,9 +113,12 @@ const headers = {
 
 const send = process.argv.includes('--send');
 const pinReferral = process.argv.includes('--pin-referral');
+const pinColdStart = process.argv.includes('--pin-cold-start');
 
 console.log(`Mode: ${send ? 'SEND' : 'dry run'}`);
-console.log(`Pinned referral banner: ${pinReferral ? 'yes (if --send)' : 'no'}\n`);
+console.log(
+  `Pinned: ${pinColdStart ? 'cold-start (both)' : pinReferral ? 'referral only' : 'no'}\n`,
+);
 
 for (const ann of ANNOUNCEMENTS) {
   const dry = await json('/admin/announcements', {
@@ -126,21 +143,30 @@ for (const ann of ANNOUNCEMENTS) {
   }
 }
 
-if (pinReferral) {
+async function savePinned(label, payload) {
   if (!send) {
-    console.log('\n[pinned-referral] dry run — would set pinned banner until', BOOST_END_ISO);
-  } else {
-    const pinned = await json('/admin/active-in-app-banner', {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify(PINNED_REFERRAL),
-    });
-    console.log('\n[pinned-referral] saved pinned banner until', BOOST_END_ISO);
-    console.log('  active:', pinned?.data?.active ?? pinned?.active ?? true);
+    console.log(`\n[${label}] dry run — would set pinned banner until`, BOOST_END_ISO);
+    console.log('  title:', payload.title);
+    console.log('  message:', payload.message);
+    return;
   }
+  const pinned = await json('/admin/active-in-app-banner', {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(payload),
+  });
+  console.log(`\n[${label}] saved pinned banner until`, BOOST_END_ISO);
+  console.log('  active:', pinned?.data?.active ?? pinned?.active ?? true);
+  console.log('  bannerId:', payload.inAppBanner.bannerId);
+}
+
+if (pinColdStart) {
+  await savePinned('pinned-cold-start', PINNED_COLD_START);
+} else if (pinReferral) {
+  await savePinned('pinned-referral', PINNED_REFERRAL);
 }
 
 if (!send) {
   console.log('\nPass --send to deliver announcement blasts.');
-  console.log('Add --pin-referral to also set the countdown pinned banner (singleton — replaces any other pin).');
+  console.log('Add --pin-cold-start for both messages on every app open (until 11 Aug or dismiss).');
 }
