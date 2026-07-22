@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /**
- * Send two Kenya viral in-app announcements (no AAB):
+ * Kenya viral in-app announcements — same delivery path as update-v47-announcement.mjs:
+ * POST /admin/announcements → premium center app_wide card on next cold start.
+ *
  *   1) Referral launch boost — 2000 + 2000 until 2026-08-11
  *   2) First Eco Guardian — KES 20,000 (125k lifetime + 30 approved sorts)
  *
- * Optional pinned (singleton — shows on EVERY cold start until dismiss or end date):
- *   --pin-cold-start  both viral messages in one card (recommended)
- *   --pin-referral    referral countdown only
+ *   node scripts/plastypesa/viral-campaign-announcements.mjs            # dry run
+ *   node scripts/plastypesa/viral-campaign-announcements.mjs --send     # deliver both
+ *   node scripts/plastypesa/viral-campaign-announcements.mjs --send --clear-pinned
  *
- *   node scripts/plastypesa/viral-campaign-announcements.mjs --send --pin-cold-start
- *   node scripts/plastypesa/viral-campaign-announcements.mjs --send --pin-cold-start --pin-only
+ * Optional (different UX — pinned singleton, not the update-announcement path):
+ *   --pin-cold-start --pin-only
  */
 import { readFileSync } from 'node:fs';
 
@@ -18,6 +20,7 @@ const API =
 
 const BOOST_END_LABEL = '11 August 2026';
 const BOOST_END_ISO = '2026-08-11T23:59:59.000Z';
+const stamp = new Date().toISOString().slice(0, 10);
 
 const ANNOUNCEMENTS = [
   {
@@ -28,8 +31,8 @@ const ANNOUNCEMENTS = [
     bannerScope: 'app_wide',
     bannerPosition: 'center',
     bannerStyle: 'premium',
-    bannerDurationSec: 18,
-    bannerId: 'viral-referral-boost-2026-08-11',
+    bannerDurationSec: 20,
+    bannerId: `viral-referral-boost-${stamp}`,
   },
   {
     key: 'eco-guardian',
@@ -41,7 +44,7 @@ const ANNOUNCEMENTS = [
     bannerPosition: 'center',
     bannerStyle: 'premium',
     bannerDurationSec: 20,
-    bannerId: 'viral-eco-guardian-founding',
+    bannerId: `viral-eco-guardian-${stamp}`,
   },
 ];
 
@@ -59,7 +62,6 @@ const PINNED_REFERRAL = {
   },
 };
 
-/** Both campaigns in one card — only way to show referral + Eco Guardian every cold start (one pinned slot). */
 const PINNED_COLD_START = {
   active: true,
   title: 'Kenya founding season — two ways to earn big',
@@ -70,7 +72,7 @@ const PINNED_COLD_START = {
     bannerScope: 'app_wide',
     bannerPosition: 'center',
     bannerStyle: 'premium',
-    bannerId: 'pinned-viral-kenya-founding-2026-08-11-v2',
+    bannerId: `pinned-viral-kenya-founding-${stamp}`,
   },
 };
 
@@ -114,34 +116,43 @@ const headers = {
 
 const send = process.argv.includes('--send');
 const pinOnly = process.argv.includes('--pin-only');
+const clearPinned = process.argv.includes('--clear-pinned');
 const pinReferral = process.argv.includes('--pin-referral');
 const pinColdStart = process.argv.includes('--pin-cold-start');
 
 console.log(`Mode: ${send ? 'SEND' : 'dry run'}`);
+console.log(`Stamp: ${stamp}`);
 console.log(
-  `Pinned: ${pinColdStart ? 'cold-start (both)' : pinReferral ? 'referral only' : 'no'}\n`,
+  `Pinned: ${pinColdStart ? 'cold-start (both)' : pinReferral ? 'referral only' : 'no (update-style announcements)'}\n`,
 );
 
-if (!pinOnly) for (const ann of ANNOUNCEMENTS) {
-  const dry = await json('/admin/announcements', {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ ...ann, dryRun: true }),
-  });
-  const total = dry?.data?.totalUsers ?? 0;
-  console.log(`[${ann.key}] dry run → ${total} Kenya users`);
-  if (total === 0) {
-    console.warn(`  ⚠ zero users — check audience filter`);
-  }
-  if (send && total > 0) {
-    const sent = await json('/admin/announcements', {
+if (send && clearPinned) {
+  await json('/admin/active-in-app-banner', { method: 'DELETE', headers });
+  console.log('[clear-pinned] removed active pinned banner\n');
+}
+
+if (!pinOnly) {
+  for (const ann of ANNOUNCEMENTS) {
+    const dry = await json('/admin/announcements', {
       method: 'POST',
       headers,
-      body: JSON.stringify(ann),
+      body: JSON.stringify({ ...ann, dryRun: true }),
     });
-    console.log(
-      `  sent ${sent?.data?.sentCount ?? '?'} / ${sent?.data?.totalUsers ?? total} (bannerId: ${ann.bannerId})`,
-    );
+    const total = dry?.data?.totalUsers ?? 0;
+    console.log(`[${ann.key}] dry run → ${total} Kenya users`);
+    if (total === 0) {
+      console.warn(`  ⚠ zero users — check audience filter`);
+    }
+    if (send && total > 0) {
+      const sent = await json('/admin/announcements', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(ann),
+      });
+      console.log(
+        `  sent ${sent?.data?.sentCount ?? '?'} / ${sent?.data?.totalUsers ?? total} (bannerId: ${ann.bannerId})`,
+      );
+    }
   }
 }
 
@@ -169,6 +180,6 @@ if (pinColdStart) {
 }
 
 if (!send) {
-  console.log('\nPass --send to deliver announcement blasts.');
-  console.log('Add --pin-cold-start for both messages on every app open (until 11 Aug or dismiss).');
+  console.log('\nPass --send to deliver both announcements (same path as update-v47).');
+  console.log('Add --clear-pinned to remove any pinned banner first.');
 }
