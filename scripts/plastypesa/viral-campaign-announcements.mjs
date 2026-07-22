@@ -9,6 +9,7 @@
  *   --pin-referral    referral countdown only
  *
  *   node scripts/plastypesa/viral-campaign-announcements.mjs --send --pin-cold-start
+ *   node scripts/plastypesa/viral-campaign-announcements.mjs --send --pin-cold-start --pin-only
  */
 import { readFileSync } from 'node:fs';
 
@@ -35,7 +36,7 @@ const ANNOUNCEMENTS = [
     audience: 'kenya',
     title: 'First Eco Guardian — KES 20,000',
     message:
-      'Be the first Kenya learner to reach 125,000 lifetime points and 30 approved sort-at-home photos. Sorting proof matters — not quiz-only farming. Rules are fixed in the app: tap First Eco Guardian on Home for your progress.',
+      'Be the first Kenya learner to reach 125,000 lifetime points and 30 approved sort-at-home photos. Learn daily, sort for proof, and track your progress — tap First Eco Guardian on Home.',
     bannerScope: 'app_wide',
     bannerPosition: 'center',
     bannerStyle: 'premium',
@@ -62,14 +63,14 @@ const PINNED_REFERRAL = {
 const PINNED_COLD_START = {
   active: true,
   title: 'Kenya founding season — two ways to earn big',
-  message: `Invite a friend before ${BOOST_END_LABEL} — you both earn 2000 bonus points (Profile → share your link).\n\nFirst Eco Guardian: KES 20,000 for the first learner to reach 125,000 lifetime points and 30 approved sort-at-home photos. Sorting proof counts — tap First Eco Guardian on Home for your progress.`,
+  message: `Invite a friend before ${BOOST_END_LABEL} — you both earn 2000 bonus points (Profile → share your link).\n\nFirst Eco Guardian: KES 20,000 for the first learner to reach 125,000 lifetime points and 30 approved sort-at-home photos. Tap First Eco Guardian on Home for your progress.`,
   endsAt: BOOST_END_ISO,
   inAppBanner: {
     bannerDurationSec: 30,
     bannerScope: 'app_wide',
     bannerPosition: 'center',
     bannerStyle: 'premium',
-    bannerId: 'pinned-viral-kenya-founding-2026-08-11',
+    bannerId: 'pinned-viral-kenya-founding-2026-08-11-v2',
   },
 };
 
@@ -112,6 +113,7 @@ const headers = {
 };
 
 const send = process.argv.includes('--send');
+const pinOnly = process.argv.includes('--pin-only');
 const pinReferral = process.argv.includes('--pin-referral');
 const pinColdStart = process.argv.includes('--pin-cold-start');
 
@@ -120,7 +122,7 @@ console.log(
   `Pinned: ${pinColdStart ? 'cold-start (both)' : pinReferral ? 'referral only' : 'no'}\n`,
 );
 
-for (const ann of ANNOUNCEMENTS) {
+if (!pinOnly) for (const ann of ANNOUNCEMENTS) {
   const dry = await json('/admin/announcements', {
     method: 'POST',
     headers,

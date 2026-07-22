@@ -76,16 +76,16 @@ Open Home to see learners in Kenya, verified sorts this week, and progress towar
     _id: 'mission-week1-day4-eco-guardian',
     title: 'First Eco Guardian — the rules',
     description:
-      'KES 20,000 for the first person to 125,000 lifetime points and 30 approved sorts. Quiz points alone are not enough.',
+      'KES 20,000 for the first person to 125,000 lifetime points and 30 approved sorts. Learn, sort at home, and track your progress on Home.',
     icon: 'eco',
     status: 'ACTIVE',
     missionWeek: 1,
     missionDay: 4,
-    content: `First Eco Guardian is a founding reward for builders — not quiz-only farming.
+    content: `First Eco Guardian is a founding reward for Kenya learners who earn points and prove real sorting at home.
 
 You need 125,000 lifetime points AND 30 approved sort proofs. Rules are fixed and public. Tap First Eco Guardian on Home to track your progress.
 
-When you cross the line, our team verifies and pays. Sorting proof matters because behaviour change matters.`,
+When you cross the line, our team verifies and pays.`,
     tips: [
       'Approved sorts are the gate — keep submitting clear grade-sorted photos.',
       'Daily quiz + read-to-earn + EcoSort stack with sorting for lifetime total.',
