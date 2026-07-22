@@ -1,0 +1,15 @@
+---
+description: When a Play AAB is ready, deliver title + 7-locale release notes exactly as the owner expects
+alwaysApply: true
+---
+
+# Play AAB → owner handoff (locked 2026-07-18)
+
+When a signed release **AAB is ready** (or the owner asks for Play title / submission notes), deliver **exactly two copy-paste fenced blocks**.
+
+1. **Title (global only):** `PlastyPesa: Recycle & Learn` — never a Kenya-only Play title (one AAB for everyone).
+2. **Release notes:** one block with all 7 tags: `en-GB`, `it-IT`, `es-ES`, `de-DE`, `fr-FR`, `pt-PT`, `ro` (≤500 chars each).
+
+Canon: `plastypesa-admin-dashboard/DOCS/PLASTYPESA_STORE_LISTING_COPY.md` and `play-aab-owner-handoff.mdc` in admin/mobile.
+
+**Kenya ads:** non-EEA by default — ads without EU consent form. EU test-phone UMP blocks ≠ Kenya production.

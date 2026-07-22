@@ -40,6 +40,7 @@ import * as b2bImpact from './suites/b2b-impact.mjs';
 import * as gdpr from './suites/gdpr.mjs';
 import * as launchSync from './suites/launch-sync.mjs';
 import * as dailyQuizContinuity from './suites/daily-quiz-continuity.mjs';
+import * as quizAnswerShuffle from './suites/quiz-answer-shuffle.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -77,6 +78,7 @@ const ALL_SUITES = [
   // Phase E — daily-quiz continuity: exactly one ACTIVE automated daily
   // quiz, fresh within 36h; fails loudly when automation stops publishing.
   { id: 'daily-quiz-continuity', mod: dailyQuizContinuity },
+  { id: 'quiz-answer-shuffle', mod: quizAnswerShuffle },
 ];
 
 function resolveSuites(cfg) {

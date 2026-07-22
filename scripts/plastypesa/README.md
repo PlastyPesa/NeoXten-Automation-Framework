@@ -12,6 +12,14 @@ See **`PLASTYPESA_E2E.md`**. Entry: `npm run test:plastypesa-e2e` (NeoXten root)
 
 See **`PLASTYPESA_LOCALIZATION_AUDIT.md`**. Entry: `npm run test:plastypesa-localization`.
 
+## App health monitor (Play vitals + live version)
+
+```bash
+npm run monitor:plastypesa
+```
+
+Setup / owner manual steps: **`MONITOR_SETUP.md`**. Writes `.neoxten/plastypesa-monitor-latest.json`.
+
 ## Run
 
 From the NeoXten repo root:

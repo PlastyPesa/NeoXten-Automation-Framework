@@ -273,14 +273,28 @@ export async function run(cfg, runner) {
   });
 
   await runner.test('legal_masters_recognition_first_wording', async () => {
+    async function fetchMaster(name, lang) {
+      let lastErr;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          const r = await fetch(url(cfg, `/master?name=${name}&lang=${lang}`), {
+            method: 'GET',
+            headers: cfg.headersJson,
+          });
+          const { body } = await readJson(r);
+          return { status: r.status, body };
+        } catch (err) {
+          lastErr = err;
+          await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+        }
+      }
+      throw lastErr;
+    }
+
     for (const [lang, updatedLabel] of Object.entries(LEGAL_LANGS)) {
       for (const name of ['terms-of-us', 'privacy-policy', 'gdpr-compliance']) {
-        const r = await fetch(url(cfg, `/master?name=${name}&lang=${lang}`), {
-          method: 'GET',
-          headers: cfg.headersJson,
-        });
-        const { body } = await readJson(r);
-        assert(r.status === 200, `${name}/${lang}: expected 200, got ${r.status}`);
+        const { status, body } = await fetchMaster(name, lang);
+        assert(status === 200, `${name}/${lang}: expected 200, got ${status}`);
         const html =
           body?.data?.[0]?.metadata?.[0] ?? body?.data?.metadata?.[0] ?? '';
         assert(

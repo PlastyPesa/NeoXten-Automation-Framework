@@ -1,0 +1,31 @@
+---
+description: Agents must run PlastyPesa app health monitor after mobile releases / when asked about crashes or live version
+alwaysApply: true
+---
+
+# PlastyPesa app performance monitor
+
+## When to run
+After a Play production release, when investigating crashes/ANRs, or when the owner asks “is the live app healthy?”:
+
+```bash
+cd C:\Users\Bobby\Documents\NeoXten-Automation-Framework
+npm run monitor:plastypesa
+```
+
+Report path: `.neoxten/plastypesa-monitor-latest.json`
+
+## What it covers
+1. **Play production** — live `versionCode` / release status (Publisher API)
+2. **Android vitals** — crash + ANR rates (Play Developer Reporting API)
+3. **Product KPIs** — optional Mongo if `PLASTYPESA_MONGO_URI` is set
+4. **Crashlytics** — pointer only (Firebase already in the Flutter app; open Console for stacks)
+
+## Rules
+- Do **not** declare a Play release “healthy” from gut feel — run the monitor and cite versionCode + vitals (or explicitly say vitals permission still missing).
+- Low install volume → empty vitals rows is normal; say so.
+- For stack traces, use Firebase Crashlytics Console (or ask owner to grant Firebase SA later).
+- Never commit Play/Firebase JSON keys.
+
+## Owner setup doc
+`scripts/plastypesa/MONITOR_SETUP.md`
