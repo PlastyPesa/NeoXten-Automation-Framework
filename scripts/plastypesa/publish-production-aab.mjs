@@ -34,31 +34,31 @@ if (!aabPath || !fs.existsSync(aabPath)) {
 const RELEASE_NOTES = [
     {
         language: "en-GB",
-        text: "Clearer home updates: pinned fairness messages, tap any notification for the full text, daily tips and articles first on Learn, and honest “kg sorted (est.)” labels until hubs weigh material. Fair weekly ranking help.",
+        text: "Learn-first daily tip: tap the tip on Learn to read the lesson and take the quiz. Home no longer duplicates it. Past champions history shows last week’s winners. Install the latest version for the best experience.",
     },
     {
         language: "it-IT",
-        text: "Home più chiara: messaggi importanti fissi, tocca una notifica per il testo completo, consigli e articoli per primi in Impara, etichette oneste “kg smistati (st.)” finché gli hub non pesano. Classifica settimanale più equa.",
+        text: "Consiglio giornaliero in Impara: tocca il consiglio per leggere la lezione e fare il quiz. Home non lo duplica più. Storico campioni passati aggiornato. Installa l’ultima versione.",
     },
     {
         language: "es-ES",
-        text: "Inicio más claro: avisos fijados, toca una notificación para leer todo, consejos y artículos primero en Aprender, etiquetas honestas “kg clasificados (est.)” hasta que los hubs pesen. Clasificación semanal más justa.",
+        text: "Consejo diario en Aprender: toca el consejo para leer la lección y hacer el quiz. Inicio ya no lo duplica. Historial de campeones pasados actualizado. Instala la última versión.",
     },
     {
         language: "de-DE",
-        text: "Klareres Home: angeheftete Hinweise, tippe Benachrichtigungen für den vollen Text, Tipps und Artikel zuerst unter Lernen, ehrliche „kg sortiert (Schätz.)“ bis Hubs wiegen. Fairere Wochenrangliste.",
+        text: "Tipp des Tages unter Lernen: tippe den Tipp, lies die Lektion und mache das Quiz. Home zeigt ihn nicht mehr doppelt. Vergangene Champions aktualisiert. Neueste Version installieren.",
     },
     {
         language: "fr-FR",
-        text: "Accueil plus clair : messages épinglés, touche une notification pour le texte complet, conseils et articles en premier dans Apprendre, libellés honnêtes « kg triés (est.) » jusqu’aux hubs. Classement hebdo plus équitable.",
+        text: "Conseil du jour dans Apprendre : touche le conseil pour lire la leçon et faire le quiz. Accueil ne le duplique plus. Historique des champions passés à jour. Installe la dernière version.",
     },
     {
         language: "pt-PT",
-        text: "Início mais claro: avisos fixos, toca numa notificação para ler tudo, dicas e artigos primeiro em Aprender, rótulos honestos “kg triados (est.)” até os hubs pesarem. Classificação semanal mais justa.",
+        text: "Dica diária em Aprender: toca na dica para ler a lição e fazer o quiz. Início já não duplica. Histórico de campeões passados atualizado. Instala a versão mais recente.",
     },
     {
         language: "ro",
-        text: "Acasă mai clar: mesaje fixate, apasă o notificare pentru textul complet, sfaturi și articole primele la Învață, etichete oneste „kg sortate (est.)” până cântăresc hub-urile. Clasament săptămânal mai corect.",
+        text: "Sfat zilnic la Învață: apasă sfatul pentru lecție și quiz. Acasă nu mai duplică. Istoric campioni trecuți actualizat. Instalează cea mai recentă versiune.",
     },
 ];
 
