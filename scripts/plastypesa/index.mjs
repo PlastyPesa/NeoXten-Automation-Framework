@@ -41,6 +41,7 @@ import * as gdpr from './suites/gdpr.mjs';
 import * as launchSync from './suites/launch-sync.mjs';
 import * as dailyQuizContinuity from './suites/daily-quiz-continuity.mjs';
 import * as quizAnswerShuffle from './suites/quiz-answer-shuffle.mjs';
+import * as readRewardRotation from './suites/read-reward-rotation.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -79,6 +80,8 @@ const ALL_SUITES = [
   // quiz, fresh within 36h; fails loudly when automation stops publishing.
   { id: 'daily-quiz-continuity', mod: dailyQuizContinuity },
   { id: 'quiz-answer-shuffle', mod: quizAnswerShuffle },
+  // BUILD 50 — read reward rotation: max 5 articles/day, next in rotation only.
+  { id: 'read-reward-rotation', mod: readRewardRotation },
 ];
 
 function resolveSuites(cfg) {

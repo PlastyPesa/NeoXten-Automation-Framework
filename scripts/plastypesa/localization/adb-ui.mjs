@@ -134,6 +134,18 @@ export function findNodeByText(nodes, candidates, options = {}) {
   return bestMatch?.node || null;
 }
 
+/** Match Flutter Semantics identifier (Android content-desc / resource-id fragment). */
+export function findNodeByResourceId(nodes, idFragment, options = {}) {
+  const needle = String(idFragment || '').toLowerCase();
+  if (!needle) return null;
+  for (const node of nodes) {
+    if (options.packageName && node.packageName !== options.packageName) continue;
+    const hay = `${node.resourceId || ''} ${node.contentDesc || ''}`.toLowerCase();
+    if (hay.includes(needle) && node.bounds) return node;
+  }
+  return null;
+}
+
 function isBetterScore(left, right) {
   for (let index = 0; index < Math.max(left.length, right.length); index += 1) {
     if ((left[index] ?? 0) !== (right[index] ?? 0)) {

@@ -354,6 +354,13 @@ async function main() {
   }
 
   await sleep(4500);
+  await tapText(['Got it', 'OK', 'Continue', 'Dismiss', 'Show me how'], {
+    deviceId,
+    timeoutMs: 8000,
+    label: 'kenya-intro-dismiss',
+  });
+  await sleep(1200);
+
   dump = dumpUiHierarchy(deviceId, 'post-login');
   nodes = parseUiNodes(dump.xml);
   if (hasTwoFactorUi(nodes)) {
@@ -361,10 +368,12 @@ async function main() {
     process.exit(2);
   }
 
-  // Home tab / Romanian Acasă / English Home
-  const homeLike = findNodeByText(nodes, ['Acasă', 'Home', 'Leaderboard', 'Clasament'], {
-    packageName: PKG,
-  });
+  // Home tab / Romanian Acasă / English Home / bottom nav Learn
+  const homeLike = findNodeByText(
+    nodes,
+    ['Acasă', 'Home', 'Leaderboard', 'Clasament', 'Learn', 'Profile', 'Community'],
+    { packageName: PKG },
+  );
   if (homeLike) {
     console.log('[device-login-e2e] PASS — post-login UI shows main app chrome.');
     process.exit(0);
