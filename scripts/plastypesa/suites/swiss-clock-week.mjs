@@ -3,7 +3,9 @@
  *
  * Product truth: week = Monday 00:00 UTC → Sunday 23:59:59 UTC; all-day Sunday
  * the board still shows this week; Monday 00:00 UTC the weekly board zeros;
- * lifetime never resets. One-time transition week Jul 26 → Aug 3 2026.
+ * lifetime never resets. One-time extended cutover week Jul 19 → Jul 27 2026
+ * (P-AAB-WEEKLY-CONTINUITY: restores the pre-wipe board; Monday era from
+ * Jul 27 — replaced the earlier Jul 26 → Aug 3 transition plan).
  *
  * These tests assert the LIVE API serves the correct week regime — the exact
  * failure that caused the 2026-07-26 trust incident (Sunday reset seen by
@@ -14,8 +16,8 @@ import { readJson, assert } from '../assert.mjs';
 
 export const id = 'swiss-clock-week';
 
-const TRANSITION_START_MS = Date.UTC(2026, 6, 26); // Jul 26 2026 00:00 UTC
-const MONDAY_EPOCH_MS = Date.UTC(2026, 7, 3);      // Aug  3 2026 00:00 UTC
+const TRANSITION_START_MS = Date.UTC(2026, 6, 19); // Jul 19 2026 00:00 UTC (extended cutover week)
+const MONDAY_EPOCH_MS = Date.UTC(2026, 6, 27);     // Jul 27 2026 00:00 UTC (Monday era)
 
 function expectedWeekStartMs(nowMs) {
   if (nowMs >= MONDAY_EPOCH_MS) {
