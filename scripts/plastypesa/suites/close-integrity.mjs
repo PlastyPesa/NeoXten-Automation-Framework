@@ -11,9 +11,14 @@
  *      Sunday-labeled snapshots (pre-clamp + re-snapshot) are VOID. Any live
  *      close for that weekStart must be the auto job's extended-week close:
  *      weekEnd Jul 26 23:59:59.999 UTC, passing evidence, and ZERO claims
- *      while it is still DRAFT (claims may exist only after Confirm).
+ *      while it is still DRAFT. After the Mon Jul 27 00:02 UTC auto run
+ *      (auto-confirm ON — owner lock ~16:20) the close should be CONFIRMED
+ *      with one PROVISIONAL claim per winner slot.
  *   3. Any live close created from the cutover onward carries the
  *      machine-checkable evidence artifact with a PASSING dual recompute.
+ *   4. Live KE market config has weeklyCloseAutoConfirm === true (owner lock
+ *      2026-07-26 ~16:20: forms create automatically on evidence pass; the
+ *      only remaining manual step is the M-Pesa payout).
  *
  * Needs an admin token: PLASTYPESA_ADMIN_JWT, or the admin-dashboard
  * credentials from the local credential registry (skips without either).
@@ -59,6 +64,23 @@ export async function run(cfg, runner) {
     );
     return;
   }
+
+  await runner.test('ke_auto_confirm_flag_live', async () => {
+    const r = await fetch(url(cfg, '/market-rewards/admin/markets'), {
+      headers: adminHeaders,
+    });
+    const { body, text } = await readJson(r);
+    if (r.status !== 200) {
+      throw new Error(`admin markets ${r.status}: ${text.slice(0, 300)}`);
+    }
+    const markets = Array.isArray(body?.data) ? body.data : [];
+    const ke = markets.find((m) => m.marketCode === 'KE');
+    assert(ke, 'KE market config present');
+    assert(
+      ke.weeklyCloseAutoConfirm === true,
+      `KE weeklyCloseAutoConfirm must be true (owner lock 2026-07-26 ~16:20), got ${JSON.stringify(ke.weeklyCloseAutoConfirm)}`,
+    );
+  });
 
   let closes = [];
   await runner.test('admin_close_list_readable', async () => {
@@ -111,20 +133,39 @@ export async function run(cfg, runner) {
       close.evidence && close.evidence.recompute && close.evidence.recompute.match === true,
       `extended cutover close ${close._id} must carry PASSING evidence (auto job artifact)`,
     );
+    const r = await fetch(
+      url(cfg, `/market-rewards/admin/claims?closeId=${close._id}`),
+      { headers: adminHeaders },
+    );
+    const { body, text } = await readJson(r);
+    if (r.status !== 200) {
+      throw new Error(`admin claims list ${r.status}: ${text.slice(0, 300)}`);
+    }
+    const claims = Array.isArray(body?.data) ? body.data : [];
     if (close.status === 'DRAFT') {
-      const r = await fetch(
-        url(cfg, `/market-rewards/admin/claims?closeId=${close._id}`),
-        { headers: adminHeaders },
-      );
-      const { body, text } = await readJson(r);
-      if (r.status !== 200) {
-        throw new Error(`admin claims list ${r.status}: ${text.slice(0, 300)}`);
-      }
-      const claims = Array.isArray(body?.data) ? body.data : [];
       assert(
         claims.length === 0,
         `DRAFT cutover close must have ZERO claims before Confirm (got ${claims.length})`,
       );
+    } else if (close.status === 'CONFIRMED') {
+      // Auto-confirm path (owner lock ~16:20): confirm creates exactly one
+      // claim per winner slot, all labeled with the cutover weekStart.
+      const winnerCount = Array.isArray(close.winners) ? close.winners.length : 0;
+      assert(
+        winnerCount > 0 && claims.length === winnerCount,
+        `CONFIRMED cutover close must have one claim per winner slot (winners ${winnerCount}, claims ${claims.length})`,
+      );
+      const slots = new Set(claims.map((c) => c.slot));
+      assert(
+        slots.size === claims.length,
+        'claim slots must be unique per close (EventBridge retry invariant)',
+      );
+      for (const claim of claims) {
+        assert(
+          new Date(claim.weekStart).toISOString() === JUL19_WEEK_START,
+          `claim ${claim._id} must carry the cutover weekStart (got ${new Date(claim.weekStart).toISOString()})`,
+        );
+      }
     }
   });
 
