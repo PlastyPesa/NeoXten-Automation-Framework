@@ -44,6 +44,7 @@ import * as quizAnswerShuffle from './suites/quiz-answer-shuffle.mjs';
 import * as readRewardRotation from './suites/read-reward-rotation.mjs';
 import * as swissClockWeek from './suites/swiss-clock-week.mjs';
 import * as closeIntegrity from './suites/close-integrity.mjs';
+import * as weeklyEarnersUi from './suites/weekly-earners-ui.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -92,6 +93,11 @@ const ALL_SUITES = [
   // close per (market, weekStart), Jul 19–25 stays DRAFT/0-claims until the
   // owner confirms, and post-Jul-26 closes carry a passing evidence pack.
   { id: 'close-integrity', mod: closeIntegrity },
+  // P-WEEKLY-WINNERS-UI (2026-07-26) — the mobile celebration card, Top-3
+  // ribbon, Past earners tab and all-time card render from existing endpoints
+  // with no new backend, so this suite is the only thing guarding the fields
+  // they depend on (weeklyPoints / confirmedAt / closeId / ledger-only past).
+  { id: 'weekly-earners-ui', mod: weeklyEarnersUi },
 ];
 
 function resolveSuites(cfg) {
