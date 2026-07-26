@@ -16,7 +16,7 @@ The owner keeps a physical Android device connected via ADB at all times. Agents
 ## How to test
 1. Run `adb devices` to confirm device is connected.
 2. Build and install: `flutter build apk --debug` then `adb install -r <path>`.
-3. For release verification: `flutter build apk --release` then install and test.
+3. For release verification: `flutter build apk --release` then install and test — but see **AdMob invalid-traffic safety** below before touching any release build with live ads.
 4. Use `adb logcat` to capture runtime errors during testing.
 5. Take screenshots with `adb exec-out screencap -p > screenshot.png` for evidence.
 6. Test in **at least 2 languages** — English plus one other (preferably Romanian as it has the longest labels).
@@ -29,6 +29,24 @@ The owner keeps a physical Android device connected via ADB at all times. Agents
 - Points display correctly after earning actions.
 - Community posts/comments can be created and appear in feed.
 - Legal pages load with correct content for the selected language.
+
+## AdMob invalid-traffic safety (LOCKED 2026-07-26 — after a real 29-day suspension)
+Agent ADB testing on a **release build with production ad units** generated ~€1.29 of
+invalid ad traffic and got the AdMob/AdSense account (pub-8112542727970759) suspended
+for 29 days (email 2026-07-24; reinstatement ~2026-08-22). This must NEVER repeat:
+
+- **Default test build = debug APK.** Debug/profile builds use Google sample ad units
+  (`lib/core/utility.dart`, `kReleaseMode` gate) — always safe for agents.
+- **Never run agent test sessions on a release/Play build with production ad units.**
+  If a release build must be verified, do it only after the device is registered as an
+  AdMob test device (`NeoXten-Automation-Framework/scripts/plastypesa/ADMOB_TEST_DEVICE.md`),
+  keep the session minimal, and never tap or click any ad.
+- **Never tap, click, or auto-navigate through ads on production units** — not even once.
+- During the suspension window follow
+  `NeoXten-Automation-Framework/scripts/plastypesa/ADMOB_SUSPENSION_PAUSE.md`;
+  `npm run test:plastypesa-ad-phase1` stays hard-blocked.
+- If a release build is found installed on the ADB device when starting ad-touching work,
+  flag it to the owner and install the debug APK before proceeding.
 
 ## Never
 - Declare mobile work "done" without installing on the real device.
