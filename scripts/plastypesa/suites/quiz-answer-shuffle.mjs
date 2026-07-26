@@ -7,11 +7,33 @@ import { readJson, assert } from '../assert.mjs';
 
 export const id = 'quiz-answer-shuffle';
 
+/** Redaction only applies to players; admin payloads keep correctAnswerIndex. */
+function jwtIsAdmin(authHeaders) {
+  try {
+    const token = (authHeaders?.Authorization || '').replace(/^Bearer\s+/, '');
+    const payload = JSON.parse(
+      Buffer.from(token.split('.')[1], 'base64url').toString('utf8'),
+    );
+    const roles = Array.isArray(payload.role) ? payload.role : [payload.role];
+    return roles.some((r) => String(r).toLowerCase() === 'admin');
+  } catch {
+    return false;
+  }
+}
+
 export async function run(cfg, runner) {
   if (!cfg.authHeaders) {
     runner.skip(
       'quiz_options_shuffled_for_player',
       'No JWT — set PLASTYPESA_TEST_EMAIL + PLASTYPESA_TEST_PASSWORD',
+    );
+    return;
+  }
+  if (jwtIsAdmin(cfg.authHeaders)) {
+    runner.skip(
+      'quiz_options_shuffled_for_player',
+      'Admin JWT in use — admin payloads keep correctAnswerIndex by design; ' +
+        'run .local-player-redaction-probe.mjs for the player-perspective proof',
     );
     return;
   }

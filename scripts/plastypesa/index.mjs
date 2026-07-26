@@ -42,6 +42,8 @@ import * as launchSync from './suites/launch-sync.mjs';
 import * as dailyQuizContinuity from './suites/daily-quiz-continuity.mjs';
 import * as quizAnswerShuffle from './suites/quiz-answer-shuffle.mjs';
 import * as readRewardRotation from './suites/read-reward-rotation.mjs';
+import * as swissClockWeek from './suites/swiss-clock-week.mjs';
+import * as closeIntegrity from './suites/close-integrity.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -82,6 +84,14 @@ const ALL_SUITES = [
   { id: 'quiz-answer-shuffle', mod: quizAnswerShuffle },
   // BUILD 50 — read reward rotation: max 5 articles/day, next in rotation only.
   { id: 'read-reward-rotation', mod: readRewardRotation },
+  // P-POINTS-SWISS-CLOCK (2026-07-26) — Monday-based competition week +
+  // clamped weekly windows served by the live API. Guards the exact regime
+  // failure behind the 2026-07-26 trust incident.
+  { id: 'swiss-clock-week', mod: swissClockWeek },
+  // P-WEEKLY-CLOSE-AUTO (2026-07-26) — close/claims integrity: one live
+  // close per (market, weekStart), Jul 19–25 stays DRAFT/0-claims until the
+  // owner confirms, and post-Jul-26 closes carry a passing evidence pack.
+  { id: 'close-integrity', mod: closeIntegrity },
 ];
 
 function resolveSuites(cfg) {
