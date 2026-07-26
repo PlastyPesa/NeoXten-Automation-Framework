@@ -113,6 +113,29 @@ export async function run(cfg, runner) {
         'the two counts are no longer drawn from the same population');
   });
 
+  await runner.test('every_number_on_the_card_describes_one_population', async () => {
+    if (!pulse) return;
+    // Owner caught this on device 2026-07-26 ~23:14. `members` and `onlineNow`
+    // were counted globally while `weeklyActive` and the milestone were counted
+    // per market, so Kenya's leaderboard read:
+    //
+    //     38 members · 33 active this week      <- global members
+    //     Members in Kenya   37 / 500           <- market members
+    //
+    // Two member counts contradicting each other one row apart, and "38 - 33"
+    // implying five idle people when Kenya's answer was four. Nothing crashed
+    // and every individual number was real, which is exactly why only a
+    // cross-field assertion catches it.
+    if (pulse.market === 'KE') {
+      assert(pulse.members === pulse.milestone.currentKeMembers,
+        `members (${pulse.members}) != milestone.currentKeMembers ` +
+          `(${pulse.milestone.currentKeMembers}) for a KE caller — the alive strip and the ` +
+          'progress bar are counting different populations again');
+    }
+    assert(pulse.market === null || typeof pulse.market === 'string',
+      'market must be echoed so the scope of these counts is auditable');
+  });
+
   await runner.test('online_now_is_null_below_the_floor_never_zero', async () => {
     if (!pulse) return;
     if (pulse.onlineNow === null) return; // the quiet case, which is correct
@@ -123,7 +146,42 @@ export async function run(cfg, runner) {
       `onlineNow (${pulse.onlineNow}) exceeds members (${pulse.members})`);
   });
 
-  await runner.test('milestone_stays_behind_the_funding_gate', async () => {
+  await runner.test('milestone_display_fields_survive_a_closed_funding_gate', async () => {
+    if (!pulse) return;
+    // Owner correction 2026-07-26 ~22:10. The first ship gated the progress bar
+    // on `milestone.enabled`, which is false until the bigger pool is funded, so
+    // no user ever saw the growth story — the one reason to care about the
+    // community growing. Display is now driven by the market data being present
+    // and `enabled` is an ops signal only.
+    //
+    // That makes THIS the assertion that protects the card: for a Kenyan caller
+    // the payload must carry a member count, a target and a pool even while the
+    // gate is shut. If `currentKeMembers` ever goes null for KE, the client's
+    // `shouldShow` returns false and the bar silently disappears again — the
+    // exact regression the owner rejected, and invisible to a widget test.
+    const m = pulse.milestone;
+    if (pulse.market !== 'KE') {
+      runner.skip(
+        'milestone_display_fields_survive_a_closed_funding_gate',
+        `test account is in market ${pulse.market ?? 'unknown'}, not KE`,
+      );
+      return;
+    }
+
+    assert(Number.isInteger(m.currentKeMembers) && m.currentKeMembers >= 0,
+      `currentKeMembers = ${JSON.stringify(m.currentKeMembers)} for a KE caller. ` +
+        'The client renders the progress bar only when this is a number, so a null ' +
+        'here hides the 15k@500 card regardless of the funding gate.');
+    assert(m.target > 0 && m.futureWeeklyPool > 0,
+      `target (${m.target}) and futureWeeklyPool (${m.futureWeeklyPool}) must both be ` +
+        'positive for a KE caller — the client treats a zero in either as "no goal to show"');
+    assert(m.currentKeMembers <= pulse.members,
+      `currentKeMembers (${m.currentKeMembers}) exceeds global members (${pulse.members})`);
+    assert(Number(m.multiplier) > 1,
+      `multiplier must be > 1 to be worth advertising, got ${JSON.stringify(m.multiplier)}`);
+  });
+
+  await runner.test('milestone_funding_gate_is_still_a_real_ops_switch', async () => {
     if (!pulse) return;
     const m = pulse.milestone;
     assert(typeof m.enabled === 'boolean', 'milestone.enabled must be a boolean switch');
@@ -142,16 +200,21 @@ export async function run(cfg, runner) {
           'the strip would promise money the schedule does not pay out');
     }
 
-    if (!m.enabled) {
-      // Shipping default until the owner confirms funding. The client hides the
-      // whole strip; nothing else in the payload may imply the pool is live.
-      assert(m.currentKeMembers === null || Number.isInteger(m.currentKeMembers),
-        'currentKeMembers must be null or an integer while the gate is closed');
-    } else {
-      assert(Number.isInteger(m.currentKeMembers) && m.currentKeMembers >= 0,
-        'an enabled milestone must carry a real KE member count to render progress against');
-      assert(m.currentKeMembers <= pulse.members,
-        `currentKeMembers (${m.currentKeMembers}) exceeds global members (${pulse.members})`);
+    // `enabled` no longer controls the card, but it must stay meaningful: it
+    // gates the admin "Kenya hit 500" alert, and flipping it is the operator's
+    // cue to edit the real KE reward tiers by hand. It must never be flipped as
+    // a shortcut to change what users see.
+    assert(m.enabled === false || m.currentKeMembers >= m.target || m.currentKeMembers === null,
+      `milestone.enabled is true at ${m.currentKeMembers}/${m.target} members. Funding was ` +
+        'confirmed early, or someone flipped the gate to force UI that is already visible ' +
+        'without it. Check with the owner before accepting this.');
+
+    // Outside the milestone market the cash pool must stay invisible: EU is
+    // recognition-only and cannot receive a Kenyan payout.
+    if (pulse.market && pulse.market !== 'KE') {
+      assert(m.currentKeMembers === null,
+        `market ${pulse.market} received currentKeMembers = ${m.currentKeMembers}; a non-Kenya ` +
+          'caller must not be shown the Kenya cash pool');
     }
   });
 
