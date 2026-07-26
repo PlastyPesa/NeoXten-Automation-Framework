@@ -47,6 +47,8 @@ import * as closeIntegrity from './suites/close-integrity.mjs';
 import * as weeklyEarnersUi from './suites/weekly-earners-ui.mjs';
 import * as forceUpdateGate from './suites/force-update-gate.mjs';
 import * as communityPulse from './suites/community-pulse.mjs';
+import * as dailyCheckInbox from './suites/daily-check-inbox.mjs';
+import * as numberSync from './suites/number-sync.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -110,6 +112,16 @@ const ALL_SUITES = [
   // that stops the app printing "0 online", and the funding gate on the KES
   // 15,000 milestone promise.
   { id: 'community-pulse', mod: communityPulse },
+  // Owner 2026-07-27 — Home mission strip + pulse + board lifetime must agree.
+  // Guards the 51-vs-38 Kenya learners dual-counter class of bug.
+  { id: 'number-sync', mod: numberSync },
+  // P-DAILY-CHECK-ADMIN-EXPANSION + P-ECO-GUARDIAN-ALERT-FORM (2026-07-26) —
+  // Daily Check is the page ops opens every morning, and each of its loaders
+  // swallows its own errors, so a dead section looks exactly like an empty
+  // queue. Proves every action queue is present, that disputes are filtered on
+  // statuses the model really issues, and that a founding qualifier owed the
+  // KES 20,000 reward can never be invisible.
+  { id: 'daily-check-inbox', mod: dailyCheckInbox },
 ];
 
 function resolveSuites(cfg) {

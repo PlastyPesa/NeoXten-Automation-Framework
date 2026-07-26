@@ -57,6 +57,7 @@ If email/password are misconfigured (only one set), the suite **exits with an er
 
 | Suite | Purpose |
 |--------|---------|
+| `number-sync` | Home mission strip `communityMembers` === pulse `members` === milestone; board lifetime vs profile |
 | `auth-baseline` | Protected routes return **401/403** without `Authorization`; auth endpoints respond |
 | `public-routes` | Public home routes (`/home/winners`, `/home/weekly-challenge`) **200** + shape |
 | `user-profile` | **GET /user/my-profile**, **GET /user/completion-percentage** — stats + completion shape |

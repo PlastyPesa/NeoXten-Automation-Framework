@@ -1,0 +1,28 @@
+# Playwright YAML pointer for Home number-sync.
+# Prefer the durable Node runners (they load credentials safely):
+#   npm run test:plastypesa-api   (includes suite number-sync)
+#   npm run test:plastypesa-number-sync-pw
+#   npm run test:plastypesa-number-sync-ui   (ADB device — rendered chips)
+#
+# This YAML is intentionally a thin navigate smoke so `neoxten run --config`
+# still has a named flow; the real assertions live in the Node suites above.
+
+project:
+  type: static
+  root: .
+  static:
+    url: about:blank
+
+flows:
+  - name: number_sync_runner_pointer
+    steps:
+      - action: navigate
+        url: about:blank
+        timeout: 10000
+      - action: evaluate
+        expression: |
+          (() => {
+            // Real sync gate: scripts/plastypesa/suites/number-sync.mjs
+            // + scripts/plastypesa/number-sync-playwright.mjs
+            return true;
+          })()
