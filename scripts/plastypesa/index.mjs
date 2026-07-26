@@ -46,6 +46,7 @@ import * as swissClockWeek from './suites/swiss-clock-week.mjs';
 import * as closeIntegrity from './suites/close-integrity.mjs';
 import * as weeklyEarnersUi from './suites/weekly-earners-ui.mjs';
 import * as forceUpdateGate from './suites/force-update-gate.mjs';
+import * as communityPulse from './suites/community-pulse.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -103,6 +104,12 @@ const ALL_SUITES = [
   // the release gate: silently broken (can't pull a bad build) and silently
   // left ON (production refusing app traffic nobody meant to refuse).
   { id: 'force-update-gate', mod: forceUpdateGate },
+  // P-SOCIAL-PROOF-PRESENCE Phase 1 (2026-07-26) — the community pulse card's
+  // numbers are trust claims on the home screen. Guards the exclusions that
+  // keep 82 suspended fraud accounts out of "members", the null-below-3 rule
+  // that stops the app printing "0 online", and the funding gate on the KES
+  // 15,000 milestone promise.
+  { id: 'community-pulse', mod: communityPulse },
 ];
 
 function resolveSuites(cfg) {
