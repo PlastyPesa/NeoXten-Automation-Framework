@@ -19,6 +19,12 @@
  *   4. Live KE market config has weeklyCloseAutoConfirm === true (owner lock
  *      2026-07-26 ~16:20: forms create automatically on evidence pass; the
  *      only remaining manual step is the M-Pesa payout).
+ *   5. P-CLAIM-CASCADE-ONE-HOP invariants (Fable Verdict 3, 2026-07-26):
+ *      a dead claim (FORFEITED / REJECTED_FRAUD) has at most ONE inherited
+ *      child; a child is never itself a parent (one hop total); the child
+ *      keeps the dead slot + tier amount + weekStart; no user holds two
+ *      claims for one close; at most one LIVE claim per (closeId, slot)
+ *      so a slot can never be double-paid.
  *
  * Needs an admin token: PLASTYPESA_ADMIN_JWT, or the admin-dashboard
  * credentials from the local credential registry (skips without either).
@@ -166,6 +172,70 @@ export async function run(cfg, runner) {
           `claim ${claim._id} must carry the cutover weekStart (got ${new Date(claim.weekStart).toISOString()})`,
         );
       }
+    }
+  });
+
+  await runner.test('cascade_one_hop_invariants', async () => {
+    const r = await fetch(url(cfg, '/market-rewards/admin/claims'), {
+      headers: adminHeaders,
+    });
+    const { body, text } = await readJson(r);
+    if (r.status !== 200) {
+      throw new Error(`admin claims list ${r.status}: ${text.slice(0, 300)}`);
+    }
+    const claims = Array.isArray(body?.data) ? body.data : [];
+    const byId = new Map(claims.map((c) => [String(c._id), c]));
+    const LIVE = new Set(['PROVISIONAL', 'CLAIM_SUBMITTED', 'VERIFIED', 'PAID']);
+
+    // One-hop invariants on every inherited claim.
+    const seenParents = new Set();
+    for (const child of claims.filter((c) => c.inheritedFromClaimId)) {
+      const parentId = String(child.inheritedFromClaimId);
+      assert(
+        !seenParents.has(parentId),
+        `dead claim ${parentId} has MULTIPLE inherited children — cascade idempotency broken`,
+      );
+      seenParents.add(parentId);
+      const parent = byId.get(parentId);
+      if (parent) {
+        assert(
+          ['FORFEITED', 'REJECTED_FRAUD'].includes(parent.status),
+          `parent ${parentId} of inherited claim ${child._id} must be dead (is ${parent.status})`,
+        );
+        assert(
+          !parent.inheritedFromClaimId,
+          `chain detected: parent ${parentId} is itself inherited — max ONE hop`,
+        );
+        assert(
+          child.slot === parent.slot && child.grossAmount === parent.grossAmount,
+          `inherited claim ${child._id} must carry the dead slot + tier amount (slot ${parent.slot}/${child.slot}, amount ${parent.grossAmount}/${child.grossAmount})`,
+        );
+        assert(
+          new Date(child.weekStart).toISOString() === new Date(parent.weekStart).toISOString(),
+          `inherited claim ${child._id} must stay in the parent's competition week`,
+        );
+      }
+      const sameCloseSameUser = claims.filter(
+        (c) =>
+          String(c.closeId) === String(child.closeId) &&
+          String(c.userId) === String(child.userId),
+      );
+      assert(
+        sameCloseSameUser.length === 1,
+        `user ${child.userId} holds ${sameCloseSameUser.length} claims for close ${child.closeId} — max one reward per member per week`,
+      );
+    }
+
+    // Double-pay guard: at most one LIVE claim per (closeId, slot).
+    const liveSlots = new Map();
+    for (const claim of claims) {
+      if (!LIVE.has(claim.status)) continue;
+      const key = `${claim.closeId}:${claim.slot}`;
+      assert(
+        !liveSlots.has(key),
+        `two LIVE claims for slot ${key} (${liveSlots.get(key)} and ${claim._id}) — double-pay risk`,
+      );
+      liveSlots.set(key, String(claim._id));
     }
   });
 
