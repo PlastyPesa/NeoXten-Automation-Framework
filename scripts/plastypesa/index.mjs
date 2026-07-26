@@ -45,6 +45,7 @@ import * as readRewardRotation from './suites/read-reward-rotation.mjs';
 import * as swissClockWeek from './suites/swiss-clock-week.mjs';
 import * as closeIntegrity from './suites/close-integrity.mjs';
 import * as weeklyEarnersUi from './suites/weekly-earners-ui.mjs';
+import * as forceUpdateGate from './suites/force-update-gate.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -98,6 +99,10 @@ const ALL_SUITES = [
   // with no new backend, so this suite is the only thing guarding the fields
   // they depend on (weeklyPoints / confirmedAt / closeId / ledger-only past).
   { id: 'weekly-earners-ui', mod: weeklyEarnersUi },
+  // P-FORCE-UPDATE-MIN-VERSION (2026-07-26) — watches both failure edges of
+  // the release gate: silently broken (can't pull a bad build) and silently
+  // left ON (production refusing app traffic nobody meant to refuse).
+  { id: 'force-update-gate', mod: forceUpdateGate },
 ];
 
 function resolveSuites(cfg) {
