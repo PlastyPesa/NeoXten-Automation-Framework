@@ -20,6 +20,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { google } from "googleapis";
+import { MongoClient } from "mongodb";
+import { loadBackendMongoEnv } from "./mongo-env.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const NEOXTEN_ROOT = path.resolve(__dirname, "../..");
@@ -257,6 +259,37 @@ function crashlyticsHint() {
   };
 }
 
+async function upsertPlayLiveVersionMaster(versionCodes, liveName) {
+  let uri = process.env.PLASTYPESA_MONGO_URI;
+  try {
+    if (!uri) uri = loadBackendMongoEnv();
+  } catch {
+    return { skipped: true, reason: "Mongo URI not available" };
+  }
+  const code = versionCodes?.[0];
+  if (code == null) return { skipped: true, reason: "No live versionCode" };
+  const client = new MongoClient(uri, { serverSelectionTimeoutMS: 12000 });
+  await client.connect();
+  try {
+    const db = client.db();
+    await db.collection("masters").updateOne(
+      { name: "play-live-version" },
+      {
+        $set: {
+          name: "play-live-version",
+          metadata: [Number(code)],
+          description: liveName || `versionCode ${code}`,
+          updatedAt: new Date(),
+        },
+      },
+      { upsert: true }
+    );
+    return { skipped: false, versionCode: Number(code) };
+  } finally {
+    await client.close();
+  }
+}
+
 async function main() {
   const report = {
     generatedAt: new Date().toISOString(),
@@ -301,6 +334,10 @@ async function main() {
     if (sum.versionCodes.length) {
       ok(
         `Live/active release: ${sum.live?.name || "(unnamed)"} · status=${sum.live?.status} · versionCode(s)=${sum.versionCodes.join(",")}`
+      );
+      report.play.mongoLiveVersion = await upsertPlayLiveVersionMaster(
+        sum.versionCodes,
+        sum.live?.name
       );
     } else {
       warn("No versionCodes on completed/inProgress production release");

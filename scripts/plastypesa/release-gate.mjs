@@ -67,19 +67,51 @@ async function blastRadius(db, { minVersionCode, blockUnreported }) {
   const users = db.collection('users');
   const active = { role: { $nin: ['admin'] }, status: 'ACTIVE' };
 
-  const [total, unreported, belowFloor] = await Promise.all([
+  // The backend writes the reported build to `lastAppVersionCode` /
+  // `signupAppVersionCode` (client_app_metadata.service.js). An earlier version
+  // of this script counted `appVersionCode`, which no writer ever sets — so it
+  // reported "everyone unreported, nobody below floor" no matter what the real
+  // fleet looked like, and made `--block-unreported` look free.
+  const reported = {
+    $ifNull: ['$lastAppVersionCode', '$signupAppVersionCode'],
+  };
+  const RECENT_DAYS = 7;
+  const recentlySeen = new Date(Date.now() - RECENT_DAYS * 24 * 3600 * 1000);
+
+  const [total, buckets] = await Promise.all([
     users.countDocuments(active),
-    users.countDocuments({
-      ...active,
-      $or: [{ appVersionCode: null }, { appVersionCode: { $exists: false } }],
-    }),
-    users.countDocuments({ ...active, appVersionCode: { $lt: minVersionCode, $ne: null } }),
+    users
+      .aggregate([
+        { $match: active },
+        { $addFields: { _build: reported } },
+        {
+          $group: {
+            _id: {
+              known: { $ne: ['$_build', null] },
+              below: { $lt: ['$_build', minVersionCode] },
+              recent: { $gte: [{ $ifNull: ['$lastAppSeenAt', new Date(0)] }, recentlySeen] },
+            },
+            n: { $sum: 1 },
+          },
+        },
+      ])
+      .toArray(),
   ]);
+
+  const sum = (pred) =>
+    buckets.filter((b) => pred(b._id)).reduce((acc, b) => acc + b.n, 0);
+
+  const unreported = sum((k) => !k.known);
+  const belowFloor = sum((k) => k.known && k.below);
 
   return {
     total,
     unreported,
     belowFloor,
+    // Dormant rows are noise; someone who opened the app this week and reports
+    // no build is a person who loses the app the moment this is armed.
+    unreportedActive: sum((k) => !k.known && k.recent),
+    belowFloorActive: sum((k) => k.known && k.below && k.recent),
     blocked: belowFloor + (blockUnreported ? unreported : 0),
   };
 }
