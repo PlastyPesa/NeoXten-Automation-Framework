@@ -235,6 +235,55 @@ export async function run(cfg, runner) {
       `onlineNow changed between reads (${pulse.onlineNow} -> ${second.onlineNow})`);
   });
 
+  await runner.test('leaderboard_green_dots_agree_with_the_pulse_floor', async () => {
+    // Phase 2. Two independent failures are possible here and neither shows up
+    // in a widget test, because the client renders `isOnline` literally:
+    //
+    //   1. A raw `lastAppSeenAt` reaching the response body turns a public
+    //      board into a stalking surface, and cannot be un-sent afterwards.
+    //   2. Dots surviving below the floor of 3 leaks exactly what the floor
+    //      hides — one lonely dot with no "N online" pill above it.
+    for (const type of ['weekly', 'lifetime']) {
+      const r = await fetch(
+        url(cfg, `/home/leaderboard?page=1&limit=10&type=${type}&scope=global`),
+        { headers: cfg.authHeaders },
+      );
+      const { body, text } = await readJson(r);
+      if (r.status !== 200) {
+        throw new Error(`${type} leaderboard ${r.status}: ${text.slice(0, 300)}`);
+      }
+      const rows = body?.data?.leaderboard;
+      assert(Array.isArray(rows), `${type} leaderboard array present`);
+
+      for (const row of rows) {
+        assert(
+          row.lastAppSeenAt === undefined,
+          `${type} board leaked lastAppSeenAt for ${row.ecoHandle ?? row.firstName} — presence must ship as a boolean, never a timestamp`,
+        );
+        assert(
+          typeof row.isOnline === 'boolean',
+          `${type} board row ${row.ecoHandle ?? row.firstName} has isOnline = ${JSON.stringify(row.isOnline)}; the client needs an explicit boolean`,
+        );
+      }
+
+      const dots = rows.filter((row) => row.isOnline).length;
+      if (pulse && pulse.onlineNow === null) {
+        assert(
+          dots === 0,
+          `${type} board shows ${dots} green dot(s) while the pulse is below the floor of ${ONLINE_MIN_TO_SHOW} (onlineNow=null) — the dots and the pill must be the same fact`,
+        );
+      }
+      if (pulse && Number.isInteger(pulse.onlineNow)) {
+        // The board is the top 10 of a larger market, so dots <= onlineNow.
+        // More dots than the market has online would be invented presence.
+        assert(
+          dots <= pulse.onlineNow,
+          `${type} board shows ${dots} green dot(s) but only ${pulse.onlineNow} people are online in this market`,
+        );
+      }
+    }
+  });
+
   await runner.test('presence_touch_does_not_break_authenticated_requests', async () => {
     // The middleware writes lastAppSeenAt after res.end on every authenticated
     // request. A regression there (throwing before next(), or double-ending the

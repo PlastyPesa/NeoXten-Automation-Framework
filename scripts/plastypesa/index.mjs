@@ -49,6 +49,8 @@ import * as forceUpdateGate from './suites/force-update-gate.mjs';
 import * as communityPulse from './suites/community-pulse.mjs';
 import * as dailyCheckInbox from './suites/daily-check-inbox.mjs';
 import * as numberSync from './suites/number-sync.mjs';
+import * as legalRewardRules from './suites/legal-reward-rules.mjs';
+import * as marketingBanner from './suites/marketing-banner.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -122,6 +124,17 @@ const ALL_SUITES = [
   // statuses the model really issues, and that a founding qualifier owed the
   // KES 20,000 reward can never be invisible.
   { id: 'daily-check-inbox', mod: dailyCheckInbox },
+  // P-MARKET-GEO-MISMATCH legal bullets / Fable Verdict 2+3 (2026-07-27) — the
+  // Terms live in Mongo, not in the AAB, so no repo test can see a publish that
+  // missed a locale. Reads /master with X-Language exactly as the app does and
+  // asserts the Monday reset, the 7-day forfeit, the discretionary one-hop
+  // cascade and the fake-Kenya void are actually being served in all 7.
+  { id: 'legal-reward-rules', mod: legalRewardRules },
+  // P-INAPP-MARKETING-BANNER (2026-07-27) — the first KE campaign served
+  // English to five of seven locales because the translator's reply was
+  // truncated and the failure fell back silently. Reads the pinned campaign
+  // per language, exactly as a device does, so a fallback fails the run.
+  { id: 'marketing-banner', mod: marketingBanner },
 ];
 
 function resolveSuites(cfg) {
