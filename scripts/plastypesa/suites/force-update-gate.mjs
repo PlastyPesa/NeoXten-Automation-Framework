@@ -52,6 +52,17 @@ export async function run(cfg, runner) {
       'android.minVersionCode must be a number the client can compare against');
   });
 
+  await runner.test('update_link_points_at_a_real_play_listing', async () => {
+    // Caught in production 2026-07-27: the default was `com.plastypesa.app`,
+    // which reads like the right id and 404s on Play. The blocked user has no
+    // other route out of the app, so this link failing is a dead end. Assert
+    // the actual applicationId, not merely that it mentions Google Play.
+    if (gate === null) throw new Error('gate not read');
+    const link = gate.storeUrl?.android ?? '';
+    assert(link.includes('id=com.app.plasty_pesa'),
+      `update link must target the real Play applicationId, got: ${link}`);
+  });
+
   await runner.test('production_is_not_left_gated', async () => {
     if (gate === null) throw new Error('gate not read');
     const floor = gate.android?.minVersionCode ?? 0;
