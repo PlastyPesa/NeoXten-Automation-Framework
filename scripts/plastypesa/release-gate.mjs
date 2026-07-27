@@ -1,28 +1,38 @@
 /**
- * Release gate ops (P-FORCE-UPDATE-MIN-VERSION).
+ * Release gate ops (P-FORCE-UPDATE-MIN-VERSION / FORCE LATEST FOREVER).
  *
- * The gate that refuses traffic from unsupported app builds lives in
- * `masters.client-release-gate` and has no admin UI, so the only alternative to
- * this script is hand-editing production Mongo — on the one switch whose
- * failure mode is "every user is locked out of earning". Hence the guardrails:
+ * OWNER LOCK 2026-07-27 (absolute): the steady state is ARMED — floor = live
+ * Play production versionCode, `blockUnreported: true`, forever. `sync` is the
+ * ritual that enforces it and is what the publish script calls after every
+ * Play upload. `disarm` still exists for a genuine incident (e.g. the gate
+ * itself blocking the live build), but leaving production disarmed violates
+ * the lock and the NeoXten force-update-gate suite will fail until re-armed.
+ *
+ * The gate lives in `masters.client-release-gate` and has no admin UI, so the
+ * only alternative to this script is hand-editing production Mongo — on the
+ * one switch whose failure mode is "every user is locked out of earning".
+ * Guardrails:
  *
  *   - `status` prints the live config AND the blast radius, measured against
  *     real users, before anything is changed.
- *   - `arm` refuses a floor that would block anyone who is not the tester
- *     unless `--force` is passed, and always prints the disarm command.
- *   - `blockUnreported` is the blunt lever (it catches every build that
- *     predates version reporting) and needs `--force` on top.
+ *   - `sync` reads the LIVE Play production versionCode (Publisher API, never
+ *     a guess) and arms floor=live + blockUnreported:true. It prints the blast
+ *     radius first; it does not ask for --force because it IS the locked
+ *     policy — the honesty is in the printed numbers, not a speed bump.
+ *   - `arm` (manual floor) refuses a floor that would block anyone unless
+ *     `--force` is passed; `--block-unreported` needs `--force` on top.
  *   - `disarm` is a single argument-free command, so restoring never depends
- *     on remembering what the previous values were.
+ *     on remembering what the previous values were — and it shouts the lock.
  *
  * Usage:
  *   node scripts/plastypesa/release-gate.mjs status
- *   node scripts/plastypesa/release-gate.mjs arm --min 58
- *   node scripts/plastypesa/release-gate.mjs arm --min 57 --block-unreported --force
- *   node scripts/plastypesa/release-gate.mjs disarm
+ *   node scripts/plastypesa/release-gate.mjs sync        # THE ritual: floor = live Play + blockUnreported
+ *   node scripts/plastypesa/release-gate.mjs arm --min 58 --block-unreported --force
+ *   node scripts/plastypesa/release-gate.mjs disarm      # incidents only — violates FORCE LATEST FOREVER
  */
 import { MongoClient } from 'mongodb';
 import { loadBackendMongoEnv } from './mongo-env.mjs';
+import { readLivePlayVersion } from './play-live-version.mjs';
 
 const GATE_NAME = 'client-release-gate';
 const PLAY_PACKAGE = 'com.app.plasty_pesa';
@@ -41,8 +51,9 @@ function usage(message) {
   if (message) console.error(`\n${message}`);
   console.error(`
   status                                    show live gate + blast radius
+  sync                                      arm to LIVE Play versionCode + blockUnreported (the locked ritual)
   arm --min <code> [--block-unreported] [--force]
-  disarm
+  disarm                                    incidents only — violates FORCE LATEST FOREVER
 `);
   process.exit(message ? 1 : 0);
 }
@@ -127,6 +138,50 @@ try {
     );
     console.log('Gate DISARMED (enabled:false, floor 0, blockUnreported off).');
     console.log(`Server caches config for ${CACHE_TTL_SECONDS}s — allow that before retesting the app.`);
+    console.log('\n  *** OWNER LOCK: FORCE LATEST FOREVER — disarmed is NOT a valid steady state. ***');
+    console.log('  *** NeoXten force-update-gate will FAIL until you re-arm. When the incident  ***');
+    console.log('  *** is over: node scripts/plastypesa/release-gate.mjs sync                   ***');
+    process.exit(0);
+  }
+
+  async function writeArmed(min, blockUnreported) {
+    await masters.updateOne(
+      { name: GATE_NAME },
+      {
+        $set: {
+          name: GATE_NAME,
+          'metadata.enabled': true,
+          'metadata.android.minVersionCode': min,
+          'metadata.android.blockUnreported': blockUnreported,
+          'metadata.storeUrl.android': STORE_URL,
+          'metadata.updatedAt': new Date(),
+        },
+      },
+      { upsert: true }
+    );
+    printConfig('Gate ARMED', (await masters.findOne({ name: GATE_NAME }))?.metadata);
+    console.log(`\nTakes effect within ${CACHE_TTL_SECONDS}s (server config cache).`);
+  }
+
+  if (command === 'sync') {
+    // FORCE LATEST FOREVER: floor = live Play production, blockUnreported on.
+    // No --force gate — this IS the locked policy; honesty is the printed
+    // blast radius, not a prompt someone learns to bypass.
+    const live = await readLivePlayVersion();
+    console.log(`\nLive Play production: ${live.releaseName} · versionCode ${live.versionCode} · ${live.status}`);
+
+    const radius = await blastRadius(db, {
+      minVersionCode: live.versionCode,
+      blockUnreported: true,
+    });
+    console.log(`\nBlast radius of floor ${live.versionCode} + blockUnreported:`);
+    console.log(`  ACTIVE users          : ${radius.total}`);
+    console.log(`  reporting below floor : ${radius.belowFloor}  <-- WILL BE BLOCKED until they update`);
+    console.log(`  reporting no version  : ${radius.unreported}  <-- WILL BE BLOCKED until they update`);
+    console.log(`  => refusing           : ${radius.blocked} user(s) until they install live Play`);
+
+    await writeArmed(live.versionCode, true);
+    console.log('\nFORCE LATEST FOREVER enforced: min = live Play, blockUnreported on.');
     process.exit(0);
   }
 
@@ -159,24 +214,9 @@ try {
     );
   }
 
-  await masters.updateOne(
-    { name: GATE_NAME },
-    {
-      $set: {
-        name: GATE_NAME,
-        'metadata.enabled': true,
-        'metadata.android.minVersionCode': min,
-        'metadata.android.blockUnreported': blockUnreported,
-        'metadata.storeUrl.android': STORE_URL,
-        'metadata.updatedAt': new Date(),
-      },
-    },
-    { upsert: true }
-  );
-
-  printConfig('Gate ARMED', (await masters.findOne({ name: GATE_NAME }))?.metadata);
-  console.log(`\nTakes effect within ${CACHE_TTL_SECONDS}s (server config cache).`);
-  console.log('DISARM WHEN DONE: node scripts/plastypesa/release-gate.mjs disarm');
+  await writeArmed(min, blockUnreported);
+  console.log('Incident disarm (violates the lock; NeoXten will fail until re-armed):');
+  console.log('  node scripts/plastypesa/release-gate.mjs disarm');
 } finally {
   await client.close();
 }
