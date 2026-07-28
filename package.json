@@ -62,6 +62,7 @@
     "test:plastypesa-api:auth-only": "node scripts/plastypesa-api-auth-only.mjs",
     "test:plastypesa-login-auth-hint": "node scripts/plastypesa/login-auth-error-hint.mjs",
     "test:plastypesa-login-auth-hint-adb": "node scripts/plastypesa/login-auth-error-hint-adb.mjs",
+    "test:plastypesa-otp-spam-hint-adb": "node scripts/plastypesa/otp-spam-hint-adb.mjs",
     "test:plastypesa-build-heartbeat": "node scripts/plastypesa/build-heartbeat-live.mjs",
     "test:plastypesa-ui-claim-truth": "node scripts/plastypesa-ui-claim-truth.cjs",
     "test:plastypesa-kenya-weekly-points": "node scripts/plastypesa-kenya-weekly-points-integrity.cjs",
