@@ -1,0 +1,36 @@
+---
+description: MANDATORY — never ship short one-screen articles in the paying Learn daily rotation
+alwaysApply: true
+---
+
+# No short paying articles (LOCKED 2026-07-28 — MANDATORY FOREVER)
+
+## Why
+Earn-by-reading only starts the dwell timer after **scroll-to-end**. Two failure modes:
+1. Short body → `maxScrollExtent <= 0` and scroll listener never fires → stuck at **0%**.
+2. Status/completion card **inside** the scroll view → article text fully visible but a few pixels of chrome below the fold → still stuck at **0%**.
+
+Live incident: WhatsApp user Dennis (`mkibet346@gmail.com`) — “We are building this together” stuck at 0% with “Keep reading to the end”.
+
+Reader fix (mobile): sync end on layout when `maxScrollExtent <= 0`, **and** keep the status card **outside** the article scroll (fixed below). Content policy still applies.
+
+## Hard rules — every agent, every content change
+1. **Never** put a short / one-viewport body into the **paying daily read-reward rotation**.
+2. Master **`read-min-words` must stay ≥ 250** (ops floor after 2026-07-28). Do not lower it without an explicit owner unlock **and** a proven reader fix for non-scrollable content.
+3. Every paying article body must be **≥ 250 words** and long enough that a normal phone **must scroll** to reach the end.
+4. Before publishing / rotating Learn content: open the article on a real phone (or ADB) and confirm progress can leave 0% and the countdown can start.
+5. If you touch `article_reader_v2.dart` / read-reward: treat **`maxScrollExtent <= 0` on first layout as scrolled-to-end** (or equivalent) so short content cannot brick the earn path again — content policy still applies even after that fix.
+6. Prefer lengthening mission / rotation copy over shipping “cute short” blurbs that pay points.
+
+## Ops checklist (content / Mongo Master)
+- [ ] `read-min-words` metadata ≥ 250
+- [ ] Each of today’s 5 rotation articles word-count ≥ floor
+- [ ] Device check: open each title → progress moves → timer can appear
+
+## Verification discipline (owner 2026-07-28 — why this bug shipped)
+Before declaring Learn / read-reward / article content “done”:
+1. **Test twice** in code/API (NeoXten `read-reward-rotation` + `read_reward_no_short_paying_articles`, plus a second independent check of live status word counts).
+2. **Then test twice on ADB** — open a paying article, confirm progress leaves 0% / timer can start; repeat on a second article (or second install pass). Never ship from a single glance.
+
+## Support posture
+If a user reports “no timer / no points on articles,” check article length + scroll progress **before** blaming the user. Make-good via idempotent `READ_REWARD` + in-app `POINTS_EARNED` when the bug is confirmed.

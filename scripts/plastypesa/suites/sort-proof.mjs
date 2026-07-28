@@ -31,6 +31,41 @@ export async function run(cfg, runner) {
       assert(s?.id && typeof s.id === 'string', 'stream.id');
       assert(typeof s.label === 'string', 'stream.label');
     }
+    // How-to-Sort learn gate — English-only admin-swappable URL
+    assert(d.learnGate && typeof d.learnGate === 'object', 'learnGate object');
+    assert(typeof d.learnGate.required === 'boolean', 'learnGate.required');
+    assert(
+      d.learnGate.reason === null ||
+        d.learnGate.reason === 'new_user' ||
+        d.learnGate.reason === 'after_reject',
+      'learnGate.reason',
+    );
+    assert(d.videos && typeof d.videos === 'object', 'videos object');
+    assert(
+      typeof d.videos.en === 'string' && d.videos.en.startsWith('https://'),
+      'videos.en https',
+    );
+    assert(d.videos.sw === undefined, 'videos.sw omitted (EN-only lock)');
+    assert(d.defaultLocale === 'en', 'defaultLocale en');
+    assert(
+      typeof d.videoUrl === 'string' && d.videoUrl.startsWith('https://'),
+      'videoUrl https',
+    );
+    assert(d.videoUrl === d.videos.en, 'videoUrl matches videos.en');
+  });
+
+  await runner.test('sort_proof_learn_complete_unlocks_shape', async () => {
+    const r = await fetch(url(cfg, '/home/sort-proof/learn-complete'), {
+      method: 'POST',
+      headers: cfg.authHeaders,
+      body: JSON.stringify({ finished: true, locale: 'en' }),
+    });
+    const { body, text } = await readJson(r);
+    if (r.status !== 200) {
+      throw new Error(`learn-complete ${r.status}: ${text.slice(0, 400)}`);
+    }
+    assert(body?.type === 'success', 'type success');
+    assert(body?.data?.learnGate?.required === false, 'gate cleared');
   });
 
   await runner.test('sort_proof_submit_403_when_feature_disabled', async () => {

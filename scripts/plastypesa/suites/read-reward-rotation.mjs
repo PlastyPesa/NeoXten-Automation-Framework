@@ -44,6 +44,37 @@ export async function run(cfg, runner) {
     }
   });
 
+  // MANDATORY 2026-07-28 — short one-screen articles brick scroll-to-end (0% forever).
+  await runner.test('read_reward_no_short_paying_articles', async () => {
+    const r = await fetch(url(cfg, '/home/read-reward/status'), {
+      method: 'GET',
+      headers: cfg.authHeaders,
+    });
+    const { body, text } = await readJson(r);
+    if (r.status !== 200) {
+      throw new Error(`read-reward/status ${r.status}: ${text.slice(0, 400)}`);
+    }
+    const d = body?.data;
+    assert(d && typeof d === 'object', 'data object');
+    const minWords = Number(d.minWords);
+    assert(
+      minWords >= 250,
+      `minWords must be >= 250 (no short paying articles), got ${d.minWords}`,
+    );
+    assert(Array.isArray(d.dailyArticles), 'dailyArticles array');
+    for (const row of d.dailyArticles) {
+      const words = Number(row.words) || 0;
+      assert(
+        words >= minWords,
+        `rotation article "${row.title || row.articleId}" has ${words} words < minWords ${minWords}`,
+      );
+      assert(
+        words >= 250,
+        `rotation article "${row.title || row.articleId}" has ${words} words — floor is 250`,
+      );
+    }
+  });
+
   await runner.test('read_reward_next_respects_rotation', async () => {
     const statusRes = await fetch(url(cfg, '/home/read-reward/status'), {
       method: 'GET',
