@@ -51,6 +51,7 @@ import * as dailyCheckInbox from './suites/daily-check-inbox.mjs';
 import * as numberSync from './suites/number-sync.mjs';
 import * as legalRewardRules from './suites/legal-reward-rules.mjs';
 import * as marketingBanner from './suites/marketing-banner.mjs';
+import * as learnContentLocaleMix from './suites/learn-content-locale-mix.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -135,6 +136,8 @@ const ALL_SUITES = [
   // truncated and the failure fell back silently. Reads the pinned campaign
   // per language, exactly as a device does, so a fallback fails the run.
   { id: 'marketing-banner', mod: marketingBanner },
+  // P-LEARN-CONTENT-LOCALE-MIX — tip/article bodies must localize (not chrome-only).
+  { id: 'learn-content-locale-mix', mod: learnContentLocaleMix },
 ];
 
 function resolveSuites(cfg) {
