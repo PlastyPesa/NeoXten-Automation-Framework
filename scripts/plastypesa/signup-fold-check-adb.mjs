@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * ADB proof: quiet OTP inbox/spam 1-liner (post-SES).
- * Forgot Password hosts OtpSpamNotice. Signup email screen does NOT
- * (loud panel removed; hint lives on OTP verify after send).
+ * ADB: signup after 2-screen split (market → email).
+ * Asserts email field + Verify CTA are fully on-screen without scrolling.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -23,20 +22,8 @@ const OUT_DIR = join(
   process.cwd(),
   '.neoxten',
   'proof',
-  `otp-spam-hint-${new Date().toISOString().replace(/[:.]/g, '-')}`,
+  `signup-fold-${new Date().toISOString().replace(/[:.]/g, '-')}`,
 );
-
-const QUIET_NEEDLES = [
-  'If it’s not in Inbox, check Spam',
-  "If it's not in Inbox, check Spam",
-  'check Spam',
-  'verifica Spam',
-  'revisa Spam',
-  'prüfe Spam',
-  'vérifie Spam',
-  'verifică Spam',
-  'controlla Spam',
-];
 
 function decodeUi(value) {
   return String(value || '')
@@ -78,11 +65,6 @@ function uiBlob(nodes) {
   return nodes
     .map((n) => decodeUi(`${n.text || ''} ${n.contentDesc || ''}`))
     .join(' | ');
-}
-
-function quietVisible(nodes) {
-  const blob = uiBlob(nodes).toLowerCase();
-  return QUIET_NEEDLES.find((n) => blob.includes(n.toLowerCase())) || null;
 }
 
 function findExactLabel(nodes, labels) {
@@ -149,7 +131,10 @@ function isLoginScreen(nodes) {
   );
   const hasForgot = /forgot password/i.test(blob);
   const hasLoginCta = Boolean(findExactLabel(nodes, ['Login']));
-  return hasEmail && hasPass && (hasForgot || hasLoginCta);
+  const hasSignUp = /sign up|înregistrează|registrati|registrarse|anmelden|s'inscrire|inscrever/i.test(
+    blob,
+  );
+  return hasEmail && hasPass && (hasForgot || hasLoginCta) && hasSignUp;
 }
 
 async function reachLogin(deviceId) {
@@ -213,6 +198,55 @@ async function reachLogin(deviceId) {
   return false;
 }
 
+function screenHeight(nodes) {
+  let maxY = 0;
+  for (const n of nodes) {
+    if (n.bounds?.bottom > maxY) maxY = n.bounds.bottom;
+  }
+  return maxY || 1640;
+}
+
+function analyzeEmailFold(nodes) {
+  const h = screenHeight(nodes);
+  const emailField = nodes.find(
+    (n) =>
+      n.packageName === PKG &&
+      n.className === 'android.widget.EditText' &&
+      !n.password &&
+      n.bounds,
+  );
+  const verify =
+    findExactLabel(nodes, ['Verify OTP', 'Verify', 'Verifică OTP', 'Verifica']) ||
+    nodes.find((n) => {
+      if (n.packageName !== PKG || !n.clickable || !n.bounds) return false;
+      const t = decodeUi(n.text || n.contentDesc || '').toLowerCase();
+      return /verify|otp|verif/.test(t);
+    });
+
+  const emailVisible =
+    emailField?.bounds &&
+    emailField.bounds.top >= 0 &&
+    emailField.bounds.bottom <= h - 8 &&
+    emailField.bounds.bottom - emailField.bounds.top >= 40;
+  const verifyVisible =
+    verify?.bounds &&
+    verify.bounds.top >= 0 &&
+    verify.bounds.bottom <= h - 8 &&
+    verify.bounds.bottom - verify.bounds.top >= 36;
+
+  return {
+    screenH: h,
+    hasEmail: Boolean(emailField),
+    hasVerify: Boolean(verify),
+    emailBounds: emailField?.bounds || null,
+    verifyBounds: verify?.bounds || null,
+    emailFullyVisible: Boolean(emailVisible),
+    verifyFullyVisible: Boolean(verifyVisible),
+    foldOk: Boolean(emailVisible && verifyVisible),
+    blobSample: uiBlob(nodes).slice(0, 900),
+  };
+}
+
 async function main() {
   bootstrapPlastyPesaEnv();
   mkdirSync(OUT_DIR, { recursive: true });
@@ -234,28 +268,57 @@ async function main() {
   }
   shot(deviceId, '01-login.png');
 
-  const forgot = await waitTap(
-    deviceId,
-    ['Forgot Password?', 'Forgot Password', 'Ai uitat parola?'],
-    { timeoutMs: 12000 },
-  );
-  if (!forgot) throw new Error('Forgot Password link missing');
-  await sleep(1200);
-  let nodes = parseUiNodes(dumpUiHierarchy(deviceId, 'forgot').xml);
-  let hit = quietVisible(nodes);
-  shot(deviceId, '02-forgot-quiet.png');
-  if (!hit) {
-    console.error('forgot blob', uiBlob(nodes).slice(0, 700));
-    throw new Error('Quiet inbox/spam line missing on Forgot Password');
+  if (
+    !(await waitTap(deviceId, ['Sign Up', 'sign up', 'Înregistrează-te'], {
+      timeoutMs: 12000,
+    }))
+  ) {
+    throw new Error('Sign Up link missing');
   }
-  // Loud panel copy must be gone
-  const blob = uiBlob(nodes);
-  if (/often lands outside|Check Spam, Junk or Promotions/i.test(blob)) {
-    throw new Error('Loud spam panel still present on Forgot Password');
-  }
-  console.log(JSON.stringify({ surface: 'forgot_password', matchedHint: hit }));
+  await sleep(1000);
 
-  console.log(JSON.stringify({ pass: true, proofDir: OUT_DIR }));
+  // Language screen → Continue
+  if (
+    !(await waitTap(deviceId, ['Continue', 'Continua', 'Continuar', 'Weiter'], {
+      timeoutMs: 10000,
+    }))
+  ) {
+    throw new Error('Language Continue missing');
+  }
+  await sleep(1000);
+  shot(deviceId, '02-market.png');
+
+  // Market: Kenya + Continue
+  await waitTap(
+    deviceId,
+    ['I live in Kenya — weekly M-Pesa rewards', 'Kenya'],
+    { timeoutMs: 8000 },
+  );
+  await sleep(800);
+  if (
+    !(await waitTap(deviceId, ['Continue', 'Continua', 'Continuar', 'Weiter'], {
+      timeoutMs: 8000,
+    }))
+  ) {
+    throw new Error('Market Continue missing');
+  }
+  await sleep(1200);
+
+  const nodes = parseUiNodes(dumpUiHierarchy(deviceId, 'email').xml);
+  shot(deviceId, '03-email-fold.png');
+  const fold = analyzeEmailFold(nodes);
+  const result = {
+    pass: fold.foldOk,
+    splitScreens: true,
+    ...fold,
+  };
+  writeFileSync(join(OUT_DIR, 'result.json'), JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(result, null, 2));
+  if (!fold.foldOk) {
+    console.error('Email screen still not fully visible');
+    process.exit(2);
+  }
+  console.log('Email screen fold OK');
 }
 
 main().catch((e) => {
