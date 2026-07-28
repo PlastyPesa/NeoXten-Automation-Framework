@@ -60,6 +60,8 @@
     "test:plastypesa-launch-sync": "node scripts/plastypesa-launch-sync.mjs",
     "test:plastypesa-landing-sync": "node scripts/plastypesa-landing-sync.mjs",
     "test:plastypesa-api:auth-only": "node scripts/plastypesa-api-auth-only.mjs",
+    "test:plastypesa-login-auth-hint": "node scripts/plastypesa/login-auth-error-hint.mjs",
+    "test:plastypesa-login-auth-hint-adb": "node scripts/plastypesa/login-auth-error-hint-adb.mjs",
     "test:plastypesa-build-heartbeat": "node scripts/plastypesa/build-heartbeat-live.mjs",
     "test:plastypesa-ui-claim-truth": "node scripts/plastypesa-ui-claim-truth.cjs",
     "test:plastypesa-kenya-weekly-points": "node scripts/plastypesa-kenya-weekly-points-integrity.cjs",
