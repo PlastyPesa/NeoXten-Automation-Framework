@@ -1,0 +1,19 @@
+---
+description: After 2× verification + 2× ADB, always commit and push (owner lock 2026-07-28)
+alwaysApply: true
+---
+
+# Commit + push after double verification (owner lock 2026-07-28)
+
+When a phase / todo item reaches this bar, **commit and push immediately** — do not wait for the owner to say “commit”:
+
+1. **2 non-ADB verifications** (e.g. NeoXten / API / unit / live endpoint) that prove the change from a consumer angle  
+2. **2 ADB verifications** on the connected device (when the change is mobile-facing)
+
+Then:
+
+- Commit only the files for that phase (no secrets, no drive-by junk)  
+- Push to the tracked remote branch  
+- Update `PLASTYPESA_CURRENT_TODO.md` + `PLASTYPESA_SUPERVISOR_HANDOFF.md` in the same or follow-up docs commit  
+
+If either verification pair fails: **do not commit/push**; fix and re-run until both pairs pass.
