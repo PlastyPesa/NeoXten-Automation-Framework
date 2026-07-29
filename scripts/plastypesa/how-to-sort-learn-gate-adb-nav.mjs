@@ -47,12 +47,16 @@ async function main() {
   spawnSync("adb", ["-s", deviceId, "shell", "am", "force-stop", "com.android.chrome"], {
     stdio: "pipe",
   });
+  spawnSync("adb", ["-s", deviceId, "shell", "am", "force-stop", PKG], {
+    stdio: "pipe",
+  });
+  await sleep(700);
   spawnSync(
     "adb",
     ["-s", deviceId, "shell", "am", "start", "-n", `${PKG}/.MainActivity`],
     { stdio: "pipe" },
   );
-  await sleep(5000);
+  await sleep(7000);
   shot(deviceId, "01-home.png");
 
   await tapText(["Got it", "OK", "Dismiss", "Close"], {
@@ -132,31 +136,8 @@ async function main() {
     b.includes("choose your language") ||
     b.includes("pick the language you want");
 
-  if (hasSw) {
-    await tapText(["Kiswahili", "Swahili"], {
-      deviceId,
-      timeoutMs: 6000,
-      label: "sw",
-    });
-    await sleep(2500);
-    shot(deviceId, "04-sw.png");
-    await tapText(["English"], { deviceId, timeoutMs: 6000, label: "en" });
-    await sleep(2000);
-    shot(deviceId, "05-en.png");
-    nodes = parseUiNodes(dumpUiHierarchy(deviceId, "gate2").xml);
-    b = blob(nodes);
-    hasEn = /\benglish\b/.test(b);
-    hasSw = b.includes("kiswahili") || /\bswahili\b/.test(b);
-    hasTitle =
-      b.includes("how to sort") ||
-      b.includes("cum să sortezi") ||
-      b.includes("so sortierst") ||
-      b.includes("como separar") ||
-      b.includes("come separare");
-  }
-
-  // onSort may be false if we resumed already on the gate; EN+SW chips are the bar.
-  const ok = opened && !languagePicker && hasTitle && hasEn && hasSw;
+  // Owner lock 2026-07-29: EN only — Kiswahili chip must be gone.
+  const ok = opened && !languagePicker && hasTitle && !hasSw;
   const summary = {
     ok,
     onSort,

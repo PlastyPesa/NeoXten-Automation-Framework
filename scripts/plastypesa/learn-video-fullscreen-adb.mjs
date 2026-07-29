@@ -195,11 +195,7 @@ async function onePass(deviceId, tag) {
   shot(deviceId, `${tag}-03-videos.png`);
 
   const opened = await tapText(
-    [
-      "How to Sort (English)",
-      "How to Sort",
-      "How to Sort (Kiswahili)",
-    ],
+    ["How to Sort (English)", "How to Sort"],
     { deviceId, timeoutMs: 12000, label: "open-clip", packageName: PKG },
   ).catch(() => false);
   await sleep(5000);

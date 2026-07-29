@@ -31,7 +31,7 @@ export async function run(cfg, runner) {
       assert(s?.id && typeof s.id === 'string', 'stream.id');
       assert(typeof s.label === 'string', 'stream.label');
     }
-    // How-to-Sort learn gate — EN + Kiswahili hosted URLs (Batch 6+)
+    // How-to-Sort learn gate — EN only (owner lock 2026-07-29; SW removed)
     assert(d.learnGate && typeof d.learnGate === 'object', 'learnGate object');
     assert(typeof d.learnGate.required === 'boolean', 'learnGate.required');
     assert(
@@ -46,8 +46,10 @@ export async function run(cfg, runner) {
       'videos.en https',
     );
     assert(
-      typeof d.videos.sw === 'string' && d.videos.sw.startsWith('https://'),
-      'videos.sw https',
+      d.videos.sw === undefined ||
+        d.videos.sw === null ||
+        d.videos.sw === '',
+      'videos.sw absent (EN-only)',
     );
     assert(d.defaultLocale === 'en', 'defaultLocale en');
     assert(

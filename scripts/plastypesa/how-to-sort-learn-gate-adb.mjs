@@ -354,27 +354,9 @@ async function main() {
   let nodes = parseUiNodes(dumpUiHierarchy(deviceId, "hts-gate").xml);
   let sig = gateSignals(nodes);
 
-  if (sig.hasSwChip) {
-    await tapText(["Kiswahili", "Swahili"], {
-      deviceId,
-      timeoutMs: 6000,
-      label: "pick-sw",
-    });
-    await sleep(2500);
-    shot(deviceId, "05-sw-selected.png");
-    await tapText(["English"], { deviceId, timeoutMs: 6000, label: "pick-en" });
-    await sleep(2000);
-    shot(deviceId, "06-en-selected.png");
-    nodes = parseUiNodes(dumpUiHierarchy(deviceId, "hts-gate-final").xml);
-    sig = gateSignals(nodes);
-  }
-
+  // Owner lock 2026-07-29: EN only — no Kiswahili chip (locale toggle hidden).
   const ok =
-    opened &&
-    !sig.languagePicker &&
-    sig.hasTitle &&
-    sig.hasEnChip &&
-    sig.hasSwChip;
+    opened && !sig.languagePicker && sig.hasTitle && !sig.hasSwChip;
 
   const summary = {
     ok,
