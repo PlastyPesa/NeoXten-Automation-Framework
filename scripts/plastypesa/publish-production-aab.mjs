@@ -41,36 +41,36 @@ if (!aabPath || !fs.existsSync(aabPath)) {
 
 // Play caps release notes at 500 characters per language; assertReleaseNotes
 // below fails the upload rather than letting the API truncate mid-sentence.
-const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.37 (57)";
+const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.39 (59)";
 
 const RELEASE_NOTES = [
     {
         language: "en-GB",
-        text: "Weekly points now reset every Monday, and the app says so clearly. Past reward slots show their real status — closed or paid — instead of a stale \"being processed\". Updated reward rules in Terms: a 7-day claim window and what happens when a slot is not claimed. In-app updates now arrive in your language. Long reward and proof lists scroll inside their card. Home shows how active the community is. Install the latest version.",
+        text: "Learn Videos now play fullscreen. Daily tip on Learn. Clearer sort review notes and claim-day countdown. Points inbox for Read and EcoSort. Weekly board resets Monday. Install for the newest fixes.",
     },
     {
         language: "it-IT",
-        text: "I punti settimanali si azzerano ogni lunedì e l'app lo indica chiaramente. Le posizioni di ricompensa passate mostrano lo stato reale — chiusa o pagata — invece di un \"in elaborazione\" non aggiornato. Regole aggiornate nei Termini: finestra di 7 giorni per la richiesta e cosa succede se una posizione non viene richiesta. Gli avvisi in-app arrivano nella tua lingua. Le liste lunghe scorrono dentro la scheda. La home mostra quanto è attiva la community. Installa l'ultima versione.",
+        text: "I video di Learn ora vanno a schermo intero. Suggerimento giornaliero in Learn. Note di revisione sort più chiare e conto alla rovescia dei giorni per la richiesta. Notifiche punti per Read e EcoSort. Classifica settimanale azzerata il lunedì.",
     },
     {
         language: "es-ES",
-        text: "Los puntos semanales se reinician cada lunes y la app lo indica con claridad. Las plazas de recompensa pasadas muestran su estado real — cerrada o pagada — en lugar de un \"en proceso\" desactualizado. Reglas actualizadas en los Términos: plazo de 7 días para reclamar y qué ocurre si una plaza no se reclama. Los avisos dentro de la app llegan en tu idioma. Las listas largas se desplazan dentro de la tarjeta. El inicio muestra la actividad de la comunidad. Instala la última versión.",
+        text: "Los vídeos de Learn ahora a pantalla completa. Consejo diario en Learn. Notas de revisión de sort más claras y cuenta atrás de días para reclamar. Aviso de puntos por Read y EcoSort. El tablero semanal se reinicia el lunes.",
     },
     {
         language: "de-DE",
-        text: "Wochenpunkte werden jetzt jeden Montag zurückgesetzt, und die App sagt das klar. Frühere Belohnungsplätze zeigen ihren echten Status — abgeschlossen oder ausgezahlt — statt eines veralteten \"wird bearbeitet\". Aktualisierte Regeln in den Nutzungsbedingungen: 7 Tage Zeit für die Anforderung und was passiert, wenn ein Platz nicht angefordert wird. Hinweise in der App kommen in deiner Sprache. Lange Listen scrollen innerhalb der Karte. Neueste Version installieren.",
+        text: "Learn-Videos jetzt im Vollbild. Täglicher Tipp unter Learn. Klarere Sort-Prüfnotizen und Tage-Countdown für die Anforderung. Punkte-Inbox für Read und EcoSort. Wochenboard setzt montags zurück.",
     },
     {
         language: "fr-FR",
-        text: "Les points hebdomadaires sont remis à zéro chaque lundi, et l'app l'indique clairement. Les places de récompense passées affichent leur vrai statut — clôturée ou payée — au lieu d'un \"en cours de traitement\" obsolète. Règles mises à jour dans les Conditions : 7 jours pour faire la demande et ce qui se passe si une place n'est pas demandée. Les avis dans l'app arrivent dans ta langue. Les longues listes défilent dans la carte. Installe la dernière version.",
+        text: "Les vidéos Learn passent en plein écran. Astuce du jour dans Learn. Notes de révision sort plus claires et compte à rebours des jours pour la demande. Inbox de points pour Read et EcoSort. Le classement hebdo se réinitialise le lundi.",
     },
     {
         language: "pt-PT",
-        text: "Os pontos semanais são reiniciados todas as segundas-feiras e a app indica-o com clareza. As posições de recompensa anteriores mostram o estado real — fechada ou paga — em vez de um \"em processamento\" desatualizado. Regras atualizadas nos Termos: prazo de 7 dias para pedir e o que acontece se uma posição não for pedida. Os avisos na app chegam no teu idioma. As listas longas deslizam dentro do cartão. Instala a versão mais recente.",
+        text: "Vídeos de Learn agora em ecrã inteiro. Dica diária em Learn. Notas de revisão de sort mais claras e contagem de dias para reclamar. Caixa de pontos para Read e EcoSort. O quadro semanal reinicia à segunda-feira.",
     },
     {
         language: "ro",
-        text: "Punctele săptămânale se resetează în fiecare luni, iar aplicația spune asta clar. Locurile de recompensă din trecut arată starea reală — închisă sau plătită — în loc de un \"în procesare\" învechit. Reguli actualizate în Termeni: termen de 7 zile pentru cerere și ce se întâmplă dacă un loc nu este cerut. Anunțurile din aplicație ajung în limba ta. Listele lungi derulează în interiorul cardului. Instalează cea mai recentă versiune.",
+        text: "Videoclipurile Learn rulează pe ecran complet. Sfat zilnic în Learn. Note de revizuire sort mai clare și numărătoare a zilelor pentru revendicare. Inbox de puncte pentru Read și EcoSort. Clasamentul săptămânal se resetează luni.",
     },
 ];
 
