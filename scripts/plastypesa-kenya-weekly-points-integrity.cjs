@@ -50,7 +50,8 @@ const EXPECT_MASTER = {
     "max-sort-proofs-per-day": 1,
     "pledge-points": 200,
     "max-pledges-per-day": 3,
-    "referral-points": 500,
+    // Base Master (boost may multiply what earn-hub shows — see checkApiKenyaUser).
+    "referral-points": 1000,
     "ecosort-points-per-correct": 15,
     "ecosort-daily-cap": 450,
 };
@@ -388,11 +389,35 @@ async function checkApiKenyaUser(rows, fails) {
 
     const earn = await apiGet(token, "home/earn-hub");
     const ed = earn.body?.data || {};
+    const masterReferral = EXPECT_MASTER["referral-points"];
+    const boostOn = ed.referralBoostActive === true;
+    // Live hub shows boosted referral when a campaign is active (through 2026-08-11).
+    const referralGot = Number(ed.referralPoints);
+    const referralOk = boostOn
+        ? referralGot >= masterReferral &&
+          !!ed.referralBoostEndsAt &&
+          Number.isFinite(referralGot)
+        : referralGot === masterReferral;
+    rows.push({
+        name: "earn-hub.referralPoints",
+        want: boostOn
+            ? `>=${masterReferral} (boost active → ${referralGot})`
+            : masterReferral,
+        got: referralGot,
+        ok: referralOk,
+        boostActive: boostOn,
+        boostEndsAt: ed.referralBoostEndsAt || null,
+    });
+    if (!referralOk) {
+        fails.push(
+            `earn-hub.referralPoints: boost=${boostOn} want base ${masterReferral}, got ${referralGot}`
+        );
+    }
+
     const earnChecks = [
         ["quizCompletionPoints", 1000],
         ["sortProofPoints", 4000],
         ["pledgePoints", 200],
-        ["referralPoints", 500],
         ["ecosortPointsPerCorrect", 15],
     ];
     for (const [key, want] of earnChecks) {

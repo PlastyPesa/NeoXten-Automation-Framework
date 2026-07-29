@@ -46,31 +46,31 @@ const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle
 const RELEASE_NOTES = [
     {
         language: "en-GB",
-        text: "Learn Videos now play fullscreen. Daily tip on Learn. Clearer sort review notes and claim-day countdown. Points inbox for Read and EcoSort. Weekly board resets Monday. Install for the newest fixes.",
+        text: "Daily quiz now shows the real 1000 points (not 0). Learn Videos fullscreen + How-to-Sort in English. Clearer sort notes, claim-day countdown, Read/EcoSort points inbox. Weekly board resets Monday.",
     },
     {
         language: "it-IT",
-        text: "I video di Learn ora vanno a schermo intero. Suggerimento giornaliero in Learn. Note di revisione sort più chiare e conto alla rovescia dei giorni per la richiesta. Notifiche punti per Read e EcoSort. Classifica settimanale azzerata il lunedì.",
+        text: "Il quiz giornaliero mostra i veri 1000 punti (non 0). Video Learn a schermo intero e How-to-Sort in inglese. Note sort più chiare, conto alla rovescia per la richiesta, inbox punti Read/EcoSort. Classifica azzerata il lunedì.",
     },
     {
         language: "es-ES",
-        text: "Los vídeos de Learn ahora a pantalla completa. Consejo diario en Learn. Notas de revisión de sort más claras y cuenta atrás de días para reclamar. Aviso de puntos por Read y EcoSort. El tablero semanal se reinicia el lunes.",
+        text: "El quiz diario muestra los 1000 puntos reales (no 0). Vídeos Learn a pantalla completa y How-to-Sort en inglés. Notas de sort más claras, cuenta atrás para reclamar, aviso de puntos Read/EcoSort. El tablero se reinicia el lunes.",
     },
     {
         language: "de-DE",
-        text: "Learn-Videos jetzt im Vollbild. Täglicher Tipp unter Learn. Klarere Sort-Prüfnotizen und Tage-Countdown für die Anforderung. Punkte-Inbox für Read und EcoSort. Wochenboard setzt montags zurück.",
+        text: "Tagesquiz zeigt echte 1000 Punkte (nicht 0). Learn-Videos im Vollbild und How-to-Sort auf Englisch. Klarere Sort-Notizen, Tage-Countdown, Punkte-Inbox für Read/EcoSort. Wochenboard setzt montags zurück.",
     },
     {
         language: "fr-FR",
-        text: "Les vidéos Learn passent en plein écran. Astuce du jour dans Learn. Notes de révision sort plus claires et compte à rebours des jours pour la demande. Inbox de points pour Read et EcoSort. Le classement hebdo se réinitialise le lundi.",
+        text: "Le quiz du jour affiche les vrais 1000 points (pas 0). Vidéos Learn en plein écran et How-to-Sort en anglais. Notes sort plus claires, compte à rebours pour la demande, inbox points Read/EcoSort. Classement réinitialisé le lundi.",
     },
     {
         language: "pt-PT",
-        text: "Vídeos de Learn agora em ecrã inteiro. Dica diária em Learn. Notas de revisão de sort mais claras e contagem de dias para reclamar. Caixa de pontos para Read e EcoSort. O quadro semanal reinicia à segunda-feira.",
+        text: "O quiz diário mostra os 1000 pontos reais (não 0). Vídeos Learn em ecrã inteiro e How-to-Sort em inglês. Notas de sort mais claras, contagem de dias para reclamar, caixa de pontos Read/EcoSort. O quadro reinicia à segunda-feira.",
     },
     {
         language: "ro",
-        text: "Videoclipurile Learn rulează pe ecran complet. Sfat zilnic în Learn. Note de revizuire sort mai clare și numărătoare a zilelor pentru revendicare. Inbox de puncte pentru Read și EcoSort. Clasamentul săptămânal se resetează luni.",
+        text: "Quizul zilnic arată cele 1000 de puncte reale (nu 0). Videoclipuri Learn pe ecran complet și How-to-Sort în engleză. Note sort mai clare, numărătoare pentru revendicare, inbox puncte Read/EcoSort. Clasamentul se resetează luni.",
     },
 ];
 
