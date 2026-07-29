@@ -2,6 +2,16 @@
 
 Durable, **Node.js `fetch`** suite against the PlastyPesa API Gateway (no Playwright required for these checks).
 
+### Daily quiz + Mission — Cursor stage → 00:05 UTC cron (LOCKED 2026-07-30)
+
+Agents: do **not** rely on admin Content Queue AI. After visual quiz proof, stage for EventBridge:
+
+```bash
+node scripts/plastypesa/.local-stage-daily-publish.mjs --date YYYY-MM-DD --template <missionTemplateId> --quiz-json <path>
+```
+
+Cron publishes at **00:05 UTC** (`SCHEDULED-DAILY-PUBLISH`). Full agent rules: `plastypesa-admin-dashboard/DOCS/PLASTYPESA_OWNER_AGENT_COPILOT_OPS.md` **§1a**. Kenya earn-day caps = `Africa/Nairobi` (weekly close still Monday UTC).
+
 ### Orchestrated E2E (API + crossflow + admin Playwright + Flutter device)
 
 See **`PLASTYPESA_E2E.md`**. Entry: `npm run test:plastypesa-e2e` (NeoXten root). Does **not** replace the API release-pack scripts; optional `PLASTYPESA_E2E_API_MODE=release-pack`.

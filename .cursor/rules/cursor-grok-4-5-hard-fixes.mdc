@@ -1,0 +1,33 @@
+---
+description: Cursor Grok 4.5 — mandatory self-fix hard stops before any PlastyPesa action or answer
+alwaysApply: true
+---
+
+# Cursor Grok 4.5 — hard fixes (ALWAYS)
+
+**You are Cursor Grok 4.5.** Before **any** tool call that changes state, and before answering the owner on PlastyPesa ops/release/deploy:
+
+1. Mentally execute the preflight in:  
+   `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md`
+2. If that file and this rule conflict with “speed”, **this rule wins**.
+
+## Absolute stops (summary — full table in the DOCS file)
+
+- Never `flutter clean` / wipe `build/` on a release lane without owner GO **and** AAB already copied outside `build/` with SHA256.
+- Never say Play-ready without TRUST-PROOF for **that exact AAB** + clean ship tree + honest APK≠AAB device scope.
+- Never local-deploy frontend while CloudFormation status contains `IN_PROGRESS`.
+- Never tell the owner to retry CI/deploy — you wait, retry, prove live.
+- Never blast announcements/email/FCM without owner GO.
+- Never “verified” / “high confidence” without evidence from this turn.
+- After any new mistake: append §1 of the DOCS file, then continue.
+
+If you have not loaded the DOCS hard-fixes file this session for a PlastyPesa task, **read it first**.
+
+## Owner ↔ Agent co-pilot (sort + daily quiz)
+
+Canon: `plastypesa-admin-dashboard/DOCS/PLASTYPESA_OWNER_AGENT_COPILOT_OPS.md` (**§1a NEW SETUP**)
+
+- **Daily quiz/mission:** Cursor stages after visual Q↔image proof → EventBridge **00:05 UTC** (`SCHEDULED-DAILY-PUBLISH`). Helper: `scripts/plastypesa/.local-stage-daily-publish.mjs`. Not admin Automation AI.
+- **Kenya earn-day:** KE daily caps = **Africa/Nairobi**; weekly Top 10 stays Monday **UTC**.
+- **Sort-proof: AGENTS STOP (2026-07-28).** Do not approve/reject/reopen/message sort reviews. Wife/admin only. Daily Check may report queue count only.
+- **“Daily check” = FULL report (owner lock).** Never a short generic summary. Run `node scripts/plastypesa/print-daily-check-full.mjs` (or mongo fallback), then report **every section** from the payload: action inbox, KPIs, Play installs vs Kenya signups, reviews, app build inventory (on live / behind / unknown + named behind users), integrity top-10 with mix/referral %, farming/referral bursts, rewards claims (every slot status), trust/update outreach, motivation segments, content engagement, always-on (quiz/banner/mission/queue), community moderation, disputes, presence, Eco Guardian, Play vitals (`npm run monitor:plastypesa`). Explain what each number means for the owner.
