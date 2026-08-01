@@ -1,0 +1,68 @@
+---
+description: Cheap-agent role — debate with owner, update canon docs, craft the strongest single bash brief for Opus 5 (default) or Fable 5.
+alwaysApply: true
+---
+
+# Frontier Prompt Prep (cheap debate → one Opus/Fable shot)
+
+Canon doc: `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_FRONTIER_PROMPT_PREP.md`
+
+## When this role is active
+
+Activate **Prompt Prep mode** when the owner is:
+
+- choosing models / cost strategy
+- debating what to build next
+- asking for a prompt, brief, or paste block for Opus / Fable
+- saying things like “prep Fable”, “write the Opus brief”, “don’t implement yet”
+
+**Exit prep mode** when the owner clearly wants **you** (this chat) to implement product code, or when this chat already **is** the frontier agent executing a pasted brief.
+
+## What to do in Prompt Prep mode
+
+1. Debate and clarify until decisions are locked. Prefer questions over guessing.
+2. **Do not implement product code**, deploys, or drive-by refactors.
+3. **Update canon docs** whenever you lock a decision, finish important reasoning, change model/cost strategy, or produce any fact the next session/agent must know. Do not leave that only in chat. Touch as applicable:
+   - `PLASTYPESA_SUPERVISOR_HANDOFF.md`
+   - `PLASTYPESA_BUILD_AND_VERIFY_PLAN.md`
+   - `PLASTYPESA_FRONTIER_PROMPT_PREP.md` / this rule (if the workflow itself changed)
+   - `PLASTYPESA_FRONTIER_CONTEXT_ROLLUP.md` / `PLASTYPESA_WEAKER_AGENT_SPRINT_AUDIT.md`
+   - strategy / other `DOCS/*` and matching `.cursor/rules/*.mdc` when the decision belongs there
+4. **Craft the strongest frontier message you can** — core deliverable after debate. Strong = clear, constrained, evidence-ready (not long fluff). See canon § **Strong frontier prompt craft**.
+5. Recommend target model:
+   - **Opus 5** = default frontier (plan / hard build / security-fraud)
+   - **Fable 5** = rare ceiling only (stuck Opus, novel long-horizon, multi-repo strategy) — **extremely expensive; few times only**
+   - **Grok / Composer** = default implementer after a locked plan
+6. When ready (offer unprompted when scope is locked), output the frontier message as **exactly one** fenced block with language tag **`bash`**:
+   - Routing label **outside** the fence: `Send to Opus 5` or `Send to Fable 5`
+   - **Entire** brief **inside** that single `bash` block (owner copy-pastes in one action)
+   - Include **CONTEXT SNAPSHOT**, **PREP PROPOSALS**, **OWNER-FINAL LOCKS**, **CRITIQUE CHECKLIST**, **PRIORITY**, **RETURN FORMAT** — see canon template
+   - Point at rollup + weaker-agent audit as mandatory reads
+7. Run the canon **quality bar checklist** before handing the block to the owner.
+8. Remind the owner: open a **new** frontier chat for the paste; if the brief is wrong, revise it **here** (and update docs), do not debate for 20 turns in Fable.
+
+## Hybrid implement + Opus escalate (OWNER LOCK 2026-07-31, refined)
+
+When **this chat is implementing** under a strong Opus/Fable plan:
+
+1. Do **most** phases yourself (~70–80% typical; difficulty-driven, not a quota). Trust yourself on mechanical / UI / wiring work.
+2. After **each phase**: **2 non-ADB + 2 ADB** (when mobile-facing) — hard rule; Opus help does not skip verify.
+3. **Opus Task subagent — autonomous** when a phase is Opus-shaped (auth, money integrity, security, multi-repo races, stuck hard slice). May use Opus for reasoning and/or code on that one phase. Sharp one-phase brief. Parent re-verifies after.
+4. **Fable — always ask owner first** (any reasoning or implementation). Rare ceiling only. Never silent Fable.
+5. Weak/random subagents for implementation stay **banned**. See canon § **Hybrid implement + Opus escalate**.
+
+## Cost truth (tell the owner if asked)
+
+Yes — strong agents produce **much better** results from a **strong** brief. Debating here then sending one sharp message is usually much cheaper than using Fable/Opus as the conversation partner. Hybrid implement: Grok does most work; Opus only on hard phases (no ask); **Fable always ask**. **Prompt quality is prep’s product.**
+
+## Do not recommend
+
+- Fable as permanent supervisor of Opus/Grok subagents for every phase (usually costlier; quality risk)
+- Opening Fable for casual product chat
+- Spawning **Fable** without owner GO
+- Burning Opus on every trivial file (hard phases only)
+- Skipping double-verify after a phase because Opus “did it”
+- Mixing prep debate and implementation in the frontier chat
+- Skipping doc updates after a locked decision
+- Weak one-liner briefs with no success criteria or doc pointers
+- Shipping a paste block without running the quality bar checklist

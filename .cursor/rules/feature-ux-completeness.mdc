@@ -1,0 +1,21 @@
+---
+description: Full user/admin UX required — nav, sync, admin speed; not code-only ship
+alwaysApply: true
+---
+
+# Feature UX completeness (OWNER LOCK 2026-08-01)
+
+Canon: `DOCS/PLASTYPESA_FEATURE_UX_COMPLETENESS.md`
+
+When you build or change **any** PlastyPesa app screen, admin dashboard page, or ops UI:
+
+1. Design the **full journey** (happy path + reject/empty/error + how they leave).  
+2. **Back / close** must work — no trapped detail screens.  
+3. **Data must sync** — cards, lists, and detail never contradict after a mutate.  
+4. Optimize for **admin/user speed** on the common action (e.g. list-row Approve when a thumbnail already proves the case).  
+5. Prove from the **consumer** angle (ADB / browser click). API suite alone ≠ admin UX done.  
+6. Closeout must state nav + sync + proof — see canon doc.
+
+**Ban:** shipping a feature that “works in code” then leaving the owner to discover missing back arrows, red out-of-sync banners, or three-click paths for a one-click job.
+
+Related: `ui-surface-audit.mdc` · Sort Review = Opus only / Grok STOP until Opus closes audit.

@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 /**
- * Soft "keep PlastyPesa updated" glass banner (~4s). Not scare copy.
+ * Pinned in-app banner: invite users to update to Play build 56 (1.0.36).
+ * Replaces any prior pinned banner (fairness, v47, etc.).
  *
- *   node scripts/plastypesa/publish-soft-update-pinned-banner.mjs
- *   node scripts/plastypesa/publish-soft-update-pinned-banner.mjs --send
- *   node scripts/plastypesa/publish-soft-update-pinned-banner.mjs --send --revision=2
+ *   node scripts/plastypesa/publish-v56-update-pinned-banner.mjs
+ *   node scripts/plastypesa/publish-v56-update-pinned-banner.mjs --send
  */
 import { readFileSync } from "node:fs";
 
-const API = "https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api";
+const API =
+  "https://qdvaw2vpck.execute-api.eu-west-2.amazonaws.com/prod/api";
 
 const credentials = readFileSync(
   "C:/Users/Bobby/Documents/plastypesa-admin-dashboard/.local/plastypesa-test-credentials.md",
@@ -29,9 +30,7 @@ async function json(path, options = {}) {
     throw new Error(`${path}: non-JSON (${response.status})`);
   }
   if (!response.ok || body.type === "Error" || body.type === "error") {
-    throw new Error(
-      `${path}: HTTP ${response.status} — ${body.message || "failed"}`,
-    );
+    throw new Error(`${path}: HTTP ${response.status} — ${body.message || "failed"}`);
   }
   return body;
 }
@@ -49,53 +48,33 @@ const headers = {
   Authorization: `Bearer ${token}`,
 };
 
-const revision = process.argv
-  .find((arg) => arg.startsWith("--revision="))
-  ?.split("=")[1];
-const BANNER_ID = `soft-keep-updated-2026-07-28${
-  revision ? `-r${revision}` : ""
-}`;
-
-const durationHours = Number(
-  process.argv.find((arg) => arg.startsWith("--hours="))?.split("=")[1] || 24,
-);
+const BANNER_ID = "update-v56-play-2026-07-24";
 
 const payload = {
   active: true,
-  untilAdminDismiss: false,
-  durationHours,
-  title: "Please update PlastyPesa",
+  untilAdminDismiss: true,
+  title: "Update PlastyPesa on Google Play",
   message:
-    "Some people are still on an older app build. Open Google Play → PlastyPesa → Update so you get today's quiz, sorting, and rewards. Your points stay safe.",
+    "Version 1.0.36 is live on Google Play — smoother ads, bonus quiz archive, and Kenya founding season polish. Open Google Play, tap Update, then come back for Week 1 Day 3 on Home.",
   inAppBanner: {
     bannerId: BANNER_ID,
     bannerScope: "app_wide",
-    // Top toast (M-Pesa / Sendwave style) — center is easy to miss under Home cards.
-    bannerPosition: "top",
+    bannerPosition: "center",
     bannerStyle: "premium",
-    bannerDurationSec: 20,
-    persistOnScreen: false,
+    bannerDurationSec: 25,
+    persistOnScreen: true,
   },
 };
 
-const BRAND_BANNED = /\b(prize|prizes|lottery|gambl|win|winner|winnings)\b/i;
-for (const [field, value] of Object.entries({
-  title: payload.title,
-  message: payload.message,
-})) {
-  const hit = value.match(BRAND_BANNED);
-  if (hit) throw new Error(`Brand-unsafe wording in ${field}: "${hit[0]}"`);
-}
-
 if (!process.argv.includes("--send")) {
   const current = await json("/admin/active-in-app-banner", { headers });
-  console.log("Dry run — soft keep-updated 4s glass banner:");
-  console.log(JSON.stringify(payload, null, 2));
+  console.log("Dry run — would publish pinned update banner:");
+  console.log(JSON.stringify({ bannerId: BANNER_ID, ...payload }, null, 2));
   console.log(
     "Current pinned:",
     JSON.stringify(current?.data?.config ?? null, null, 2),
   );
-  console.log("Pass --send to publish on production.");
+  console.log("Pass --send to replace pinned banner on production.");
   process.exit(0);
 }
 
@@ -105,7 +84,7 @@ const saved = await json("/admin/active-in-app-banner", {
   body: JSON.stringify(payload),
 });
 
-console.log("Pinned soft keep-updated banner published.");
+console.log("Pinned v56 update banner published.");
 console.log(
   JSON.stringify(
     {
@@ -113,8 +92,6 @@ console.log(
       active: saved?.data?.config?.active,
       title: saved?.data?.config?.title,
       message: saved?.data?.config?.message,
-      endsAt: saved?.data?.config?.endsAt,
-      inAppBanner: saved?.data?.config?.inAppBanner,
     },
     null,
     2,

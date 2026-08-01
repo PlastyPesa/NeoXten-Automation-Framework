@@ -19,6 +19,7 @@ alwaysApply: true
 - Never tell the owner to retry CI/deploy — you wait, retry, prove live.
 - Never blast announcements/email/FCM without owner GO.
 - Never “verified” / “high confidence” without evidence from this turn.
+- Live Meta/Play verification that needs `plastypesa.com` (e.g. `app-ads.txt`) → agent edits + deploys + proves live URL. Never ask the owner to paste the line themselves.
 - After any new mistake: append §1 of the DOCS file, then continue.
 
 If you have not loaded the DOCS hard-fixes file this session for a PlastyPesa task, **read it first**.

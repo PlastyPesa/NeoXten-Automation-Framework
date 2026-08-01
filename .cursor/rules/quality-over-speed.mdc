@@ -26,6 +26,8 @@ Getting it right once is faster than fixing it five times. When you feel the urg
 - When asked if something is "up to date," compare against **every recent change**, not just the last one.
 - When submission/documentation files exist, check their content matches the **current app behavior** — not a previous version.
 
-## Subagent prohibition
-- Do NOT use subagents for implementation. The owner has explicitly forbidden this due to quality issues.
-- Subagents may only be used for **read-only exploration or testing**, never for code changes.
+## Subagent rules (updated 2026-07-31 refined)
+- **Banned:** weak/random subagents for implementation (quality history).
+- **Opus:** may run Task subagent **without asking** for Opus-shaped hard phases (reason and/or code); still **2+2 verify** after each phase.
+- **Fable:** **always ask owner first** (any reasoning or implementation). Rare ceiling only.
+- See `PLASTYPESA_FRONTIER_PROMPT_PREP.md` § Hybrid implement. Read-only exploration/testing subagents remain OK.

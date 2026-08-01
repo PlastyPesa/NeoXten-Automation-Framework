@@ -1,0 +1,9 @@
+# Integrity user snapshot (PlastyPesa ops)
+
+When investigating PlastyPesa referral fraud or preparing owner suspend briefs:
+
+1. Run `plastypesa-backend-api/.local/integrity-full-user-snapshot.js <email>` first.
+2. Report **fair activity + fraud signal** in one brief — never farm-only.
+3. Canon: `plastypesa-admin-dashboard/DOCS/PLASTYPESA_INTEGRITY_USER_SNAPSHOT_STANDARD.md`
+
+Mongo: transactions use field **`from`**, not `userId`.

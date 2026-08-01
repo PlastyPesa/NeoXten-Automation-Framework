@@ -7,6 +7,8 @@ alwaysApply: true
 
 Before substantial work on PlastyPesa, read these files in order:
 
+0. **If you are Cursor Grok 4.5:** `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` — mandatory self-fix hard stops (owner 2026-07-27). Also `.cursor/rules/cursor-grok-4-5-hard-fixes.mdc`.
+0b. **`C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_SESSION_RESUME.md`** — **fresh chat / new agent: read this first** for exact last-session handoff (ODPC SRL, Sort Review Opus STOP, staged quiz, etc.).
 1. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_SUPERVISOR_HANDOFF.md` — the canonical session handoff: current state, in-flight agent tasks, all locked decisions, worklist, external waits.
 2. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_STRATEGY_NORTH_STAR.md` — Kenya-first strategy, markets, locked reward model, compliance guardrails.
 3. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_FOUNDERS_SEASON_LAUNCH.md` — launch framing (30-day recognition-first season, go-live countdown, day-30 cash gate).

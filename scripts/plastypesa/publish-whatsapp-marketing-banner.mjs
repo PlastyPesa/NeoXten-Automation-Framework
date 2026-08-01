@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * Soft "keep PlastyPesa updated" glass banner (~4s). Not scare copy.
+ * A1 — 4s in-app WhatsApp marketing banner (auto-dismiss).
  *
- *   node scripts/plastypesa/publish-soft-update-pinned-banner.mjs
- *   node scripts/plastypesa/publish-soft-update-pinned-banner.mjs --send
- *   node scripts/plastypesa/publish-soft-update-pinned-banner.mjs --send --revision=2
+ *   node scripts/plastypesa/publish-whatsapp-marketing-banner.mjs
+ *   node scripts/plastypesa/publish-whatsapp-marketing-banner.mjs --send
+ *   node scripts/plastypesa/publish-whatsapp-marketing-banner.mjs --send --revision=2
  */
 import { readFileSync } from "node:fs";
 
@@ -52,28 +52,24 @@ const headers = {
 const revision = process.argv
   .find((arg) => arg.startsWith("--revision="))
   ?.split("=")[1];
-const BANNER_ID = `soft-keep-updated-2026-07-28${
+const BANNER_ID = `ke-whatsapp-support-2026-07-28${
   revision ? `-r${revision}` : ""
 }`;
 
-const durationHours = Number(
-  process.argv.find((arg) => arg.startsWith("--hours="))?.split("=")[1] || 24,
-);
-
+// 4 seconds ≈ short skim. Exact screen: Profile → WhatsApp support.
 const payload = {
   active: true,
   untilAdminDismiss: false,
-  durationHours,
-  title: "Please update PlastyPesa",
+  durationHours: 168,
+  title: "We're on WhatsApp",
   message:
-    "Some people are still on an older app build. Open Google Play → PlastyPesa → Update so you get today's quiz, sorting, and rewards. Your points stay safe.",
+    "Profile → WhatsApp support. Message us anytime. Replies within 24h. We never ask for your M-Pesa PIN or any fee.",
   inAppBanner: {
     bannerId: BANNER_ID,
     bannerScope: "app_wide",
-    // Top toast (M-Pesa / Sendwave style) — center is easy to miss under Home cards.
-    bannerPosition: "top",
+    bannerPosition: "center",
     bannerStyle: "premium",
-    bannerDurationSec: 20,
+    bannerDurationSec: 4,
     persistOnScreen: false,
   },
 };
@@ -89,7 +85,7 @@ for (const [field, value] of Object.entries({
 
 if (!process.argv.includes("--send")) {
   const current = await json("/admin/active-in-app-banner", { headers });
-  console.log("Dry run — soft keep-updated 4s glass banner:");
+  console.log("Dry run — WhatsApp 4s marketing banner:");
   console.log(JSON.stringify(payload, null, 2));
   console.log(
     "Current pinned:",
@@ -105,18 +101,29 @@ const saved = await json("/admin/active-in-app-banner", {
   body: JSON.stringify(payload),
 });
 
-console.log("Pinned soft keep-updated banner published.");
+const config = saved?.data?.config ?? {};
+console.log("WhatsApp marketing banner published.");
 console.log(
   JSON.stringify(
     {
-      bannerId: BANNER_ID,
-      active: saved?.data?.config?.active,
-      title: saved?.data?.config?.title,
-      message: saved?.data?.config?.message,
-      endsAt: saved?.data?.config?.endsAt,
-      inAppBanner: saved?.data?.config?.inAppBanner,
+      bannerId: config?.inAppBanner?.bannerId,
+      active: config.active,
+      untilAdminDismiss: config.untilAdminDismiss,
+      persistOnScreen: config?.inAppBanner?.persistOnScreen,
+      bannerDurationSec: config?.inAppBanner?.bannerDurationSec,
+      title: config.title,
+      message: config.message,
+      endsAt: config.endsAt,
+      locales: Object.keys(config.translations ?? {}).sort(),
     },
     null,
     2,
   ),
 );
+
+if (config.untilAdminDismiss === true || config?.inAppBanner?.persistOnScreen === true) {
+  console.error(
+    "\nFAIL: server persisted this as an admin-dismissed banner — it will not auto-dismiss.",
+  );
+  process.exit(1);
+}
