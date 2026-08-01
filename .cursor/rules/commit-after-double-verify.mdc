@@ -17,3 +17,5 @@ Then:
 - Update `PLASTYPESA_CURRENT_TODO.md` + `PLASTYPESA_SUPERVISOR_HANDOFF.md` in the same or follow-up docs commit  
 
 If either verification pair fails: **do not commit/push**; fix and re-run until both pairs pass.
+
+**Train mode (2026-08-01):** After commit, continue the next planned phase without asking the owner. **Brief once at end of the full plan** (see `phase-based-delivery.mdc`).

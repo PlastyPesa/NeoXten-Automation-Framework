@@ -1,28 +1,55 @@
 ---
-description: Plan → approval → one phase at a time → test → commit only if pass
+description: Plan phases → one GO → run train (2+2 verify → commit → next); brief at end
 alwaysApply: true
 ---
 
-# Phase-based delivery (owner workflow)
+# Phase-based delivery (OWNER LOCK 2026-08-01)
 
-Work in **strict phases**. Do not mix phases or add scope outside what was approved for the current phase.
+How Bobby wants agents to work (admin glass pattern — **never** re-ask GO per phase).
 
-## Cycle (repeat until done)
+## Before any code
 
-1. **Plan** — Present a concise, execution-focused plan for the next phase only.
-2. **Approval** — Wait for explicit owner approval before implementing that phase.
-3. **Implement** — Only the approved phase. No drive-by refactors or “while we’re here” changes.
-4. **Test** — Run the **relevant** automation / validation (NeoXten and repo tests per workspace rules: API suite for backend changes, admin config + dev server for dashboard changes, etc.).
-5. **Commit / push** — **Only if all relevant tests pass.** If tests fail: **stop**, report clearly, **no commit and no push**.
-6. **Next phase** — After a successful commit/push, start again at **plan** for the following phase (or the pre-agreed next phase if the full roadmap was already approved phase-by-phase).
+1. **Plan the full track in numbered phases** with concrete success criteria each.
+2. Confirm you understand the train.
+3. **Wait for one owner GO** on that plan / track.
 
-## Rules
+## After GO — run the train (do not stop for per-phase GO)
 
-- **One phase at a time** — Do not implement Phase 2 while Phase 1 is in progress or unapproved.
-- **No re-planning** — Once a phase is approved, execute it; do not reopen the same plan unless the owner explicitly revises scope.
-- **No phase mixing** — A single PR/commit cycle should correspond to **one** phase.
-- **Failures** — Diagnose, report, fix within the **same** phase scope if the failure is caused by that phase’s changes; otherwise stop and ask.
+For **each** phase, in order:
+
+1. **Implement** only that phase (no drive-by scope).
+2. **Test twice (non-ADB)** — two independent consumer-angle proofs (NeoXten / API / live / unit as relevant).
+3. **Test twice on ADB** when the change is mobile-facing (skip ADB only for pure admin/backend with no app surface).
+4. **Commit + push** only if **all** tests for that phase pass.
+5. **Immediately start the next phase** — do **not** ask `GO Phase 2`, `GO Phase 3`, etc.
+
+Repeat until every phase in the approved plan is done.
+
+## Stop only if something important
+
+Stop the train and ping the owner when:
+
+- A phase’s tests **fail** and cannot be fixed inside that phase’s scope
+- Missing credentials / AWS / MFA / physical action blocks progress
+- Scope is wrong vs the approved plan, or a trust/money risk needs a decision
+- Owner explicitly cuts you off
+
+Do **not** stop to “confirm Phase N” or for routine status mid-train.
+
+## End of train
+
+After the last successful phase commit:
+
+- **Brief the owner once** — what shipped, proof summary, what’s live, any residual risk
+- Update `PLASTYPESA_CURRENT_TODO.md` + `PLASTYPESA_SESSION_RESUME.md` / handoff
+
+## Hard rules
+
+- One phase’s commit = one phase’s files only
+- Never commit on failed gates
+- No agent sort approve/reject (unless owner co-pilots that chat)
+- `commit-after-double-verify.mdc` + NeoXten rules still apply
 
 ## Testing reference
 
-Follow `.cursor/rules/neoxten-test-and-commit.mdc` for **which** commands to run (e.g. `npm test` + `npm run build:lambda` + NeoXten API for backend; admin NeoXten config when the admin app changed).
+`.cursor/rules/neoxten-test-and-commit.mdc` — which suites to run per surface.

@@ -71,6 +71,7 @@
     "test:plastypesa-europe": "node scripts/plastypesa-europe-run.mjs",
     "verify:plastypesa-sort-proof-pilot": "node scripts/plastypesa/verify-sort-proof-pilot.mjs",
     "test:plastypesa-sort-review-sync": "node scripts/plastypesa/sort-review-queue-sync-prove.mjs",
+    "test:plastypesa-admin-live-truth-baseline": "node scripts/plastypesa/admin-live-truth-baseline.mjs",
     "test:plastypesa-e2e": "node scripts/plastypesa/plastypesa-e2e-orchestrator.mjs",
     "test:plastypesa-device-login": "node scripts/plastypesa/device-login-e2e.mjs",
     "test:plastypesa-ad-phase1": "node scripts/plastypesa/ad-phase1-adb-proof.mjs",

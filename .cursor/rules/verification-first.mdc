@@ -6,9 +6,10 @@ alwaysApply: true
 # Verification-First Workflow
 
 ## Before ANY implementation
-1. Write a plan with numbered steps and **concrete success criteria**.
-2. Present it to the owner. Do not start until approved.
-3. Success criteria must be testable — URLs to hit, values to check, commands to run, screens to verify.
+1. Write a **full phased plan** with numbered phases and **concrete success criteria** each.
+2. Present it to the owner. Do not start until **one GO** on that plan.
+3. After GO: run the phase train per `phase-based-delivery.mdc` — **do not** re-ask approval per phase.
+4. Success criteria must be testable — URLs to hit, values to check, commands to run, screens to verify.
 
 ## During implementation
 - After each change, verify against REAL output — live API responses, rendered pages, actual file timestamps — not source code grep of your own change.
