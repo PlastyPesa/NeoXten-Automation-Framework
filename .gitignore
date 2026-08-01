@@ -76,3 +76,11 @@ playwright-report/
 response.txt
 screen.png
 screen*.xml
+.local-*
+.neoxten-run.txt
+artifacts/
+scripts/.local-*
+scripts/plastypesa/.local-*
+scripts/plastypesa/localization/.local-*
+scripts/play-console/.local-*
+*.code-workspace
