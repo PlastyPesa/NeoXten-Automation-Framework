@@ -63,6 +63,7 @@
     "test:plastypesa-notif-copy-hygiene": "node scripts/plastypesa/notif-copy-hygiene.mjs",
     "ops:plastypesa-churn-probe": "node scripts/plastypesa/churn-probe.mjs",
     "ops:plastypesa-build-adoption": "node scripts/plastypesa/build-adoption-verify.mjs",
+    "ops:plastypesa-feedback-ops": "node scripts/plastypesa/feedback-ops-triage.mjs",
     "test:plastypesa-api:auth-only": "node scripts/plastypesa-api-auth-only.mjs",
     "test:plastypesa-login-auth-hint": "node scripts/plastypesa/login-auth-error-hint.mjs",
     "test:plastypesa-login-auth-hint-adb": "node scripts/plastypesa/login-auth-error-hint-adb.mjs",
