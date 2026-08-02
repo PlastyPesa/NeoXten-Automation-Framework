@@ -60,6 +60,7 @@
     "test:plastypesa-api:release-pack": "node scripts/plastypesa-release-pack.mjs",
     "test:plastypesa-launch-sync": "node scripts/plastypesa-launch-sync.mjs",
     "test:plastypesa-landing-sync": "node scripts/plastypesa-landing-sync.mjs",
+    "test:plastypesa-notif-copy-hygiene": "node scripts/plastypesa/notif-copy-hygiene.mjs",
     "test:plastypesa-api:auth-only": "node scripts/plastypesa-api-auth-only.mjs",
     "test:plastypesa-login-auth-hint": "node scripts/plastypesa/login-auth-error-hint.mjs",
     "test:plastypesa-login-auth-hint-adb": "node scripts/plastypesa/login-auth-error-hint-adb.mjs",
