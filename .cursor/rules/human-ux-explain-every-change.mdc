@@ -1,0 +1,17 @@
+---
+description: Every change explained in plain English + app UX (owner LOCK 2026-08-02)
+alwaysApply: true
+---
+
+# Human words + app UX — every change (LOCKED 2026-08-02 — FOREVER)
+
+Canon (full): `plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` §1 + absolute stop 13 · admin `.cursor/rules/human-ux-explain-every-change.mdc`.
+
+For **every** change / phase closeout / train brief to Bobby:
+
+1. **Human words** — plain English what we did and why (not ticket IDs alone).
+2. **App user experience** — what the user sees on phone/admin; if ops-only say **“Users see no change in the app”** and who is affected in real life.
+3. **Docs first** — SESSION_RESUME → CURRENT_TODO row → linked canon → hard-fixes, before acting.
+
+**Forbidden:** close with only `npm run` / commit SHAs.
+---

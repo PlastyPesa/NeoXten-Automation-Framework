@@ -20,16 +20,17 @@ alwaysApply: true
 - Never blast announcements/email/FCM without owner GO.
 - Never “verified” / “high confidence” without evidence from this turn.
 - Live Meta/Play verification that needs `plastypesa.com` (e.g. `app-ads.txt`) → agent edits + deploys + proves live URL. Never ask the owner to paste the line themselves.
+- **Every change brief = human words + app UX** (or “users see no app change” + who is affected). Never only ticket IDs / npm / SHAs. Docs first: SESSION_RESUME → CURRENT_TODO. Rule: `human-ux-explain-every-change.mdc`.
 - After any new mistake: append §1 of the DOCS file, then continue.
 
 If you have not loaded the DOCS hard-fixes file this session for a PlastyPesa task, **read it first**.
 
-## Company / Meta form fill (LOCKED 2026-07-30)
+## Company / Meta form fill + ALL owner pastes (LOCKED 2026-07-30; email lock 2026-08-01)
 
-Canon: `plastypesa-admin-dashboard/DOCS/PlastyPesa-Company-Legal-Identity-Reference.md`
+Canon: `plastypesa-admin-dashboard/DOCS/PlastyPesa-Company-Legal-Identity-Reference.md` · `OWNER_ACTIONS` § Form-fill · `.cursor/rules/owner-paste-one-block.mdc`
 
 - **VAT-registered:** TIN `52198408` · VAT `RO52198408` — never “leave VAT blank”.
-- **One field / one dropdown = one fenced `bash` block.** No mixed paste tables.
+- **One field / one dropdown / one email part = one fenced `bash` block** (label outside). **Subject ≠ Body** (two fences). No mixed tables.
 - **Do not** put inactive `+40 793 850 007` on Meta/OTP forms — ask owner for live phone.
 
 ## Owner ↔ Agent co-pilot (sort + daily quiz)
