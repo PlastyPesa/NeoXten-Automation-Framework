@@ -1,0 +1,212 @@
+{
+  "2026-08-03": {
+    "name": "Bottle Caps Day",
+    "line": "Small caps, big pile - keep today's caps and sort them with your bottles.",
+    "translations": {
+      "it": {
+        "name": "Giornata dei tappi",
+        "line": "Tappi piccoli, mucchio grande - conservali e differenziali con le bottiglie."
+      },
+      "es": {
+        "name": "Dia de los tapones",
+        "line": "Tapones pequenos, monton grande - guardalos y separalos con las botellas."
+      },
+      "de": {
+        "name": "Tag der Deckel",
+        "line": "Kleine Deckel, grosser Haufen - sammle sie und sortiere sie mit den Flaschen."
+      },
+      "fr": {
+        "name": "Journee des bouchons",
+        "line": "Petits bouchons, grand tas - gardez-les et triez-les avec vos bouteilles."
+      },
+      "pt": {
+        "name": "Dia das tampas",
+        "line": "Tampas pequenas, monte grande - guarde-as e separe-as com as garrafas."
+      },
+      "ro": {
+        "name": "Ziua capacelor",
+        "line": "Capace mici, morman mare - pastreaza-le si sorteaza-le cu sticlele."
+      }
+    }
+  },
+  "2026-08-04": {
+    "name": "Fresh Week Day",
+    "line": "New week, clean board - every member starts today from the same line.",
+    "translations": {
+      "it": {
+        "name": "Nuova settimana",
+        "line": "Settimana nuova, classifica pulita - oggi si riparte tutti dalla stessa riga."
+      },
+      "es": {
+        "name": "Semana nueva",
+        "line": "Semana nueva, tabla limpia - hoy todos empiezan desde la misma linea."
+      },
+      "de": {
+        "name": "Neue Woche",
+        "line": "Neue Woche, leere Tabelle - heute starten alle von der gleichen Linie."
+      },
+      "fr": {
+        "name": "Nouvelle semaine",
+        "line": "Semaine neuve, tableau vide - aujourd'hui tout le monde repart a egalite."
+      },
+      "pt": {
+        "name": "Semana nova",
+        "line": "Semana nova, quadro limpo - hoje todos comecam da mesma linha."
+      },
+      "ro": {
+        "name": "Saptamana noua",
+        "line": "Saptamana noua, clasament curat - azi toti pornim de la aceeasi linie."
+      }
+    }
+  },
+  "2026-08-05": {
+    "name": "Clean Sort Day",
+    "line": "Rinse it, dry it, sort it - clean plastic is approved faster.",
+    "translations": {
+      "it": {
+        "name": "Giornata pulizia",
+        "line": "Sciacqua, asciuga, differenzia - la plastica pulita viene approvata prima."
+      },
+      "es": {
+        "name": "Dia de limpieza",
+        "line": "Enjuaga, seca y separa - el plastico limpio se aprueba mas rapido."
+      },
+      "de": {
+        "name": "Sauber-Sortier-Tag",
+        "line": "Ausspulen, trocknen, sortieren - sauberes Plastik wird schneller bestatigt."
+      },
+      "fr": {
+        "name": "Journee tri propre",
+        "line": "Rincez, sechez, triez - le plastique propre est valide plus vite."
+      },
+      "pt": {
+        "name": "Dia da separacao",
+        "line": "Lave, seque e separe - o plastico limpo e aprovado mais depressa."
+      },
+      "ro": {
+        "name": "Ziua sortarii curate",
+        "line": "Clateste, usuca, sorteaza - plasticul curat e aprobat mai repede."
+      }
+    }
+  },
+  "2026-08-06": {
+    "name": "PET Bottle Day",
+    "line": "Water and soda bottles are PET 1 - the easiest plastic to recycle.",
+    "translations": {
+      "it": {
+        "name": "Giornata PET",
+        "line": "Le bottiglie di acqua e bibite sono PET 1 - la plastica piu facile da riciclare."
+      },
+      "es": {
+        "name": "Dia del PET",
+        "line": "Las botellas de agua y refresco son PET 1 - el plastico mas facil de reciclar."
+      },
+      "de": {
+        "name": "PET-Flaschen-Tag",
+        "line": "Wasser- und Limoflaschen sind PET 1 - das am leichtesten recycelbare Plastik."
+      },
+      "fr": {
+        "name": "Journee bouteilles PET",
+        "line": "Les bouteilles d'eau et de soda sont du PET 1 - le plastique le plus recyclable."
+      },
+      "pt": {
+        "name": "Dia do PET",
+        "line": "Garrafas de agua e refrigerante sao PET 1 - o plastico mais facil de reciclar."
+      },
+      "ro": {
+        "name": "Ziua sticlelor PET",
+        "line": "Sticlele de apa si suc sunt PET 1 - plasticul cel mai usor de reciclat."
+      }
+    }
+  },
+  "2026-08-07": {
+    "name": "Learn and Earn Day",
+    "line": "Read one article to the very end today and take the points with you.",
+    "translations": {
+      "it": {
+        "name": "Impara e guadagna",
+        "line": "Leggi oggi un articolo fino in fondo e porta con te i punti."
+      },
+      "es": {
+        "name": "Aprende y gana",
+        "line": "Lee hoy un articulo hasta el final y llevate los puntos."
+      },
+      "de": {
+        "name": "Lernen und verdienen",
+        "line": "Lies heute einen Artikel bis zum Ende und nimm die Punkte mit."
+      },
+      "fr": {
+        "name": "Apprendre et gagner",
+        "line": "Lisez un article jusqu'au bout aujourd'hui et gardez les points."
+      },
+      "pt": {
+        "name": "Aprender e ganhar",
+        "line": "Le hoje um artigo ate ao fim e leva os pontos contigo."
+      },
+      "ro": {
+        "name": "Invata si castiga",
+        "line": "Citeste azi un articol pana la capat si iei punctele cu tine."
+      }
+    }
+  },
+  "2026-08-08": {
+    "name": "Neighbour Day",
+    "line": "Invite one neighbour - you both earn when they join and start sorting.",
+    "translations": {
+      "it": {
+        "name": "Giornata del vicino",
+        "line": "Invita un vicino - guadagnate entrambi quando si iscrive e inizia a differenziare."
+      },
+      "es": {
+        "name": "Dia del vecino",
+        "line": "Invita a un vecino - los dos ganan cuando se registra y empieza a separar."
+      },
+      "de": {
+        "name": "Nachbarschaftstag",
+        "line": "Lade eine Nachbarin ein - ihr verdient beide, wenn sie startet und sortiert."
+      },
+      "fr": {
+        "name": "Journee du voisin",
+        "line": "Invitez un voisin - vous gagnez tous les deux quand il s'inscrit et trie."
+      },
+      "pt": {
+        "name": "Dia do vizinho",
+        "line": "Convida um vizinho - ambos ganham quando ele entra e comeca a separar."
+      },
+      "ro": {
+        "name": "Ziua vecinului",
+        "line": "Invita un vecin - castigati amandoi cand se inscrie si incepe sa sorteze."
+      }
+    }
+  },
+  "2026-08-09": {
+    "name": "Photo Proof Day",
+    "line": "One clear photo of your sorted plastic is today's biggest single earn.",
+    "translations": {
+      "it": {
+        "name": "Giornata della foto",
+        "line": "Una foto nitida della plastica differenziata e il guadagno piu grande di oggi."
+      },
+      "es": {
+        "name": "Dia de la foto",
+        "line": "Una foto clara de tu plastico separado es la mayor ganancia de hoy."
+      },
+      "de": {
+        "name": "Foto-Beweis-Tag",
+        "line": "Ein scharfes Foto deines sortierten Plastiks bringt heute am meisten Punkte."
+      },
+      "fr": {
+        "name": "Journee photo preuve",
+        "line": "Une photo nette de votre plastique trie est le plus gros gain du jour."
+      },
+      "pt": {
+        "name": "Dia da foto prova",
+        "line": "Uma foto nitida do teu plastico separado e o maior ganho de hoje."
+      },
+      "ro": {
+        "name": "Ziua dovezii foto",
+        "line": "O poza clara cu plasticul sortat aduce cele mai multe puncte azi."
+      }
+    }
+  }
+}
