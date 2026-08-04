@@ -173,13 +173,23 @@ async function preview(db, config, now) {
     const idle = idleDays(clockStart, now);
     if (idle === null || idle < config.warnAfterDays) continue;
 
+    // Wave 1 narrows pausing to accounts that never proved anything and have
+    // been away a fortnight. Warnings ignore the wave — a nudge is harmless.
+    const everProved = Number(user.sortProofCount) > 0 || Boolean(user.earnPause?.restoredAt);
+    const seen = user.lastAppSeenAt ? new Date(user.lastAppSeenAt) : null;
+    const inWave =
+      config.waveFilter === 'ALL' ||
+      (!everProved && (!seen || now.getTime() - seen.getTime() >= 14 * 86400000));
+
     rows.push({
       ecoHandle: user.ecoHandle || String(user._id),
       idle,
       everSubmitted: Boolean(lastQualifyingAt),
       alreadyWarned: Boolean(pause.warnedAt),
+      inWave,
       wouldWarn: !pause.warnedAt,
       wouldPause:
+        inWave &&
         idle >= config.idleDays &&
         Boolean(pause.warnedAt) &&
         now.getTime() - new Date(pause.warnedAt).getTime() >= config.minWarnNoticeHours * 3600000,
@@ -238,12 +248,14 @@ async function main() {
       console.log(`=== Preview — ${rows.length} account(s) at or past the warning line ===`);
       console.log(`would be warned on the next run : ${rows.filter((r) => r.wouldWarn).length}`);
       console.log(`could be paused on the next run : ${rows.filter((r) => r.wouldPause).length}`);
+      console.log(`inside the ${current.waveFilter} wave : ${rows.filter((r) => r.inWave).length}`);
       console.log(`never submitted anything        : ${rows.filter((r) => !r.everSubmitted).length}`);
       for (const row of rows.slice(0, 40)) {
         console.log(
           `  ${row.ecoHandle.padEnd(18)} idle ${String(row.idle).padStart(3)}d  ` +
             `${row.everSubmitted ? "has submitted before" : "never submitted   "}  ` +
-            `${row.alreadyWarned ? "warned" : "not warned"}` +
+            `${row.alreadyWarned ? "warned" : "not warned"}  ` +
+            `${row.inWave ? "in wave    " : "outside wave"}` +
             `${row.wouldPause ? "  -> PAUSE" : row.wouldWarn ? "  -> warn" : ""}`,
         );
       }
