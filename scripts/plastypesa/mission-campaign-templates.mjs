@@ -8,7 +8,7 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     category: "pride_kenya",
     audience: "kenya",
     title: "We chose Kenya",
-    message: "PlastyPesa exists to teach millions of us to sort plastic by grade at home — with proof. Weekly M-Pesa rewards are real today (Top 10 every Monday). First Eco Guardian: KES 20,000 for the first person to 125,000 lifetime points and 30 approved sorts — rules are public in the app. Invite a friend: both earn 2000 pts during our launch boost.",
+    message: "PlastyPesa exists to teach millions of us to sort plastic by grade at home — with proof. Weekly M-Pesa rewards are real today (Top 10 every Monday). First Eco Guardian: KES 20,000 for the first person to 125,000 lifetime points and 30 approved sorts — rules are public in the app. Invite a friend: you both earn 2000 pts once their first sorting photo is approved.",
   },
   "week1_day2_sort_habit": {
     id: "week1_day2_sort_habit",
@@ -22,7 +22,7 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     category: "community_counter",
     audience: "kenya",
     title: "We're building this together",
-    message: "Every verified sort this week helps Kenya prove grade-sorting at home. Check the live counters on Home. Invite a friend — both earn 2000 pts during the launch boost.",
+    message: "Every verified sort this week helps Kenya prove grade-sorting at home. Check the live counters on Home. Invite a friend — you both earn 2000 pts once their first sorting photo is approved.",
   },
   "week1_day4_eco_guardian": {
     id: "week1_day4_eco_guardian",
@@ -43,7 +43,7 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     category: "invite_grow",
     audience: "kenya",
     title: "Grow together",
-    message: "Invite a friend with your link — you both earn 2000 bonus points during our launch boost. When more learners join, we expand weekly rewards together.",
+    message: "Invite a friend with your link — you both earn 2000 bonus points once their first sorting photo is approved, not when they join. When more learners join and sort, we expand weekly rewards together.",
   },
   "week1_day7_weekly": {
     id: "week1_day7_weekly",
@@ -64,7 +64,7 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     category: "community_counter",
     audience: "kenya",
     title: "We're building this together",
-    message: "Every verified sort this week helps Kenya prove grade-sorting at home. Invite a friend — both earn 2000 pts during the launch boost. When we grow, the weekly board grows too.",
+    message: "Every verified sort this week helps Kenya prove grade-sorting at home. Invite a friend — you both earn 2000 pts once their first sorting photo is approved. When we grow, the weekly board grows too.",
   },
   "week2_day3_jobs": {
     id: "week2_day3_jobs",
@@ -106,14 +106,14 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     category: "invite_grow",
     audience: "kenya",
     title: "Launch boost: 2000 + 2000",
-    message: "Invite a friend with your link — you both earn 2000 bonus points during our launch boost. Referral points count toward your weekly board rank. Share from Profile → Invite friends.",
+    message: "Invite a friend with your link — you both earn 2000 bonus points once their first sorting photo is approved, not when they join. Referral points count toward your weekly board rank. Share from Profile → Invite friends.",
   },
   "week3_day2_invite_grow": {
     id: "week3_day2_invite_grow",
     category: "invite_grow",
     audience: "kenya",
     title: "Help us grow the board",
-    message: "When more learners join and sort, PlastyPesa expands weekly rewards — Top 10 today, Top 20 next. Invite a friend: both earn 2000 pts during the launch boost.",
+    message: "When more learners join and sort, PlastyPesa expands weekly rewards — Top 10 today, Top 20 next. Invite a friend: you both earn 2000 pts once their first sorting photo is approved.",
   },
   "week3_day3_top20_path": {
     id: "week3_day3_top20_path",
@@ -148,7 +148,7 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     category: "invite_grow",
     audience: "kenya",
     title: "Boost ending soon",
-    message: "Launch referral boost: 2000 + 2000 points for you and your friend. After the boost ends, referral rewards stay at 1000 + 1000. Invite now from Profile while the boost is live.",
+    message: "Launch referral boost: 2000 + 2000 points for you and your friend, paid once their first sorting photo is approved. After the boost ends, referral rewards stay at 1000 + 1000. Invite now from Profile while the boost is live.",
   },
   "week4_day1_eco_guardian": {
     id: "week4_day1_eco_guardian",
@@ -175,8 +175,8 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     id: "week4_day4_referral",
     category: "invite_grow",
     audience: "kenya",
-    title: "Friends who join, earn",
-    message: "Your referral code is in Profile. When a friend registers through your link, you both earn bonus points — 2000 + 2000 during the launch boost. Referral history shows who joined.",
+    title: "Friends who sort, earn",
+    message: "Your referral code is in Profile. When a friend joins through your link and their first sorting photo is approved, you both earn bonus points — 2000 + 2000 during the launch boost. Referral history shows who joined and who has sorted.",
   },
   "week4_day5_learning": {
     id: "week4_day5_learning",
@@ -225,7 +225,7 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     category: "community_counter",
     audience: "kenya",
     title: "Community milestone",
-    message: "Every new learner and verified sort moves Kenya closer to bigger weekly boards. Check Home counters and invite a friend — launch boost still 2000 + 2000 for both of you.",
+    message: "Every new learner and verified sort moves Kenya closer to bigger weekly boards. Check Home counters and invite a friend — launch boost still 2000 + 2000 for both of you, paid on their first approved sort.",
   },
   "week5_day5_sort": {
     id: "week5_day5_sort",
@@ -239,7 +239,7 @@ export const MISSION_CAMPAIGN_TEMPLATES = {
     category: "invite_grow",
     audience: "kenya",
     title: "Share the mission",
-    message: "Tell one friend why you sort — weekly M-Pesa for Top 10, First Eco Guardian KES 20,000 published in the app. Your link gives you both 2000 pts during the launch boost.",
+    message: "Tell one friend why you sort — weekly M-Pesa for Top 10, First Eco Guardian KES 20,000 published in the app. Your link gives you both 2000 pts once their first sorting photo is approved.",
   },
   "week5_day7_founding_stretch": {
     id: "week5_day7_founding_stretch",

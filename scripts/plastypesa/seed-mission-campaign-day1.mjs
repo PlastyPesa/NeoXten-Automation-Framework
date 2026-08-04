@@ -50,7 +50,7 @@ const headers = {
 const payload = {
   title: 'We chose Kenya',
   message:
-    'PlastyPesa exists to teach millions of us to sort plastic by grade at home — with proof. Weekly M-Pesa rewards are real today (Top 10 every Monday). First Eco Guardian: KES 20,000 for the first person to 125,000 lifetime points and 30 approved sorts — rules are public in the app. Invite a friend: both earn 2000 pts during our launch boost.',
+    'PlastyPesa exists to teach millions of us to sort plastic by grade at home — with proof. Weekly M-Pesa rewards are real today (Top 10 every Monday). First Eco Guardian: KES 20,000 for the first person to 125,000 lifetime points and 30 approved sorts — rules are public in the app. Invite a friend: you both earn 2000 pts once their first sorting photo is approved.',
   audience: 'kenya',
   bannerScope: 'main_shell',
   bannerPosition: 'top',

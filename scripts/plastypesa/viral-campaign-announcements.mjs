@@ -27,7 +27,10 @@ const ANNOUNCEMENTS = [
     key: 'referral-boost',
     audience: 'kenya',
     title: 'Launch boost — invite a friend',
-    message: `Limited time until ${BOOST_END_LABEL}: invite a friend from Profile and you both earn 2000 bonus points. Referral points count toward your weekly board. After the boost, referral rewards stay 1000 + 1000.`,
+    // P-INVITE-COPY-SWEEP: the boost freezes the AMOUNT at signup; the points
+    // are paid on the friend's first approved sort. Never publish the amount
+    // without that condition.
+    message: `Limited time until ${BOOST_END_LABEL}: invite a friend from Profile and you both earn 2000 bonus points once their first sorting photo is approved — not when they join. Referral points count toward your weekly board. After the boost, referral rewards stay 1000 + 1000.`,
     bannerScope: 'app_wide',
     bannerPosition: 'center',
     bannerStyle: 'premium',
@@ -50,8 +53,8 @@ const ANNOUNCEMENTS = [
 
 const PINNED_REFERRAL = {
   active: true,
-  title: 'Invite a friend — both earn 2000',
-  message: `Launch boost ends ${BOOST_END_LABEL}. Share your link from Profile — you and your friend each earn 2000 bonus points while the boost is live.`,
+  title: 'Invite a friend — 2000 on first approved sort',
+  message: `Launch boost ends ${BOOST_END_LABEL}. Share your link from Profile — you and your friend each earn 2000 bonus points once their first sorting photo is approved, not when they join. Invite during the boost and the 2000 is locked in even if they sort later.`,
   endsAt: BOOST_END_ISO,
   inAppBanner: {
     bannerDurationSec: 25,
@@ -65,7 +68,7 @@ const PINNED_REFERRAL = {
 const PINNED_COLD_START = {
   active: true,
   title: 'Kenya founding season — two ways to earn big',
-  message: `Invite a friend before ${BOOST_END_LABEL} — you both earn 2000 bonus points (Profile → share your link).\n\nFirst Eco Guardian: KES 20,000 for the first learner to reach 125,000 lifetime points and 30 approved sort-at-home photos. Tap First Eco Guardian on Home for your progress.`,
+  message: `Invite a friend before ${BOOST_END_LABEL} — you both earn 2000 bonus points once their first sorting photo is approved (Profile → share your link).\n\nFirst Eco Guardian: KES 20,000 for the first learner to reach 125,000 lifetime points and 30 approved sort-at-home photos. Tap First Eco Guardian on Home for your progress.`,
   endsAt: BOOST_END_ISO,
   inAppBanner: {
     bannerDurationSec: 30,

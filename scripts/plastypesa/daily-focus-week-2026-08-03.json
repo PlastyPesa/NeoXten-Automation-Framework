@@ -151,31 +151,31 @@
   },
   "2026-08-08": {
     "name": "Neighbour Day",
-    "line": "Invite one neighbour - you both earn when they join and start sorting.",
+    "line": "Invite one neighbour - you both earn when their first sorting photo is approved.",
     "translations": {
       "it": {
         "name": "Giornata del vicino",
-        "line": "Invita un vicino - guadagnate entrambi quando si iscrive e inizia a differenziare."
+        "line": "Invita un vicino - guadagnate entrambi quando la sua prima foto di raccolta viene approvata."
       },
       "es": {
         "name": "Dia del vecino",
-        "line": "Invita a un vecino - los dos ganan cuando se registra y empieza a separar."
+        "line": "Invita a un vecino - los dos ganan cuando se aprueba su primera foto de separacion."
       },
       "de": {
         "name": "Nachbarschaftstag",
-        "line": "Lade eine Nachbarin ein - ihr verdient beide, wenn sie startet und sortiert."
+        "line": "Lade eine Nachbarin ein - ihr verdient beide, wenn ihr erstes Sortierfoto genehmigt ist."
       },
       "fr": {
         "name": "Journee du voisin",
-        "line": "Invitez un voisin - vous gagnez tous les deux quand il s'inscrit et trie."
+        "line": "Invitez un voisin - vous gagnez tous les deux quand sa premiere photo de tri est approuvee."
       },
       "pt": {
         "name": "Dia do vizinho",
-        "line": "Convida um vizinho - ambos ganham quando ele entra e comeca a separar."
+        "line": "Convida um vizinho - ambos ganham quando a primeira foto de separacao dele for aprovada."
       },
       "ro": {
         "name": "Ziua vecinului",
-        "line": "Invita un vecin - castigati amandoi cand se inscrie si incepe sa sorteze."
+        "line": "Invita un vecin - castigati amandoi cand prima lui poza de sortare este aprobata."
       }
     }
   },

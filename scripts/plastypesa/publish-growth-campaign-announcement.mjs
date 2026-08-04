@@ -51,8 +51,10 @@ const headers = {
 const stamp = new Date().toISOString().slice(0, 10);
 const announcePayload = {
   title: "Invite friends — boost until 11 August",
+  // P-INVITE-COPY-SWEEP: points land on the invitee's first APPROVED sort,
+  // not at signup. The boost only freezes the amount.
   message:
-    "Invite a friend from Profile before 11 August — you both earn 2000 bonus points during our launch boost. First Eco Guardian: KES 20,000 for the first person at 125,000 lifetime points and 30 approved sorts. Tap the home card for your progress.",
+    "Invite a friend from Profile before 11 August — you both earn 2000 bonus points once their first sorting photo is approved, not when they join. First Eco Guardian: KES 20,000 for the first person at 125,000 lifetime points and 30 approved sorts. Tap the home card for your progress.",
   audience: "kenya",
   bannerScope: "main_shell",
   bannerPosition: "top",
