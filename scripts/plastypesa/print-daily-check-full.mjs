@@ -56,6 +56,20 @@ line("Alert active", d.ecoGuardian?.alertActive);
 line("Open claims", d.ecoGuardian?.openClaims?.length);
 line("Qualified without claim", d.ecoGuardian?.qualifiedWithoutClaim?.length);
 
+console.log("\n── Inactivity pulse (earn pause) ──");
+const ip = d.inactivityPulse || {};
+line("Pausing switch ON", ip.killSwitch?.pausingEnabled);
+line("Warnings switch ON", ip.killSwitch?.warningsEnabled);
+line("Wave", ip.killSwitch?.waveFilter);
+line("Rule (idle / warn) days", [ip.killSwitch?.idleDays, ip.killSwitch?.warnAfterDays].join(" / "));
+line("Paused right now", ip.pausedNow);
+line("Warned, not yet paused", ip.warnedAwaitingAction);
+line("Paused last 24h", ip.pausedLast24h);
+line("Came back last 24h", ip.restoredLast24h);
+line("On 48h provisional", ip.provisionalActive);
+line("Repeat-pause candidates", ip.terminateCandidates);
+if (ip.note) console.log("  note:", ip.note);
+
 console.log("\n── Weekly reward claims ──");
 console.log(JSON.stringify(d.rewardsOps?.statusCounts || d.rewardsOps, null, 2));
 
