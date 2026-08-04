@@ -23,7 +23,7 @@
  *   node scripts/plastypesa/inactivity-pulse-ops.mjs --undo-everything
  *
  * Change a number without touching the switches:
- *   node scripts/plastypesa/inactivity-pulse-ops.mjs --set idleDays=5 --set warnAfterDays=4
+ *   node scripts/plastypesa/inactivity-pulse-ops.mjs --set idleDays=3 --set warnAfterDays=2
  *
  * Preview who the next run would touch, writing nothing:
  *   node scripts/plastypesa/inactivity-pulse-ops.mjs --preview
@@ -45,8 +45,8 @@ const MASTER_NAME = "inactivity-pulse";
 const SHIPPED_POLICY = {
   enabled: false,
   warningsEnabled: false,
-  idleDays: 5,
-  warnAfterDays: 4,
+  idleDays: 3,
+  warnAfterDays: 2,
   newMemberGraceDays: 7,
   minWarnNoticeHours: 24,
   provisionalRestoreHours: 48,
@@ -133,6 +133,7 @@ async function preview(db, config, now) {
           createdAt: 1,
           sortProofCount: 1,
           lastAppSeenAt: 1,
+          lastEngagedAt: 1,
           earnPause: 1,
         },
       },
@@ -164,11 +165,14 @@ async function preview(db, config, now) {
     }
 
     const graceEndsAt = user.createdAt ? new Date(new Date(user.createdAt).getTime() + graceMs) : null;
-    const clockStart =
-      lastQualifyingAt && graceEndsAt
-        ? new Date(Math.max(lastQualifyingAt.getTime(), graceEndsAt.getTime()))
-        : lastQualifyingAt || graceEndsAt;
-    if (!clockStart) continue;
+    // Owner lock 2026-08-04: the clock measures absence from the app. Mirror of
+    // clockStartFor() in inactivity_pulse.service.js - keep the two in step.
+    const signsOfLife = [user.lastEngagedAt, user.lastAppSeenAt, lastQualifyingAt, graceEndsAt]
+      .filter(Boolean)
+      .map((d) => new Date(d))
+      .filter((d) => !Number.isNaN(d.getTime()));
+    if (!signsOfLife.length) continue;
+    const clockStart = new Date(Math.max(...signsOfLife.map((d) => d.getTime())));
 
     const idle = idleDays(clockStart, now);
     if (idle === null || idle < config.warnAfterDays) continue;
