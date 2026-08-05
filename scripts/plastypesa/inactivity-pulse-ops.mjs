@@ -23,7 +23,7 @@
  *   node scripts/plastypesa/inactivity-pulse-ops.mjs --undo-everything
  *
  * Change a number without touching the switches:
- *   node scripts/plastypesa/inactivity-pulse-ops.mjs --set idleDays=3 --set warnAfterDays=2
+ *   node scripts/plastypesa/inactivity-pulse-ops.mjs --set idleDays=5 --set warnAfterDays=4
  *
  * Preview who the next run would touch, writing nothing:
  *   node scripts/plastypesa/inactivity-pulse-ops.mjs --preview
@@ -45,8 +45,8 @@ const MASTER_NAME = "inactivity-pulse";
 const SHIPPED_POLICY = {
   enabled: false,
   warningsEnabled: false,
-  idleDays: 3,
-  warnAfterDays: 2,
+  idleDays: 5,
+  warnAfterDays: 4,
   newMemberGraceDays: 7,
   minWarnNoticeHours: 24,
   provisionalRestoreHours: 48,

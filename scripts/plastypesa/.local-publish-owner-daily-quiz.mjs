@@ -24,101 +24,121 @@ const REGION = "eu-west-2";
 const s3url = (key) => `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
 
 /**
- * 2026-07-30 UTC — theme: Mission Campaign Week2 Day3 "Your sort creates jobs"
- * Visual verified this session (local catalogue files read pixel-side).
+ * 2026-08-05 Nairobi — theme: "Know your grade: the plastic in your own kitchen".
+ *
+ * Five questions, not ten: the 10Q + 2-hard redesign is a separate owner
+ * decision and is deliberately out of this publish. Every question is
+ * answerable from what is actually in the picture, and each picture was opened
+ * and looked at this session before it was wired to its question:
+ *
+ *   milk jug        opaque white jug, moulded handle, pink screw cap  -> HDPE
+ *   food container  translucent tub with an orange snap lid           -> PP
+ *   bottle cage     mesh cage packed with clear/green/brown drink bottles -> PET
+ *   street banks    green "bottles, cans, jars" beside blue "paper, card, cartons"
+ *   littered shore  bottles, foam and sachets across rocks and sand, boats behind
+ *
+ * The theme is deliberately the Sort by Grade earn path: telling #1, #2 and #5
+ * apart in your own kitchen is the skill that gets a sort photo approved.
  */
 const Q = [
   {
     question:
-      "A dedicated plastic packaging bin like this is the first step toward what?",
+      "This milk jug is stiff, cloudy-white rather than see-through, and has a moulded handle. Which grade is it?",
     options: [
-      "Collecting clean plastic so recycling plants and jobs can use it",
-      "Throwing food waste and bottles into one mixed bag",
-      "Burning all plastic in the street",
-      "Stopping recycling forever",
+      "HDPE — grade 2",
+      "PET — grade 1",
+      "PVC — grade 3",
+      "Polystyrene — grade 6",
     ],
-    answer: "Collecting clean plastic so recycling plants and jobs can use it",
+    answer: "HDPE — grade 2",
     explanation:
-      "Household collection of plastic packaging is step one in the circular chain — collection, sorting hubs, and recycling jobs need clean material.",
-    topic: "recycling",
+      "Milk and juice jugs are HDPE, grade 2. The giveaway is the look and feel: HDPE is opaque and rigid, and it is one of the easiest grades to sell on, so keep it in its own pile.",
+    topic: "plastic-types",
+    difficulty: "easy",
     imageUrl: s3url(
-      "quiz-images/quiz-images/verified/recycling/plastic-recycling-bin-reykjavik.jpg",
+      "quiz-images/quiz-images/verified/plastic-types/plastic-milk-bottle.jpg",
     ),
   },
   {
-    question: "Bottles gathered in a cage like this are usually waiting for what?",
+    question:
+      "A food tub like this — translucent body, snap-on lid, happy in the microwave — is usually which grade?",
     options: [
-      "Recycling collection / processing (often PET, code 1)",
-      "Immediate landfill with no further use",
-      "Only decorative display",
-      "Mixing with wet food waste on purpose",
+      "PP — grade 5",
+      "PET — grade 1",
+      "HDPE — grade 2",
+      "It has no grade at all",
     ],
-    answer: "Recycling collection / processing (often PET, code 1)",
+    answer: "PP — grade 5",
     explanation:
-      "Caged bottle take-back is a collection step. Clear drink bottles are typically PET (code 1). Clean empties keep the stream usable.",
+      "Reusable food tubs and their lids are normally polypropylene, grade 5. PP handles heat, which is why it survives the microwave and the dishwasher when a PET bottle would not.",
     topic: "plastic-types",
+    difficulty: "medium",
+    imageUrl: s3url(
+      "quiz-images/quiz-images/verified/plastic-types/tupperware-polypropylene-container.jpg",
+    ),
+  },
+  {
+    question:
+      "This cage is packed with clear and coloured drink bottles. What is the grade collectors are after here?",
+    options: [
+      "PET — grade 1",
+      "PP — grade 5",
+      "PVC — grade 3",
+      "Mixed plastic with no grade",
+    ],
+    answer: "PET — grade 1",
+    explanation:
+      "Water and soda bottles are PET, grade 1 — the most wanted household plastic there is. Empty them, squash them and keep them apart from other grades and they stay worth collecting.",
+    topic: "plastic-types",
+    difficulty: "easy",
     imageUrl: s3url(
       "quiz-images/quiz-images/verified/plastic-types/clear-pet-bottles-recycling-pile.jpg",
     ),
   },
   {
-    question: "A large outdoor pile of bottles like this mainly shows what need?",
+    question:
+      "Two banks stand side by side: green for bottles, cans and jars, blue for paper, card and drinks cartons. Where does an empty plastic water bottle belong?",
     options: [
-      "Organised collection and recycling jobs — not leaving plastic in the open",
-      "That plastic disappears on its own in a week",
-      "That sorting at home never matters",
-      "That only glass can be recycled",
+      "The green bottles bank",
+      "The blue paper and card bank, because the label is paper",
+      "Either one — the lorry separates it later",
+      "Neither; bottles cannot be recycled",
     ],
-    answer:
-      "Organised collection and recycling jobs — not leaving plastic in the open",
+    answer: "The green bottles bank",
     explanation:
-      "Loose dumps of bottles are a collection failure. Grade-sorting at home + organised pickup feeds recycling work instead of open piles.",
+      "Read the label on the bank, not the label on the bottle. A drinks carton is lined card and belongs in blue; a plastic bottle belongs in green. One wrong item can down-grade a whole load.",
     topic: "recycling",
+    difficulty: "easy",
     imageUrl: s3url(
-      "quiz-images/quiz-images/verified/recycling/plastic-bottles-gathered-for-recycling.jpg",
-    ),
-  },
-  {
-    question: "Compressed bales of bottles like this usually mean what stage?",
-    options: [
-      "Industrial recycling processing after collection and sorting",
-      "Brand-new bottles ready for the shop shelf",
-      "Ocean cleanup with no land recycling",
-      "Paper-only recycling",
-    ],
-    answer: "Industrial recycling processing after collection and sorting",
-    explanation:
-      "Baling PET bottles is a recycling-plant step. Clean, sorted household plastic is what makes those processing jobs possible.",
-    topic: "recycling",
-    imageUrl: s3url(
-      "quiz-images/quiz-images/verified/plastic-types/bales-of-pet-bottles-closeup.jpg",
+      "quiz-images/quiz-images/verified/recycling/recycling-bins-north-west-england.jpg",
     ),
   },
   {
     question:
-      "If plastic escapes the circular chain, scenes like this beach show what?",
+      "Bottles, foam and sachets are lying mixed across this shoreline. What does a scene like this cost most?",
     options: [
-      "Plastic pollution on the coast — the cost of weak collection and sorting",
-      "A clean natural beach with no human waste",
-      "Successful home sorting already finished",
-      "Only wooden fishing gear, never plastic",
+      "The material is now mixed and dirty, so almost none of it can be recycled",
+      "Nothing — the sea breaks plastic down within a few weeks",
+      "Only the look of the beach; the plastic is still perfectly sellable",
+      "Only glass recycling, never plastic",
     ],
     answer:
-      "Plastic pollution on the coast — the cost of weak collection and sorting",
+      "The material is now mixed and dirty, so almost none of it can be recycled",
     explanation:
-      "When plastic is not collected and recycled, it becomes marine debris. Home grade-sorting helps keep material in the jobs/circular loop.",
-    topic: "ocean-pollution",
+      "Value is lost the moment grades mix and get soiled. That is the whole point of sorting at home while your plastic is still clean and separate — it stays worth something instead of ending up like this.",
+    topic: "environment",
+    difficulty: "medium",
     imageUrl: s3url(
-      "quiz-images/quiz-images/verified/ocean-pollution/marine-debris-hawaiian-coast.jpg",
+      "quiz-images/quiz-images/verified/environment/plastic-waste-pile-00998.jpg",
     ),
   },
 ];
 
 const draftId = `owner-quiz-${new Date().toISOString().slice(0, 10)}-${randomUUID().slice(0, 8)}`;
 const content = {
-  title: "Your sort creates jobs: collection to recycling",
+  title: "Know your grade: the plastic in your own kitchen",
   description:
-    "See how clean plastic packaging, PET collection, baling, and stopping coastal waste connect household sorting to recycling jobs.",
+    "Tell HDPE, PP and PET apart on sight, put each one in the right bank, and see what it costs when grades get mixed. This is the skill that gets your sort photo approved.",
   questions: Q,
   quizConfigs: { difficulty: "medium", timeLimit: 90, maxAttempts: 1 },
   reward: {
@@ -150,7 +170,7 @@ const draft = {
     authoredBy: "owner-agent-copilot",
     visualVerified: true,
     visualVerifiedAt: new Date().toISOString(),
-    missionTemplateId: "week2_day3_jobs",
+    missionTemplateId: "week2_day5_grades",
   },
 };
 await db.collection("masters").updateOne(
