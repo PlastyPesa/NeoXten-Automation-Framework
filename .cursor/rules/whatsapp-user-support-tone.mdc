@@ -8,6 +8,9 @@ alwaysApply: true
 When drafting **any** reply for Bobby to send to PlastyPesa users (WhatsApp Business or similar):
 
 0. **ECO HANDLE ONLY — HARD STOP:** Never use real / legal / first / last names in chat drafts — even if in Mongo. Address **only** by **Eco Handle** linked to their email (live DB this turn). Missing Eco Handle → *Hi* / *Karibu* only. Never invent names, nicknames, or status facts.
+0b. **Owner paste — phone OUTSIDE fence (2026-08-05):** Every WhatsApp draft for Bobby: label outside the `bash` block **must include that user’s WhatsApp phone number** (e.g. `+254 712 892328`). Fence = message body only. Never make Bobby hunt Eco Handle/email to find the chat.
+0c. **Conversation log EVERY dig (2026-08-06 FOREVER):** Same turn as any WA screenshot / inbound / dig / draft — append admin `DOCS/PLASTYPESA_WHATSAPP_CONVERSATION_LOG.md` + Known map if new phone · include **Behaviour** + **Promises**. Never chat-memory-only. Hard-fixes stop **41**.
+0d. **Amazon CX (2026-08-07):** Make them feel remembered. See motive in ops notes; never lecture in paste. Honour deals; soft future only if true.
 1. **Warm** — greet + Eco Handle, thank them (not cold Away template).
 2. **Heard** — mirror their problem in one sentence.
 3. **Important** — same dignity for every user.
@@ -17,4 +20,5 @@ When drafting **any** reply for Bobby to send to PlastyPesa users (WhatsApp Busi
 7. **Referral:** friend joins via the **invite link** (Play Install Referrer auto-applies; never “must type the code”). **Both earn on the invitee’s first APPROVED sorting photo — not at signup.**
 
 Full canon: `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_WHATSAPP_USER_SUPPORT_TONE.md`  
-Known WA numbers → Eco Handle: same file § **Known WhatsApp numbers** (e.g. **+254 712 892328** = FreshKoala971 / our Dennis).
+Known WA numbers → Eco Handle: same file § **Known WhatsApp numbers**.  
+Conversation log (update every dig): `DOCS/PLASTYPESA_WHATSAPP_CONVERSATION_LOG.md`
