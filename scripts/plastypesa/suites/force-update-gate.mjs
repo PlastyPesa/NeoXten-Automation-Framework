@@ -22,9 +22,9 @@
  *      correct storeUrl and a LOCALIZED message (X-Language: ro must not get
  *      English); an unreported app-like client is refused; a build at the
  *      floor passes; browsers without version headers are never gated.
- *   6. Open-wall forever (2026-08-08): `/api/auth` is gated for old builds —
- *      they must not open a session. Legal (`/api/master`) stays reachable so
- *      users can still read the documents they have a right to read.
+ *   6. Open-wall forever (2026-08-08): `/api/auth` and `/api/master` are gated
+ *      for old **app** builds. Browsers (landing legal pages) still pass because
+ *      they are not `looksLikeApp`. `/api/app-release-gate` stays public.
  */
 import { url } from '../config.mjs';
 import { readJson, assert } from '../assert.mjs';
@@ -167,9 +167,9 @@ export async function run(cfg, runner) {
       'a browser UA without version headers was gated — staff tooling would be down');
   });
 
-  await runner.test('auth_is_gated_on_open_legal_stays_reachable', async () => {
-    // OWNER LOCK 2026-08-08 open wall: old builds must not open a session.
-    // Login POST with below-floor headers must be 426 before password logic.
+  await runner.test('auth_and_master_are_gated_on_open_for_old_app_builds', async () => {
+    // OWNER LOCK 2026-08-08 open wall (+ master follow-up): old Flutter builds
+    // must not open a session OR stamp presence via /api/master (ads-config).
     const login = await fetch(url(cfg, '/auth/login'), {
       method: 'POST',
       headers: {
@@ -183,14 +183,18 @@ export async function run(cfg, runner) {
       `/auth/login must be gated on open for old builds — got ${login.status}`);
     assert(loginBody?.code === 'upgrade_required',
       'login 426 must carry code=upgrade_required');
-    assert(typeof loginBody?.message === 'string' && loginBody.message.includes('Google Play'),
-      'login 426 must carry a clear Google Play update message for pre-gate UIs');
 
-    // Legal stays exempt — privacy/terms must remain readable.
-    const legal = await fetch(url(cfg, '/master/legal-pages?type=privacy'), {
+    const master = await fetch(url(cfg, '/master?name=ads-config'), {
       headers: OLD_BUILD_HEADERS,
     });
-    assert(legal.status !== 426,
-      `/master/legal-pages answered 426 — legal must stay reachable for an old build`);
+    assert(master.status === 426,
+      `/master?name=ads-config must be gated for old app builds — got ${master.status} (was stamping online via presenceTouch)`);
+
+    // Landing / browsers still read masters without version headers.
+    const browserMaster = await fetch(url(cfg, '/master?name=ads-config'), {
+      headers: BROWSER_HEADERS,
+    });
+    assert(browserMaster.status !== 426,
+      `browser UA hitting /master was gated — landing legal/config would break`);
   });
 }
