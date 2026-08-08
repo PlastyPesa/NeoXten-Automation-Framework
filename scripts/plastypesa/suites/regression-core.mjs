@@ -263,8 +263,31 @@ export async function run(cfg, runner) {
     }
     const d = body?.data;
     const total = d?.summary?.totalPoints ?? 0;
-    const sum = (d?.history || []).reduce((s, h) => s + (h.points || 0), 0);
-    assert(sum <= total + 0.01, 'sum of page history points should not exceed summary totalPoints');
+    const rows = d?.history || [];
+
+    // Since every sort goes to human review (2026-08-06), the history also lists
+    // submissions that have NOT been awarded yet, at their full potential value.
+    // Those rows are deliberately excluded from summary.totalPoints, so a naive
+    // sum will exceed the total for any member with something in the queue.
+    // What must hold is narrower: the AWARDED rows never exceed the total, and
+    // anything above the total is visibly marked as pending.
+    const isPending = (h) => /pending review|pending|awaiting/i.test(String(h?.title || ''));
+    const awarded = rows.filter((h) => !isPending(h));
+    const awardedSum = awarded.reduce((s, h) => s + (h.points || 0), 0);
+    assert(
+      awardedSum <= total + 0.01,
+      `awarded history points (${awardedSum}) should not exceed summary totalPoints (${total})`,
+    );
+
+    const pending = rows.filter(isPending);
+    const pendingSum = pending.reduce((s, h) => s + (h.points || 0), 0);
+    const fullSum = awardedSum + pendingSum;
+    if (fullSum > total + 0.01) {
+      assert(
+        pending.length > 0,
+        `history sums to ${fullSum} against a ${total} total with no row marked pending — a member adding up this screen would think points went missing`,
+      );
+    }
   });
 
   await runner.test('transaction_list_first_page_shape', async () => {
