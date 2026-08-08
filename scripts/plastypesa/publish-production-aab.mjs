@@ -41,36 +41,36 @@ if (!aabPath || !fs.existsSync(aabPath)) {
 
 // Play caps release notes at 500 characters per language; assertReleaseNotes
 // below fails the upload rather than letting the API truncate mid-sentence.
-const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.39 (59)";
+const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.42 (72)";
 
 const RELEASE_NOTES = [
     {
         language: "en-GB",
-        text: "Daily quiz now shows the real 1000 points (not 0). Learn Videos fullscreen + How-to-Sort in English. Clearer sort notes, claim-day countdown, Read/EcoSort points inbox. Weekly board resets Monday.",
+        text: "The Home strip now carries only messages from the team, so nothing important gets buried. Paid Rewards Proof scrolls properly. A sort waiting for review shows as pending instead of a points total, so nothing is counted twice. If a sort photo fails to send, you now see why and can retry. Support replies can include images.",
     },
     {
         language: "it-IT",
-        text: "Il quiz giornaliero mostra i veri 1000 punti (non 0). Video Learn a schermo intero e How-to-Sort in inglese. Note sort più chiare, conto alla rovescia per la richiesta, inbox punti Read/EcoSort. Classifica azzerata il lunedì.",
+        text: "La striscia in Home mostra solo i messaggi del team, così niente di importante resta nascosto. La prova delle ricompense pagate ora scorre correttamente. Un sort in attesa di revisione appare come in revisione invece di un totale punti, così nulla viene contato due volte. Se l'invio di una foto fallisce, vedi il motivo e puoi riprovare. Le risposte del supporto possono includere immagini.",
     },
     {
         language: "es-ES",
-        text: "El quiz diario muestra los 1000 puntos reales (no 0). Vídeos Learn a pantalla completa y How-to-Sort en inglés. Notas de sort más claras, cuenta atrás para reclamar, aviso de puntos Read/EcoSort. El tablero se reinicia el lunes.",
+        text: "La franja de Inicio solo muestra mensajes del equipo, así nada importante queda oculto. La prueba de recompensas pagadas ahora se desplaza bien. Un sort en revisión aparece como pendiente en vez de un total de puntos, así nada se cuenta dos veces. Si el envío de una foto falla, ves el motivo y puedes reintentar. Las respuestas de soporte pueden incluir imágenes.",
     },
     {
         language: "de-DE",
-        text: "Tagesquiz zeigt echte 1000 Punkte (nicht 0). Learn-Videos im Vollbild und How-to-Sort auf Englisch. Klarere Sort-Notizen, Tage-Countdown, Punkte-Inbox für Read/EcoSort. Wochenboard setzt montags zurück.",
+        text: "Der Streifen auf Home zeigt nur noch Nachrichten vom Team, damit nichts Wichtiges untergeht. Der Nachweis ausgezahlter Belohnungen lässt sich jetzt richtig scrollen. Ein Sort in Prüfung erscheint als ausstehend statt mit Punktesumme, damit nichts doppelt zählt. Schlägt das Senden eines Fotos fehl, siehst du den Grund und kannst es erneut versuchen. Support-Antworten können Bilder enthalten.",
     },
     {
         language: "fr-FR",
-        text: "Le quiz du jour affiche les vrais 1000 points (pas 0). Vidéos Learn en plein écran et How-to-Sort en anglais. Notes sort plus claires, compte à rebours pour la demande, inbox points Read/EcoSort. Classement réinitialisé le lundi.",
+        text: "Le bandeau de l'accueil ne montre plus que les messages de l'équipe, rien d'important n'est enfoui. La preuve des récompenses versées défile correctement. Un tri en attente de vérification s'affiche comme en cours plutôt qu'avec un total de points, rien n'est compté deux fois. Si l'envoi d'une photo échoue, tu vois pourquoi et tu peux réessayer. Le support peut répondre avec des images.",
     },
     {
         language: "pt-PT",
-        text: "O quiz diário mostra os 1000 pontos reais (não 0). Vídeos Learn em ecrã inteiro e How-to-Sort em inglês. Notas de sort mais claras, contagem de dias para reclamar, caixa de pontos Read/EcoSort. O quadro reinicia à segunda-feira.",
+        text: "A faixa do Início mostra apenas mensagens da equipa, para nada importante ficar escondido. A prova de recompensas pagas já faz scroll corretamente. Um sort à espera de revisão aparece como pendente em vez de um total de pontos, para nada ser contado duas vezes. Se o envio de uma foto falhar, vês o motivo e podes tentar de novo. As respostas do apoio podem incluir imagens.",
     },
     {
         language: "ro",
-        text: "Quizul zilnic arată cele 1000 de puncte reale (nu 0). Videoclipuri Learn pe ecran complet și How-to-Sort în engleză. Note sort mai clare, numărătoare pentru revendicare, inbox puncte Read/EcoSort. Clasamentul se resetează luni.",
+        text: "Banda de pe Acasă arată doar mesajele echipei, ca nimic important să nu fie îngropat. Dovada recompenselor plătite se derulează corect. Un sort care așteaptă verificarea apare ca în așteptare, nu cu un total de puncte, ca nimic să nu fie numărat de două ori. Dacă trimiterea unei poze eșuează, vezi motivul și poți încerca din nou. Răspunsurile de la suport pot conține imagini.",
     },
 ];
 
