@@ -1,30 +1,25 @@
 /**
- * P-FORCE-UPDATE-MIN-VERSION — FORCE LATEST FOREVER (owner lock 2026-07-27).
+ * P-FORCE-UPDATE-MIN-VERSION — FORCE LATEST FOREVER (owner lock 2026-07-27)
+ * + STOP 45 Update lag (2026-08-08).
  *
- * The policy inverted on 2026-07-27: ARMED is the steady state, forever.
- * Every user must be on the live Play production build or the app is dead —
- * min = live Play versionCode, blockUnreported:true, no grace. The old
- * `production_is_not_left_gated` backstop asserted the opposite world and is
- * retired; this suite now FAILS if production is ever found disarmed, drifted
- * below live Play, missing blockUnreported, or pointing at a wrong Play id.
+ * Steady state: ARMED, floor > 0, blockUnreported:true.
+ * Ideal: floor = live Play production versionCode AFTER a real device proves
+ * Play Update installs that code. Lag-hold is allowed: floor < live Play while
+ * Update is unproven (Cindy class — e.g. floor 71 while Play shows 73).
  *
  * Asserted here:
  *   1. `/api/app-release-gate` is reachable WITHOUT auth and publishes the
  *      floor. A blocked build has no way to explain itself otherwise.
  *   2. The update link targets the real Play applicationId
  *      (`com.app.plasty_pesa` — `com.plastypesa.app` reads right and 404s).
- *   3. The gate is ARMED: enabled, floor > 0, blockUnreported on. Fixer:
- *      `node scripts/plastypesa/release-gate.mjs sync`.
- *   4. The floor equals the LIVE Play production versionCode (Publisher API,
- *      same service account as monitor:plastypesa). Set
+ *   3. The gate is ARMED: enabled, floor > 0, blockUnreported on.
+ *   4. Floor equals live Play OR lag-hold (floor < live, still armed).
+ *      Floor > live Play is drift and FAILS. Set
  *      PLASTYPESA_SKIP_PLAY_CHECK=1 only on a machine without the SA file.
- *   5. Live 426 behavior: an old build is refused on a gated route with the
- *      correct storeUrl and a LOCALIZED message (X-Language: ro must not get
- *      English); an unreported app-like client is refused; a build at the
- *      floor passes; browsers without version headers are never gated.
- *   6. Open-wall forever (2026-08-08): `/api/auth` and `/api/master` are gated
- *      for old **app** builds. Browsers (landing legal pages) still pass because
- *      they are not `looksLikeApp`. `/api/app-release-gate` stays public.
+ *   5. Live 426 behavior: old build refused; unreported refused; floor passes;
+ *      browsers without version headers never gated.
+ *   6. Open-wall forever (2026-08-08): `/api/auth` and `/api/master` gated
+ *      for old app builds. `/api/app-release-gate` stays public.
  */
 import { url } from '../config.mjs';
 import { readJson, assert } from '../assert.mjs';
@@ -78,35 +73,38 @@ export async function run(cfg, runner) {
   });
 
   await runner.test('production_gate_is_armed_forever', async () => {
-    // FORCE LATEST FOREVER: disarmed production violates the owner lock. If
-    // this fails after an incident disarm, the fix is:
-    //   node scripts/plastypesa/release-gate.mjs sync
+    // ARMED forever. Disarm = incident only. After Update proof: sync --force.
     if (gate === null) throw new Error('gate not read');
     assert(gate.enabled === true,
-      'release gate is DISARMED — owner lock FORCE LATEST FOREVER requires it armed. ' +
-      'Fix: node scripts/plastypesa/release-gate.mjs sync');
+      'release gate is DISARMED — steady state requires armed. ' +
+      'After a real phone proves Play Update, fix: node scripts/plastypesa/release-gate.mjs sync --force');
     const floor = gate.android?.minVersionCode ?? 0;
     assert(floor > 0,
-      `android floor is ${floor} — the floor must be the live Play versionCode, never 0`);
+      `android floor is ${floor} — never 0 while armed (lag-hold uses last installable code)`);
     assert(gate.android?.blockUnreported === true,
       'blockUnreported is OFF — pre-heartbeat builds would slip the gate. ' +
-      'Fix: node scripts/plastypesa/release-gate.mjs sync');
+      'Fix: node scripts/plastypesa/release-gate.mjs sync --force');
   });
 
-  await runner.test('gate_floor_equals_live_play_production', async () => {
+  await runner.test('gate_floor_equals_live_play_or_lag_hold', async () => {
     if (gate === null) throw new Error('gate not read');
     if (process.env.PLASTYPESA_SKIP_PLAY_CHECK === '1') {
-      // Only for machines without the Play service account. On the owner
-      // machine this check must run — min ≠ live Play is the drift the owner
-      // locked against.
+      // Only for machines without the Play service account.
       return;
     }
     const { readLivePlayVersion } = await import('../play-live-version.mjs');
     const live = await readLivePlayVersion();
     const floor = gate.android?.minVersionCode ?? 0;
-    assert(floor === live.versionCode,
-      `gate floor ${floor} ≠ live Play production ${live.versionCode} (${live.releaseName}). ` +
-      'Fix: node scripts/plastypesa/release-gate.mjs sync');
+    if (floor === live.versionCode) return;
+    // STOP 45 lag-hold: floor below live Play is OK until Update proven.
+    assert(floor < live.versionCode,
+      `gate floor ${floor} > live Play ${live.versionCode} (${live.releaseName}) — drifted ahead. ` +
+      'Fix: lower floor or sync carefully.');
+    // Soft pass: lag-hold documented (Cindy class). Do not fail NeoXten.
+    console.log(
+      `  [lag-hold OK stop 45] floor ${floor} < live Play ${live.versionCode} — ` +
+        'raise only after a real phone proves Play Update installs live code'
+    );
   });
 
   await runner.test('old_build_is_refused_with_localized_426', async () => {

@@ -2,13 +2,15 @@
 /**
  * Upload AAB + assign to production track + commit edit (bypasses broken Console Submit loop).
  *
- * After a successful commit this ALWAYS runs `release-gate.mjs sync` (FORCE
- * LATEST FOREVER, owner lock 2026-07-27): the gate floor follows every
- * production release automatically, with blockUnreported:true. If the sync
- * fails, this script exits non-zero — the publish is not done.
+ * STOP 45 (2026-08-08): Publisher "completed/available" ≠ every phone can Update yet.
+ * Default = upload ONLY. Do NOT auto-arm the release-gate floor to the new code.
+ * Arm only after a real device proves Play Update installs the new versionCode, then:
+ *   node scripts/plastypesa/release-gate.mjs sync --force
+ * or re-run this script with --arm-gate (or PLASTYPESA_GATE_SYNC=1).
  *
  * Usage:
  *   node scripts/plastypesa/publish-production-aab.mjs <path-to.aab> [versionCode]
+ *   node scripts/plastypesa/publish-production-aab.mjs <path-to.aab> [versionCode] --arm-gate
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -31,22 +33,31 @@ const SA_PATH =
         "play-publisher-plastypesa-f5274-16-07-2026.json"
     );
 
-const aabPath = process.argv[2];
-const versionCodeArg = process.argv[3];
+const rawArgs = process.argv.slice(2);
+const wantArmGate =
+    rawArgs.includes("--arm-gate") || process.env.PLASTYPESA_GATE_SYNC === "1";
+const positional = rawArgs.filter((a) => !a.startsWith("--") && a !== "arm-gate");
+const aabPath = positional[0];
+const versionCodeArg = positional[1];
 
 if (!aabPath || !fs.existsSync(aabPath)) {
-    console.error("Usage: node publish-production-aab.mjs <aab-path> [versionCode]");
+    console.error(
+        "Usage: node publish-production-aab.mjs <aab-path> [versionCode] [--arm-gate]\n" +
+            "  Default: upload only (stop 45 — no blind gate sync).\n" +
+            "  --arm-gate or PLASTYPESA_GATE_SYNC=1: run release-gate sync --force after commit\n" +
+            "    (only after a real phone proves Play Update installs this code)."
+    );
     process.exit(2);
 }
 
 // Play caps release notes at 500 characters per language; assertReleaseNotes
 // below fails the upload rather than letting the API truncate mid-sentence.
-const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.42 (72)";
+const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.43 (73)";
 
 const RELEASE_NOTES = [
     {
         language: "en-GB",
-        text: "The Home strip now carries only messages from the team, so nothing important gets buried. Paid Rewards Proof scrolls properly. A sort waiting for review shows as pending instead of a points total, so nothing is counted twice. If a sort photo fails to send, you now see why and can retry. Support replies can include images.",
+        text: "The Home strip now carries only messages from the team, so nothing important gets buried. Paid Rewards Proof scrolls properly. A sort waiting for review shows as pending instead of a points total, so nothing is counted twice. If a sort photo fails to send, you now see why and can retry — calmly, without red alarm screens. Support replies can include images.",
     },
     {
         language: "it-IT",
@@ -154,34 +165,48 @@ async function main() {
             await ap.edits.delete({ packageName: PACKAGE, editId: verifyEdit });
         }
 
-        // FORCE LATEST FOREVER (owner lock 2026-07-27): a production upload is
-        // not done until the release gate follows it. `sync` arms the floor to
-        // whatever Play reports as the *completed* live release — if this
-        // upload is still in review, the previous live code stays the floor
-        // and the operator must re-run sync once Play flips it live. Arming to
-        // an unreleased code would refuse users who have no update to install.
-        console.log("\nArming release gate to live Play (FORCE LATEST FOREVER)...");
+        const live = await readLivePlayVersion();
+        console.log(
+            `\nPlay live completed: ${live.releaseName} · versionCode ${live.versionCode} · ${live.status}`
+        );
+        if (String(live.versionCode) !== String(versionCode)) {
+            console.warn(
+                `\n*** Uploaded ${versionCode} but Play's live completed release is still ${live.versionCode} ` +
+                    "(review pending?). ***"
+            );
+        }
+
+        // STOP 45: never auto-raise floor on Publisher completed alone.
+        if (!wantArmGate) {
+            console.log(
+                "\n*** PUBLISH OK — gate floor NOT changed (stop 45 default). ***\n" +
+                    "*** Leave floor where it is until a real phone proves Play Update installs ***\n" +
+                    `*** versionCode ${versionCode}. Then either:                                      ***\n` +
+                    "***   node scripts/plastypesa/release-gate.mjs sync --force                     ***\n" +
+                    "*** or re-run publish with --arm-gate / PLASTYPESA_GATE_SYNC=1                  ***\n"
+            );
+            return;
+        }
+
+        console.log(
+            "\n--arm-gate / PLASTYPESA_GATE_SYNC=1: syncing gate to live Play (requires --force on blast)..."
+        );
         const sync = spawnSync(
             process.execPath,
-            [path.join(path.dirname(fileURLToPath(import.meta.url)), "release-gate.mjs"), "sync"],
+            [
+                path.join(path.dirname(fileURLToPath(import.meta.url)), "release-gate.mjs"),
+                "sync",
+                "--force",
+            ],
             { stdio: "inherit" }
         );
         if (sync.status !== 0) {
             console.error(
-                "\n*** GATE NOT ARMED — the upload succeeded but the release gate did not sync. ***\n" +
-                    "*** The publish is NOT complete. Fix and run:                               ***\n" +
-                    "***   node scripts/plastypesa/release-gate.mjs sync                          ***"
+                "\n*** GATE NOT ARMED — upload succeeded but release-gate sync failed. ***\n" +
+                    "*** Fix blast / --force policy, then:                                       ***\n" +
+                    "***   node scripts/plastypesa/release-gate.mjs sync --force                 ***"
             );
             process.exit(1);
-        }
-        const live = await readLivePlayVersion();
-        if (String(live.versionCode) !== String(versionCode)) {
-            console.warn(
-                `\n*** Uploaded ${versionCode} but Play's live completed release is still ${live.versionCode} ` +
-                    "(review pending?). Gate floor = " + live.versionCode + ". ***\n" +
-                    "*** RE-RUN once the new release is live:                                     ***\n" +
-                    "***   node scripts/plastypesa/release-gate.mjs sync                          ***"
-            );
         }
     } catch (e) {
         console.error("FAILED:", e.response?.data || e.message || e);

@@ -1,11 +1,9 @@
 /**
- * Live Play production versionCode — the single source of truth for "latest".
+ * Live Play production versionCode — source of truth for "what Play serves".
  *
- * FORCE LATEST FOREVER (owner lock 2026-07-27) pins the release gate's floor to
- * whatever Play is actually serving, so both the arm ritual (`release-gate.mjs
- * sync`) and the NeoXten forever-assert read the same number from the same
- * place. Reads the production track via the Publisher API with the same
- * service account the monitor uses; never guesses from local artifacts.
+ * STOP 45 (2026-08-08): do not arm the gate floor to this number until a real
+ * device proves Play Update installs it. `release-gate.mjs sync --force` and
+ * NeoXten lag-hold both read this same Publisher API value.
  */
 import fs from "node:fs";
 import path from "node:path";

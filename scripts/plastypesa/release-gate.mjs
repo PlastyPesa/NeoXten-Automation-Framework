@@ -1,34 +1,27 @@
 /**
  * Release gate ops (P-FORCE-UPDATE-MIN-VERSION / FORCE LATEST FOREVER).
  *
- * OWNER LOCK 2026-07-27 (absolute): the steady state is ARMED — floor = live
- * Play production versionCode, `blockUnreported: true`, forever. `sync` is the
- * ritual that enforces it and is what the publish script calls after every
- * Play upload. `disarm` still exists for a genuine incident (e.g. the gate
- * itself blocking the live build), but leaving production disarmed violates
- * the lock and the NeoXten force-update-gate suite will fail until re-armed.
+ * OWNER LOCK 2026-07-27: steady state = ARMED + blockUnreported.
+ * STOP 45 (2026-08-08): Publisher "completed" ≠ every phone can Update yet.
+ * Do NOT sync floor to newest Play code until a real device proves Update
+ * installs. Lag-hold (armed floor below live Play, e.g. 71 while Play is 73)
+ * is a valid incident state — NeoXten allows it.
  *
- * The gate lives in `masters.client-release-gate` and has no admin UI, so the
- * only alternative to this script is hand-editing production Mongo — on the
- * one switch whose failure mode is "every user is locked out of earning".
+ * `publish-production-aab.mjs` defaults to NO auto-sync. Arm later with
+ * `sync --force` (or publish `--arm-gate`) after Update proof.
+ *
  * Guardrails:
- *
- *   - `status` prints the live config AND the blast radius, measured against
- *     real users, before anything is changed.
- *   - `sync` reads the LIVE Play production versionCode (Publisher API, never
- *     a guess) and arms floor=live + blockUnreported:true. It prints the blast
- *     radius first; it does not ask for --force because it IS the locked
- *     policy — the honesty is in the printed numbers, not a speed bump.
- *   - `arm` (manual floor) refuses a floor that would block anyone unless
- *     `--force` is passed; `--block-unreported` needs `--force` on top.
- *   - `disarm` is a single argument-free command, so restoring never depends
- *     on remembering what the previous values were — and it shouts the lock.
+ *   - `status` prints live config + blast radius.
+ *   - `sync` reads LIVE Play versionCode, prints blast, arms floor=live +
+ *     blockUnreported. If blast > 0, refuses unless `--force` (Cindy class).
+ *   - `arm` same blast/`--force` rules as before.
+ *   - `disarm` = incidents only.
  *
  * Usage:
  *   node scripts/plastypesa/release-gate.mjs status
- *   node scripts/plastypesa/release-gate.mjs sync        # THE ritual: floor = live Play + blockUnreported
+ *   node scripts/plastypesa/release-gate.mjs sync [--force]
  *   node scripts/plastypesa/release-gate.mjs arm --min 58 --block-unreported --force
- *   node scripts/plastypesa/release-gate.mjs disarm      # incidents only — violates FORCE LATEST FOREVER
+ *   node scripts/plastypesa/release-gate.mjs disarm
  */
 import { MongoClient } from 'mongodb';
 import { loadBackendMongoEnv } from './mongo-env.mjs';
@@ -51,9 +44,10 @@ function usage(message) {
   if (message) console.error(`\n${message}`);
   console.error(`
   status                                    show live gate + blast radius
-  sync                                      arm to LIVE Play versionCode + blockUnreported (the locked ritual)
+  sync [--force]                            arm to LIVE Play + blockUnreported
+                                            (refuses if blast > 0 unless --force — stop 45)
   arm --min <code> [--block-unreported] [--force]
-  disarm                                    incidents only — violates FORCE LATEST FOREVER
+  disarm                                    incidents only
 `);
   process.exit(message ? 1 : 0);
 }
@@ -196,9 +190,9 @@ try {
   }
 
   if (command === 'sync') {
-    // FORCE LATEST FOREVER: floor = live Play production, blockUnreported on.
-    // No --force gate — this IS the locked policy; honesty is the printed
-    // blast radius, not a prompt someone learns to bypass.
+    // Floor = live Play + blockUnreported. STOP 45: refuse blast > 0 without
+    // --force — Publisher completed ≠ every phone can Update yet (Cindy loop).
+    const force = has('--force');
     const live = await readLivePlayVersion();
     console.log(`\nLive Play production: ${live.releaseName} · versionCode ${live.versionCode} · ${live.status}`);
 
@@ -208,12 +202,26 @@ try {
     });
     console.log(`\nBlast radius of floor ${live.versionCode} + blockUnreported:`);
     console.log(`  ACTIVE users          : ${radius.total}`);
-    console.log(`  reporting below floor : ${radius.belowFloor}  <-- WILL BE BLOCKED until they update`);
-    console.log(`  reporting no version  : ${radius.unreported}  <-- WILL BE BLOCKED until they update`);
-    console.log(`  => refusing           : ${radius.blocked} user(s) until they install live Play`);
+    console.log(`  reporting below floor : ${radius.belowFloor}  <-- WOULD BE BLOCKED until they update`);
+    console.log(`  reporting no version  : ${radius.unreported}  <-- WOULD BE BLOCKED until they update`);
+    console.log(`  => would refuse       : ${radius.blocked} user(s)`);
+
+    if (radius.blocked > 0 && !force) {
+      usage(
+        `Refusing sync (stop 45): floor ${live.versionCode} would refuse ${radius.blocked} user(s).\n` +
+          'Play "Available" does not mean every phone can Update yet.\n' +
+          'Keep lag-hold (current floor) until a real device proves Update installs this code,\n' +
+          'then re-run with --force:\n' +
+          '  node scripts/plastypesa/release-gate.mjs sync --force'
+      );
+    }
 
     await writeArmed(live.versionCode, true);
-    console.log('\nFORCE LATEST FOREVER enforced: min = live Play, blockUnreported on.');
+    console.log(
+      force && radius.blocked > 0
+        ? '\nGate ARMED with --force (owner accepted blast). min = live Play, blockUnreported on.'
+        : '\nGate ARMED: min = live Play, blockUnreported on.'
+    );
     process.exit(0);
   }
 
