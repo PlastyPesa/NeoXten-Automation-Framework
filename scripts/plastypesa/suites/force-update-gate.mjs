@@ -22,9 +22,9 @@
  *      correct storeUrl and a LOCALIZED message (X-Language: ro must not get
  *      English); an unreported app-like client is refused; a build at the
  *      floor passes; browsers without version headers are never gated.
- *   6. Exempt routes (auth, legal) stay reachable for an old build so a
- *      blocked user can still sign in to see the update screen and read the
- *      documents they have a right to read.
+ *   6. Open-wall forever (2026-08-08): `/api/auth` is gated for old builds —
+ *      they must not open a session. Legal (`/api/master`) stays reachable so
+ *      users can still read the documents they have a right to read.
  */
 import { url } from '../config.mjs';
 import { readJson, assert } from '../assert.mjs';
@@ -167,14 +167,30 @@ export async function run(cfg, runner) {
       'a browser UA without version headers was gated — staff tooling would be down');
   });
 
-  await runner.test('auth_and_legal_stay_reachable_for_an_old_build', async () => {
-    // These two exemptions are what stop the gate from being a brick wall: a
-    // blocked user must still be able to log in to see the update screen, and
-    // must still be able to read the legal documents.
-    for (const path of ['/auth/login', '/master/legal-pages?type=privacy']) {
-      const r = await fetch(url(cfg, path), { headers: OLD_BUILD_HEADERS });
-      assert(r.status !== 426,
-        `${path} answered 426 — this route is exempt and must never be gated`);
-    }
+  await runner.test('auth_is_gated_on_open_legal_stays_reachable', async () => {
+    // OWNER LOCK 2026-08-08 open wall: old builds must not open a session.
+    // Login POST with below-floor headers must be 426 before password logic.
+    const login = await fetch(url(cfg, '/auth/login'), {
+      method: 'POST',
+      headers: {
+        ...OLD_BUILD_HEADERS,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email: 'gate-open-wall@example.com', password: 'x' }),
+    });
+    const loginBody = (await readJson(login)).body;
+    assert(login.status === 426,
+      `/auth/login must be gated on open for old builds — got ${login.status}`);
+    assert(loginBody?.code === 'upgrade_required',
+      'login 426 must carry code=upgrade_required');
+    assert(typeof loginBody?.message === 'string' && loginBody.message.includes('Google Play'),
+      'login 426 must carry a clear Google Play update message for pre-gate UIs');
+
+    // Legal stays exempt — privacy/terms must remain readable.
+    const legal = await fetch(url(cfg, '/master/legal-pages?type=privacy'), {
+      headers: OLD_BUILD_HEADERS,
+    });
+    assert(legal.status !== 426,
+      `/master/legal-pages answered 426 — legal must stay reachable for an old build`);
   });
 }
