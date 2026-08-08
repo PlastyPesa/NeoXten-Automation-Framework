@@ -128,6 +128,12 @@ export async function run(cfg, runner) {
       '426 message must be user-facing copy');
     assert(roBody.message !== enBody.message,
       'X-Language: ro returned the English message — the 426 body is not localized');
+    // STOP 45 honesty — after deploy of Phase 1 copy.
+    assert(
+      typeof enBody?.message === 'string' &&
+        (/only see Open/i.test(enBody.message) || /Open Google Play/i.test(enBody.message)),
+      `426 EN message must be honest Update/Open copy, got: ${enBody?.message}`
+    );
   });
 
   await runner.test('unreported_app_build_is_refused', async () => {
