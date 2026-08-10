@@ -44,6 +44,7 @@ line("Open disputes", d.disputeQueue?.openTotal);
 line("Low-star reviews unanswered", d.trustAndUpdates?.reviewsAlert?.unansweredLowStar?.length);
 line("Device multi-account clusters 24h", d.integrity?.signupWatch?.multiAccountDevices24h?.length);
 line("Similar email clusters", d.integrity?.signupWatch?.similarEmailClusters?.length);
+line("Advertising-ID hash clusters (B2)", d.integrity?.signupWatch?.advertisingIdClusters?.length);
 
 console.log("\n── Presence (raw) ──");
 line("Members", d.presence?.members);
