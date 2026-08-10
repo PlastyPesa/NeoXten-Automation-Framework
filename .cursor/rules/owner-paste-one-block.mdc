@@ -1,0 +1,42 @@
+---
+description: OWNER PASTE LOCK — one bash block per field/message (Subject ≠ Body)
+alwaysApply: true
+---
+
+# Owner paste — one block per field / message (LOCKED 2026-08-01 — FOREVER)
+
+**Owner order:** Stop mixing Subject + Body + labels into one fence. Bobby must copy-paste with zero editing.
+
+## Hard rule (every agent, every product)
+
+Whenever the owner must paste into **any** external UI — forms, consoles, **email compose**, support tickets, Meta/Play/AdMob/Unity/AppLovin, WhatsApp Business profile fields, etc.:
+
+1. **Label OUTSIDE** the fence (plain text: `Subject:` / `Body:` / field name).
+2. **One fenced `bash` block = only the paste value** for that one field or message part.
+3. **Subject and Body are ALWAYS two separate blocks** — never one email blob.
+4. No titles, bullets, “Subject:”, signatures-as-commentary, or coaching text **inside** the fence.
+5. No markdown tables of mixed paste values for owner copy.
+
+## Email / ticket template (mandatory shape)
+
+Subject:
+
+```bash
+exact subject line only
+```
+
+Body:
+
+```bash
+exact body only
+```
+
+## Canon
+
+- `plastypesa-admin-dashboard/DOCS/PLASTYPESA_OWNER_ACTIONS.md` § Form-fill blocks  
+- `plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` §1 + absolute stop 12  
+- `.cursor/rules/owner-paste-one-block.mdc`
+
+## Violation
+
+If you deliver a mixed Subject+Body fence, you failed this lock — rewrite immediately as separate blocks before any other work.

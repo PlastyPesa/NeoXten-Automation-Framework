@@ -52,36 +52,36 @@ if (!aabPath || !fs.existsSync(aabPath)) {
 
 // Play caps release notes at 500 characters per language; assertReleaseNotes
 // below fails the upload rather than letting the API truncate mid-sentence.
-const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.43 (73)";
+const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.46 (76)";
 
 const RELEASE_NOTES = [
     {
         language: "en-GB",
-        text: "The Home strip now carries only messages from the team, so nothing important gets buried. Paid Rewards Proof scrolls properly. A sort waiting for review shows as pending instead of a points total, so nothing is counted twice. If a sort photo fails to send, you now see why and can retry — calmly, without red alarm screens. Support replies can include images.",
+        text: "Channel stays on Home between your week and Today — even when there is no news yet. Weekly climb numbers stay honest for Kenya. Daily quiz ads fail open calmly if an ad never loads. Sort and invite copy clearer. Closest Eco Guardian board while the founding campaign runs.",
     },
     {
         language: "it-IT",
-        text: "La striscia in Home mostra solo i messaggi del team, così niente di importante resta nascosto. La prova delle ricompense pagate ora scorre correttamente. Un sort in attesa di revisione appare come in revisione invece di un totale punti, così nulla viene contato due volte. Se l'invio di una foto fallisce, vedi il motivo e puoi riprovare. Le risposte del supporto possono includere immagini.",
+        text: "Channel resta sulla Home tra la tua settimana e Oggi — anche senza notizie. I punti per salire in classifica in Kenya restano corretti. Se un annuncio del quiz non carica, il quiz continua con calma. Testi di sort e inviti più chiari. Tabellone Eco Guardian più vicino durante la campagna fondatrice.",
     },
     {
         language: "es-ES",
-        text: "La franja de Inicio solo muestra mensajes del equipo, así nada importante queda oculto. La prueba de recompensas pagadas ahora se desplaza bien. Un sort en revisión aparece como pendiente en vez de un total de puntos, así nada se cuenta dos veces. Si el envío de una foto falla, ves el motivo y puedes reintentar. Las respuestas de soporte pueden incluir imágenes.",
+        text: "Channel permanece en Inicio entre tu semana y Hoy — aunque no haya noticias. Los puntos para subir en Kenia se muestran con honestidad. Si un anuncio del quiz no carga, el quiz sigue con calma. Textos de sort e invitaciones más claros. Tablero Eco Guardian cercano mientras dura la campaña fundadora.",
     },
     {
         language: "de-DE",
-        text: "Der Streifen auf Home zeigt nur noch Nachrichten vom Team, damit nichts Wichtiges untergeht. Der Nachweis ausgezahlter Belohnungen lässt sich jetzt richtig scrollen. Ein Sort in Prüfung erscheint als ausstehend statt mit Punktesumme, damit nichts doppelt zählt. Schlägt das Senden eines Fotos fehl, siehst du den Grund und kannst es erneut versuchen. Support-Antworten können Bilder enthalten.",
+        text: "Channel bleibt auf Home zwischen deiner Woche und Heute — auch ohne Neuigkeiten. Die Kletterpunkte für Kenia bleiben ehrlich. Lädt eine Quiz-Anzeige nicht, geht das Quiz ruhig weiter. Sort- und Einladungs-Texte klarer. Nächstes Eco-Guardian-Board während der Gründerkampagne.",
     },
     {
         language: "fr-FR",
-        text: "Le bandeau de l'accueil ne montre plus que les messages de l'équipe, rien d'important n'est enfoui. La preuve des récompenses versées défile correctement. Un tri en attente de vérification s'affiche comme en cours plutôt qu'avec un total de points, rien n'est compté deux fois. Si l'envoi d'une photo échoue, tu vois pourquoi et tu peux réessayer. Le support peut répondre avec des images.",
+        text: "Channel reste sur l'accueil entre ta semaine et Aujourd'hui — même sans nouvelle. Les points pour monter au Kenya restent honnêtes. Si une pub du quiz ne charge pas, le quiz continue calmement. Textes de tri et d'invitation plus clairs. Tableau Eco Guardian proche pendant la campagne fondatrice.",
     },
     {
         language: "pt-PT",
-        text: "A faixa do Início mostra apenas mensagens da equipa, para nada importante ficar escondido. A prova de recompensas pagas já faz scroll corretamente. Um sort à espera de revisão aparece como pendente em vez de um total de pontos, para nada ser contado duas vezes. Se o envio de uma foto falhar, vês o motivo e podes tentar de novo. As respostas do apoio podem incluir imagens.",
+        text: "O Channel fica no Início entre a tua semana e Hoje — mesmo sem notícias. Os pontos para subir no Quénia mantêm-se honestos. Se um anúncio do quiz não carregar, o quiz continua com calma. Textos de sort e convite mais claros. Quadro Eco Guardian próximo durante a campanha fundadora.",
     },
     {
         language: "ro",
-        text: "Banda de pe Acasă arată doar mesajele echipei, ca nimic important să nu fie îngropat. Dovada recompenselor plătite se derulează corect. Un sort care așteaptă verificarea apare ca în așteptare, nu cu un total de puncte, ca nimic să nu fie numărat de două ori. Dacă trimiterea unei poze eșuează, vezi motivul și poți încerca din nou. Răspunsurile de la suport pot conține imagini.",
+        text: "Channel rămâne pe Acasă între săptămâna ta și Astăzi — chiar fără noutăți. Punctele pentru urcare în Kenya rămân corecte. Dacă o reclamă la quiz nu se încarcă, quiz-ul continuă calm. Texte de sort și invitații mai clare. Tabloul Eco Guardian apropiat în timpul campaniei fondatoare.",
     },
 ];
 

@@ -24,21 +24,23 @@ const REGION = "eu-west-2";
 const s3url = (key) => `https://${BUCKET}.s3.${REGION}.amazonaws.com/${key}`;
 
 /**
- * 2026-08-05 Nairobi — theme: "Know your grade: the plastic in your own kitchen".
+ * 2026-08-06 — owner GO: publish immediately after Play vc71 + gate arm.
+ * Theme: "Sort smart: grades, banks, and what the ocean keeps".
  *
- * Five questions, not ten: the 10Q + 2-hard redesign is a separate owner
- * decision and is deliberately out of this publish. Every question is
- * answerable from what is actually in the picture, and each picture was opened
- * and looked at this session before it was wired to its question:
+ * Ten questions, exactly two hard. Every question is answerable from what is
+ * actually in the picture; each verified S3 asset was opened and matched this
+ * session before wiring:
  *
- *   milk jug        opaque white jug, moulded handle, pink screw cap  -> HDPE
- *   food container  translucent tub with an orange snap lid           -> PP
- *   bottle cage     mesh cage packed with clear/green/brown drink bottles -> PET
- *   street banks    green "bottles, cans, jars" beside blue "paper, card, cartons"
- *   littered shore  bottles, foam and sachets across rocks and sand, boats behind
- *
- * The theme is deliberately the Sort by Grade earn path: telling #1, #2 and #5
- * apart in your own kitchen is the skill that gets a sort photo approved.
+ *   milk jug        opaque white jug, moulded handle, pink screw cap     -> HDPE
+ *   food tub        translucent body, bright orange snap lid             -> PP
+ *   bottle cage     green/clear/brown drink bottles in wire mesh         -> PET
+ *   street banks    green bottles/cans/jars beside blue paper/card       -> green for bottle
+ *   Reykjavik bin   purple "PLASTUMBÚÐIR / PLASTIC PACKAGING"            -> plastic packaging only
+ *   dusty lot pile  clear bottles + filled sacks beside trees            -> bulk collection
+ *   harbour shore   foam, bottles, sachets, nets, boats                  -> soiled mix loses value
+ *   Tenerife pebbles yellow/clear bottles + white fragments on dark rock -> sea soaks grades
+ *   HARD baled PET  wall of crushed clear bottles + coloured caps        -> baled for transport
+ *   HARD Hawaii     floats, crates, barrels on remote beach              -> fishing/maritime debris
  */
 const Q = [
   {
@@ -72,7 +74,7 @@ const Q = [
     explanation:
       "Reusable food tubs and their lids are normally polypropylene, grade 5. PP handles heat, which is why it survives the microwave and the dishwasher when a PET bottle would not.",
     topic: "plastic-types",
-    difficulty: "medium",
+    difficulty: "easy",
     imageUrl: s3url(
       "quiz-images/quiz-images/verified/plastic-types/tupperware-polypropylene-container.jpg",
     ),
@@ -115,7 +117,43 @@ const Q = [
   },
   {
     question:
-      "Bottles, foam and sachets are lying mixed across this shoreline. What does a scene like this cost most?",
+      "This bin’s purple sign says PLASTUMBÚÐIR / PLASTIC PACKAGING and shows a bag and a jug. What belongs in it?",
+    options: [
+      "Clean plastic packaging such as bottles, jugs and bags",
+      "Glass bottles only",
+      "Food leftovers and wet kitchen waste",
+      "Paper, card and drinks cartons",
+    ],
+    answer: "Clean plastic packaging such as bottles, jugs and bags",
+    explanation:
+      "The icons and the word “plastic packaging” are the rule: plastic bottles, jugs and bags go here — not glass, not organics, not paper.",
+    topic: "recycling",
+    difficulty: "easy",
+    imageUrl: s3url(
+      "quiz-images/quiz-images/verified/recycling/plastic-recycling-bin-reykjavik.jpg",
+    ),
+  },
+  {
+    question:
+      "Hundreds of clear bottles sit loose on dusty ground, with big filled sacks nearby. What is happening here?",
+    options: [
+      "Plastic is being bulk-collected so it can be sorted and sold later",
+      "The bottles are already finished recycled pellets",
+      "This is the correct place to dump mixed household rubbish",
+      "Only glass is being gathered; plastic is ignored",
+    ],
+    answer: "Plastic is being bulk-collected so it can be sorted and sold later",
+    explanation:
+      "Loose piles and stuffed sacks are the start of the value chain: gather volume first, then sort grades so the load stays sellable.",
+    topic: "recycling",
+    difficulty: "medium",
+    imageUrl: s3url(
+      "quiz-images/quiz-images/verified/recycling/plastic-bottles-gathered-for-recycling.jpg",
+    ),
+  },
+  {
+    question:
+      "Bottles, foam and sachets are lying mixed across this shoreline next to nets and boats. What does a scene like this cost most?",
     options: [
       "The material is now mixed and dirty, so almost none of it can be recycled",
       "Nothing — the sea breaks plastic down within a few weeks",
@@ -132,15 +170,69 @@ const Q = [
       "quiz-images/quiz-images/verified/environment/plastic-waste-pile-00998.jpg",
     ),
   },
+  {
+    question:
+      "On this dark pebble shore, bottles and white fragments sit where the waves wash. Why is plastic here so hard to turn into new packaging?",
+    options: [
+      "Salt, sand and mixed fragments ruin the material for clean recycling",
+      "Dark pebbles turn plastic into glass overnight",
+      "Yellow bottles cannot be recycled anywhere in the world",
+      "Only wood from the shore can be recycled, never plastic",
+    ],
+    answer: "Salt, sand and mixed fragments ruin the material for clean recycling",
+    explanation:
+      "Once plastic rides the tide it picks up salt, grit and other grades. Recyclers need clean, sorted feedstock — beach litter almost never qualifies.",
+    topic: "ocean-pollution",
+    difficulty: "medium",
+    imageUrl: s3url(
+      "quiz-images/quiz-images/verified/ocean-pollution/beach-pollution-tenerife-plastic-debris.jpg",
+    ),
+  },
+  {
+    question:
+      "You are looking at a solid wall of crushed clear drink bottles pressed flat with coloured caps still visible. What recycling step is this?",
+    options: [
+      "Baled PET ready to move to a reprocessor",
+      "Finished clothing fibre already spun from plastic",
+      "Household rubbish waiting for landfill burial",
+      "Glass cullet after bottles were melted",
+    ],
+    answer: "Baled PET ready to move to a reprocessor",
+    explanation:
+      "A baler compresses sorted PET bottles into dense blocks so they can be trucked or shipped to a plant that flakes and remelts them. Caps and labels you still see are normal at this stage.",
+    topic: "plastic-types",
+    difficulty: "hard",
+    imageUrl: s3url(
+      "quiz-images/quiz-images/verified/plastic-types/bales-of-pet-bottles-closeup.jpg",
+    ),
+  },
+  {
+    question:
+      "This remote shore is piled with black floats, crates, barrels and buckets — not just drinks bottles. Where did most of this plastic likely come from?",
+    options: [
+      "Fishing and maritime activity carried by ocean currents",
+      "Only kitchen milk jugs washed from one nearby village",
+      "Paper and card that somehow turned into plastic at sea",
+      "Volcanic rock that looks like plastic in photos",
+    ],
+    answer: "Fishing and maritime activity carried by ocean currents",
+    explanation:
+      "Floats, crates and industrial barrels are classic fishing and shipping gear. Currents can dump that maritime debris on beaches far from where it was lost — different from a household PET bottle left in a kitchen bin.",
+    topic: "ocean-pollution",
+    difficulty: "hard",
+    imageUrl: s3url(
+      "quiz-images/quiz-images/verified/ocean-pollution/marine-debris-hawaiian-coast.jpg",
+    ),
+  },
 ];
 
 const draftId = `owner-quiz-${new Date().toISOString().slice(0, 10)}-${randomUUID().slice(0, 8)}`;
 const content = {
-  title: "Know your grade: the plastic in your own kitchen",
+  title: "Sort smart: grades, banks, and what the ocean keeps",
   description:
-    "Tell HDPE, PP and PET apart on sight, put each one in the right bank, and see what it costs when grades get mixed. This is the skill that gets your sort photo approved.",
+    "Tell HDPE, PP and PET apart, put each item in the right bank, then see what happens when plastic hits the shore — including two harder reads on baled PET and maritime debris.",
   questions: Q,
-  quizConfigs: { difficulty: "medium", timeLimit: 90, maxAttempts: 1 },
+  quizConfigs: { difficulty: "medium", timeLimit: 180, maxAttempts: 1 },
   reward: {
     name: "Daily quiz",
     rewardType: "POINTS",
@@ -171,6 +263,8 @@ const draft = {
     visualVerified: true,
     visualVerifiedAt: new Date().toISOString(),
     missionTemplateId: "week2_day5_grades",
+    questionCount: Q.length,
+    hardCount: Q.filter((q) => q.difficulty === "hard").length,
   },
 };
 await db.collection("masters").updateOne(
@@ -191,6 +285,12 @@ await db.collection("masters").updateOne(
 );
 await client.close();
 console.log("DRAFT_INSERTED", draftId);
+console.log(
+  "Q_COUNTS",
+  Q.length,
+  "hard=",
+  Q.filter((q) => q.difficulty === "hard").length,
+);
 
 bootstrapPlastyPesaEnv();
 const cfg = getConfig();
@@ -240,5 +340,22 @@ for (const g of live) {
     { projection: { rewardPoints: 1, name: 1 } },
   );
   console.log("REWARD", g._id.toString(), rew?.rewardPoints, rew?.name);
+  if (g.quizGameId) {
+    const qg = await db2.collection("quiz_games").findOne(
+      { _id: g.quizGameId },
+      { projection: { questions: 1, title: 1 } },
+    );
+    const qs = qg?.questions || [];
+    console.log(
+      "QUIZ_SHAPE",
+      g._id.toString(),
+      "n=",
+      qs.length,
+      "hard=",
+      qs.filter((q) => q.difficulty === "hard").length,
+      "images=",
+      qs.filter((q) => !!q.imageUrl).length,
+    );
+  }
 }
 await client2.close();

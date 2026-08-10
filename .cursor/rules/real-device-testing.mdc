@@ -23,6 +23,7 @@ The owner keeps a physical Android device connected via ADB at all times. Agents
 
 ## What to verify on device
 - All screens render without overflow, truncation, or layout breaks.
+- **Whole-frame UI audit every visit (stop 51 · 2026-08-09):** even if you opened the app to test something else, scan Channel, TODAY tiles, points labels, scroll cue overlap, marquee readability, i18n. Read-tool every screenshot.
 - All strings are translated — no English leaking in non-English locale.
 - Navigation works — no dead buttons, no stuck screens.
 - Ads load where expected (app-open on launch, interstitial before quiz, banner on pages).

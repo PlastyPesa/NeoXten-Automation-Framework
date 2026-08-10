@@ -19,7 +19,8 @@ const checks = [
     path: "lib/frontend/src/pages/SortProofReview/Page.tsx",
     must: [
       "Today (Nairobi",
-      "Rolling 24h new submissions",
+      "New photos = arrived",
+      "decisions in",
       "Back to queue",
       "Approve from list",
       "Refresh queue",
