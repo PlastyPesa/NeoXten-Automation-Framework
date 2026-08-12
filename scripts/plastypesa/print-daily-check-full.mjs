@@ -71,6 +71,31 @@ line("On 48h provisional", ip.provisionalActive);
 line("Repeat-pause candidates", ip.terminateCandidates);
 if (ip.note) console.log("  note:", ip.note);
 
+console.log("\n── Retention cohorts (TRUE — not signup windows) ──");
+const ret = d.retention || {};
+if (ret.note) console.log("  note:", ret.note);
+line("Earn day (Nairobi)", ret.earnDayKey);
+line("Kenya approved sorts today", ret.daily?.kenyaApprovedSortsToday);
+line("Floor vc", ret.daily?.floorVersionCode);
+line("On floor / with sort / zero-sort", [
+  ret.daily?.activeOnFloor,
+  ret.daily?.onFloorWithApprovedSort,
+  ret.daily?.onFloorZeroSort,
+].join(" / "));
+const d1 = ret.d1 || {};
+line("D1 cohort size / returned / rate%", [d1.cohortSize, d1.returned, d1.returnRate].join(" / "));
+const d7 = ret.d7 || {};
+line("D7 cohort size / returned / rate%", [d7.cohortSize, d7.returned, d7.returnRate].join(" / "));
+line("D7 ≥1 sort by D3 / rate%", [d7.with1SortByD3, d7.with1SortByD3Rate].join(" / "));
+line("D7 ≥1 sort by D7 / rate%", [d7.with1SortByD7, d7.with1SortByD7Rate].join(" / "));
+line("D7 ≥2 sorts by D7 (NORTH-STAR) / rate%", [d7.with2SortsByD7, d7.with2SortsByD7Rate].join(" / "));
+const roll = ret.d7Rolling || {};
+line("D7 rolling (7d matured) size / ≥2 sorts / rate%", [
+  roll.cohortSize,
+  roll.with2SortsByD7,
+  roll.with2SortsByD7Rate,
+].join(" / "));
+
 console.log("\n── Weekly reward claims ──");
 console.log(JSON.stringify(d.rewardsOps?.statusCounts || d.rewardsOps, null, 2));
 

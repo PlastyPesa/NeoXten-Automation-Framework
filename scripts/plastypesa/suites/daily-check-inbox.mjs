@@ -101,13 +101,33 @@ export async function run(cfg, runner) {
 
     // Each of these is an independent loader. A missing key means it threw
     // outside its own try/catch or was dropped from buildDailyCheckReport.
-    for (const section of ['communityModeration', 'disputeQueue', 'presence', 'ecoGuardian']) {
+    for (const section of ['communityModeration', 'disputeQueue', 'presence', 'ecoGuardian', 'retention']) {
       assert(
         report[section] && typeof report[section] === 'object',
         `${section} missing from daily-check — the admin queue renders empty forever`,
       );
     }
     assert(Array.isArray(report.actionItems), 'actionItems must be an array');
+  });
+
+  await runner.test('retention_cohorts_are_true_habit_not_signup_windows', async () => {
+    if (!report) return;
+    const ret = report.retention;
+    assert(ret && typeof ret === 'object', 'retention section missing');
+    assert(ret.d1 && typeof ret.d1 === 'object', 'retention.d1 missing');
+    assert(ret.d7 && typeof ret.d7 === 'object', 'retention.d7 missing');
+    assert(ret.d7Rolling && typeof ret.d7Rolling === 'object', 'retention.d7Rolling missing');
+    assert(ret.daily && typeof ret.daily === 'object', 'retention.daily missing');
+    assert(isCountOrNull(ret.d1.cohortSize), `d1.cohortSize bad: ${ret.d1.cohortSize}`);
+    assert(isCountOrNull(ret.d1.returned), `d1.returned bad: ${ret.d1.returned}`);
+    assert(isCountOrNull(ret.d7.cohortSize), `d7.cohortSize bad: ${ret.d7.cohortSize}`);
+    assert(isCountOrNull(ret.d7.with2SortsByD7), `d7.with2SortsByD7 (north-star) bad: ${ret.d7.with2SortsByD7}`);
+    assert(isCountOrNull(ret.daily.kenyaApprovedSortsToday), `daily Kenya sorts bad: ${ret.daily.kenyaApprovedSortsToday}`);
+    // Signup windows must stay labeled separately — never pretend new7d is D7 return.
+    assert(
+      typeof ret.note === 'string' && /cohort|north-star|not signup/i.test(ret.note),
+      'retention.note must explain these are true cohorts, not signup windows',
+    );
   });
 
   await runner.test('flagged_comments_are_counted_not_only_flagged_posts', async () => {
