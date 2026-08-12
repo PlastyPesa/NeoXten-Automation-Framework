@@ -52,36 +52,36 @@ if (!aabPath || !fs.existsSync(aabPath)) {
 
 // Play caps release notes at 500 characters per language; assertReleaseNotes
 // below fails the upload rather than letting the API truncate mid-sentence.
-const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.46 (76)";
+const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.48 (79)";
 
 const RELEASE_NOTES = [
     {
         language: "en-GB",
-        text: "Channel stays on Home between your week and Today — even when there is no news yet. Weekly climb numbers stay honest for Kenya. Daily quiz ads fail open calmly if an ad never loads. Sort and invite copy clearer. Closest Eco Guardian board while the founding campaign runs.",
+        text: "Home Next up, unpaid quiz practice, clearer Sort vs Eco Action coaching, Sort pending honesty, faster photos, and fairer account walls. Weekly rewards stay 10,000 KES with the new ladder from the community vote. Update to keep earning.",
     },
     {
         language: "it-IT",
-        text: "Channel resta sulla Home tra la tua settimana e Oggi — anche senza notizie. I punti per salire in classifica in Kenya restano corretti. Se un annuncio del quiz non carica, il quiz continua con calma. Testi di sort e inviti più chiari. Tabellone Eco Guardian più vicino durante la campagna fondatrice.",
+        text: "Novità: suggerimenti Home, quiz di pratica senza punti, coaching Sort vs Eco Action, foto più fluide e schermate account più chiare. Ricompense settimanali 10.000 KES. Aggiorna per continuare a guadagnare.",
     },
     {
         language: "es-ES",
-        text: "Channel permanece en Inicio entre tu semana y Hoy — aunque no haya noticias. Los puntos para subir en Kenia se muestran con honestidad. Si un anuncio del quiz no carga, el quiz sigue con calma. Textos de sort e invitaciones más claros. Tablero Eco Guardian cercano mientras dura la campaña fundadora.",
+        text: "Novedades: Next up en Inicio, práctica de quiz sin puntos, coach Sort vs Eco Action, fotos más fluidas y muros de cuenta más claros. Recompensas semanales 10.000 KES. Actualiza para seguir ganando.",
     },
     {
         language: "de-DE",
-        text: "Channel bleibt auf Home zwischen deiner Woche und Heute — auch ohne Neuigkeiten. Die Kletterpunkte für Kenia bleiben ehrlich. Lädt eine Quiz-Anzeige nicht, geht das Quiz ruhig weiter. Sort- und Einladungs-Texte klarer. Nächstes Eco-Guardian-Board während der Gründerkampagne.",
+        text: "Neu: Home-Next-up, Quiz-Übung ohne Punkte, Sort-vs-Eco-Coach, flüssigere Fotos und klarere Kontosperren. Wöchentliche Belohnungen 10.000 KES. Update, um weiter zu verdienen.",
     },
     {
         language: "fr-FR",
-        text: "Channel reste sur l'accueil entre ta semaine et Aujourd'hui — même sans nouvelle. Les points pour monter au Kenya restent honnêtes. Si une pub du quiz ne charge pas, le quiz continue calmement. Textes de tri et d'invitation plus clairs. Tableau Eco Guardian proche pendant la campagne fondatrice.",
+        text: "Nouveautés : Next up Accueil, quiz d'entraînement sans points, coach Sort vs Eco Action, photos plus fluides et murs compte plus clairs. Récompenses hebdo 10 000 KES. Mettez à jour pour continuer à gagner.",
     },
     {
         language: "pt-PT",
-        text: "O Channel fica no Início entre a tua semana e Hoje — mesmo sem notícias. Os pontos para subir no Quénia mantêm-se honestos. Se um anúncio do quiz não carregar, o quiz continua com calma. Textos de sort e convite mais claros. Quadro Eco Guardian próximo durante a campanha fundadora.",
+        text: "Novidades: Next up no Início, prática de quiz sem pontos, coach Sort vs Eco Action, fotos mais fluidas e muros de conta mais claros. Recompensas semanais 10.000 KES. Atualize para continuar a ganhar.",
     },
     {
         language: "ro",
-        text: "Channel rămâne pe Acasă între săptămâna ta și Astăzi — chiar fără noutăți. Punctele pentru urcare în Kenya rămân corecte. Dacă o reclamă la quiz nu se încarcă, quiz-ul continuă calm. Texte de sort și invitații mai clare. Tabloul Eco Guardian apropiat în timpul campaniei fondatoare.",
+        text: "Noutăți: Next up pe Acasă, quiz de practică fără puncte, coach Sort vs Eco Action, poze mai fluide și ecrane de cont mai clare. Recompense săptămânale 10.000 KES. Actualizează ca să continui să câștigi.",
     },
 ];
 
