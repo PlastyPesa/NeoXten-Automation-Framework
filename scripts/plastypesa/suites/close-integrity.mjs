@@ -154,18 +154,79 @@ export async function run(cfg, runner) {
         `DRAFT cutover close must have ZERO claims before Confirm (got ${claims.length})`,
       );
     } else if (close.status === 'CONFIRMED') {
-      // Auto-confirm path (owner lock ~16:20): confirm creates exactly one
-      // claim per winner slot, all labeled with the cutover weekStart.
+      // Auto-confirm creates one claim per winner slot. A slot can then accumulate
+      // MORE claim rows over time, legitimately: the one-hop cascade (locked
+      // 2026-07-26) passes a dead reward to the next frozen-eligible member, and
+      // the dead claim is kept as an audit record. `reward_claims` enforces this
+      // shape with a partial unique index on (closeId, slot) over LIVE statuses
+      // only, for exactly that reason.
+      //
+      // So a raw count of claims against winner slots is not an invariant. It was
+      // written before the cascade existed and went red on 19 Jul for a benign
+      // reason: slots 7 and 8 forfeited, cascaded to BrightRaven163 and
+      // FrostCobra592, and those forfeited too — 12 rows for 10 slots, KES 0
+      // moved on the extras.
+      //
+      // Worse, the old count could not tell that apart from the emergency. Twelve
+      // rows where two are PAID duplicates produces the identical message. So
+      // assert what actually matters instead: one LIVE claim per slot, and no slot
+      // paid twice.
       const winnerCount = Array.isArray(close.winners) ? close.winners.length : 0;
+      assert(winnerCount > 0, 'CONFIRMED close must carry winner slots');
+
+      const DEAD = new Set(['FORFEITED', 'REJECTED_FRAUD']);
+      const live = claims.filter((c) => !DEAD.has(String(c.status)));
+
+      const liveBySlot = new Map();
+      for (const c of live) {
+        const slot = Number(c.slot);
+        liveBySlot.set(slot, (liveBySlot.get(slot) || 0) + 1);
+      }
+      const doubleLive = [...liveBySlot.entries()].filter(([, n]) => n > 1);
       assert(
-        winnerCount > 0 && claims.length === winnerCount,
-        `CONFIRMED cutover close must have one claim per winner slot (winners ${winnerCount}, claims ${claims.length})`,
+        doubleLive.length === 0,
+        `a slot can never hold two live claims — slots ${doubleLive
+          .map(([s, n]) => `${s}(${n})`)
+          .join(', ')}. Either the confirm job ran twice or a cascade issued a replacement while the original was still alive.`,
       );
-      const slots = new Set(claims.map((c) => c.slot));
+
+      // The money rule, stated directly: nobody is paid twice for one slot.
+      const paidBySlot = new Map();
+      for (const c of claims.filter((c) => String(c.status) === 'PAID')) {
+        const slot = Number(c.slot);
+        paidBySlot.set(slot, (paidBySlot.get(slot) || 0) + 1);
+      }
+      const doublePaid = [...paidBySlot.entries()].filter(([, n]) => n > 1);
       assert(
-        slots.size === claims.length,
-        'claim slots must be unique per close (EventBridge retry invariant)',
+        doublePaid.length === 0,
+        `DOUBLE PAYMENT: slot(s) ${doublePaid
+          .map(([s, n]) => `${s} paid ${n}x`)
+          .join(', ')} on close ${close._id} — real cash left twice for one reward`,
       );
+
+      // Every slot must have been offered to somebody. A slot with no claim row
+      // at all means a winner was never told they won.
+      const slotsSeen = new Set(claims.map((c) => Number(c.slot)));
+      const missing = [];
+      for (let s = 1; s <= winnerCount; s += 1) if (!slotsSeen.has(s)) missing.push(s);
+      assert(
+        missing.length === 0,
+        `slot(s) ${missing.join(', ')} have no claim at all — those winners were never offered their reward`,
+      );
+
+      // Cash out can never exceed the pot the close itself declared.
+      const pot = (close.winners || []).reduce(
+        (n, w) => n + (Number(w.grossAmount ?? w.amount) || 0),
+        0,
+      );
+      const paidOut = claims
+        .filter((c) => String(c.status) === 'PAID')
+        .reduce((n, c) => n + (Number(c.grossAmount ?? c.amount) || 0), 0);
+      assert(
+        pot === 0 || paidOut <= pot,
+        `paid out ${paidOut} against a declared pot of ${pot} on close ${close._id}`,
+      );
+
       for (const claim of claims) {
         assert(
           new Date(claim.weekStart).toISOString() === JUL19_WEEK_START,
