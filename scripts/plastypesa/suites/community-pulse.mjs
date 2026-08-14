@@ -79,6 +79,12 @@ export async function run(cfg, runner) {
     // (a fraud cleanup), 11 INACTIVE. If `members` ever climbs toward the
     // registration count, the exclusion filter has regressed and the app is
     // advertising a fraud ring as its community.
+    //
+    // 2026-08-14: this test used to carry a second, absolute bound (`members <
+    // 100`) frozen at launch-week scale. Kenya crossed it by growing, so the row
+    // went red for a real reason that was not the one the test was written to
+    // catch — and a red row that means "we grew" trains everyone to ignore it.
+    // The population-relative assertion below does the real job.
     const r = await fetch(
       url(cfg, '/home/leaderboard?page=1&limit=1&type=lifetime&scope=global'),
       { headers: cfg.authHeaders },
@@ -90,15 +96,26 @@ export async function run(cfg, runner) {
       // The lifetime board ranks ACTIVE non-admin users. Pulse uses a strictly
       // tighter filter (it also drops operator accounts), so it can never
       // exceed the board.
+      //
+      // This is the assertion that actually catches the failure mode described
+      // above, and it catches it exactly: on 2026-08-14 the live populations were
+      // 412 registrations / 238 ACTIVE / 162 SUSPENDED, so if the SUSPENDED
+      // cleanup leaked back in, `members` would read ~398 while the ranked ACTIVE
+      // population stayed at 238. It scales with the product instead of freezing
+      // a launch-week number, so it never needs raising by hand.
       assert(pulse.members <= totalRanked,
         `members (${pulse.members}) exceeds the ranked ACTIVE population (${totalRanked}) — ` +
           'the SUSPENDED/INACTIVE exclusion has regressed');
+    } else {
+      // No live population to compare against, so fall back to a dated absolute
+      // so this test can never pass with no bound at all. Raise it deliberately,
+      // with the real populations of the day written down next to it.
+      // 2026-08-14: 412 registrations, 238 ACTIVE.
+      const ABSOLUTE_CEILING = 1000;
+      assert(pulse.members < ABSOLUTE_CEILING,
+        `members = ${pulse.members} and the ranked population was unavailable, so only the ` +
+          `dated ceiling (${ABSOLUTE_CEILING}) applied. Re-check activeUserMatch before raising it.`);
     }
-
-    assert(pulse.members < 100,
-      `members = ${pulse.members}; at this stage of launch that is far above the known ACTIVE ` +
-        'population and suggests raw registrations are being counted. Re-check activeUserMatch ' +
-        'before raising this bound.');
     assert(pulse.registrations === undefined && pulse.totalUsers === undefined,
       'the pulse payload must never expose a raw registration count');
   });
