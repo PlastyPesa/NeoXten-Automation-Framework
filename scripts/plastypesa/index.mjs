@@ -52,6 +52,7 @@ import * as numberSync from './suites/number-sync.mjs';
 import * as legalRewardRules from './suites/legal-reward-rules.mjs';
 import * as marketingBanner from './suites/marketing-banner.mjs';
 import * as learnContentLocaleMix from './suites/learn-content-locale-mix.mjs';
+import * as shareLinkLive from './suites/share-link-live.mjs';
 
 /** Optional until `/challenges/*` routes are deployed to prod (404 today). */
 const OPTIONAL_SUITES = [{ id: 'challenges-progress', mod: challengesProgress }];
@@ -138,6 +139,12 @@ const ALL_SUITES = [
   { id: 'marketing-banner', mod: marketingBanner },
   // P-LEARN-CONTENT-LOCALE-MIX — tip/article bodies must localize (not chrome-only).
   { id: 'learn-content-locale-mix', mod: learnContentLocaleMix },
+  // P-SHARE-LINK-HYGIENE (2026-08-14) — share copy carried the Play id
+  // `com.plastypesa.plastypesa`, which reads correct and 404s, so every quiz /
+  // Plastic IQ / pledge / badge share sent a curious friend to a dead listing.
+  // Invisible from inside the app: the damage only shows in someone else's
+  // WhatsApp. Resolves the link over the network, which no unit test can do.
+  { id: 'share-link-live', mod: shareLinkLive },
 ];
 
 function resolveSuites(cfg) {
