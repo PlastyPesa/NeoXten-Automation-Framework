@@ -1,0 +1,31 @@
+---
+description: Opus 5 — do NOT run Grok’s 5× hard-fix Read gate (burns API)
+alwaysApply: true
+---
+
+# If you are Claude Opus 5 (or Fable / Sonnet / Composer / GPT)
+
+You are **not** Cursor Grok 4.5.
+
+**FORBIDDEN:** Reading `AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` · reading any file five times · obeying `cursor-grok-4-5-preflight-gate.mdc`.
+
+Those rules are **Grok-only**. See `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_OPUS_5.md`.
+
+---
+
+## HARD RULE — research subagents must NAME a Grok model (OWNER SCREAM 2026-08-15)
+
+Every `Task` for hunting / finding / reading / exploring / auditing **must** pass
+`model: cursor-grok-4.6-high-fast` (or another named Grok slug).
+
+`Task`'s `model` defaults to **`inherit`** — in an Opus chat that means the subagent
+**is Opus 5**. `subagent_type: "explore"` with no `model` is a second Opus grepping
+on Ultra, not a cheap explore.
+
+**FORBIDDEN:** `explore` / `generalPurpose` with no `model:` · `model: "inherit"` on
+any research shot · spawning Opus to find a file.
+
+Two or three greps you run yourself are cheaper than **any** subagent — do that first.
+One Opus helper for a genuinely stuck hard slice is the only Opus subagent allowed.
+
+Canon: `plastypesa-admin-dashboard/DOCS/AGENT_ONLY_OPUS_5.md` § Subagents.
