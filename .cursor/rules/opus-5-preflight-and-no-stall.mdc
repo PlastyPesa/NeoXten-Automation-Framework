@@ -54,6 +54,36 @@ does not survive the next compaction.
    change. Never a number I did not measure. When a test disagrees with me, suspect the test
    before rewriting the code — four of my scroll-cue failures were the test's fault.
 
+## 1b. THE BUILD GATE — the expensive step goes LAST (owner scream 2026-08-15, second one)
+
+Three APK builds were spent in a row on one line of text nobody asked me to change, and the
+change I *was* asked for shipped with the scroll pill resting on the money card because I
+measured one number instead of looking at the page. Both failures have the same shape: **I
+acted before I looked, and I looked at my target instead of the screen.**
+
+**Before typing `flutter build`, all four of these are written down in the reply:**
+
+1. **Quote him.** The exact words of Bobby's that asked for this change. No quote → the change
+   does not go in the build. This alone kills every unasked "improvement".
+2. **Above and below.** What moves *above* the thing I touched and what moves *below* it.
+   Removing a card, moving a card, changing a height — the page is a column; everything after
+   it shifts. Name what shifts.
+3. **What I will look at afterwards** — which screens, scrolled how far.
+4. **Batch.** Every pending change is in this one build. Never a build to check a font size,
+   a word, or a colour; those are read in the code or in the widget test.
+
+**After the install: read the whole page, not the frame I care about.** Screenshot at the top,
+then scroll and screenshot until the page ends, and Read-tool every one. A measuring script
+answers the question I asked it; it cannot tell me a pill is sitting on a card 400 px lower.
+**A number is never proof that a screen is right.**
+
+## 1c. THE BRIEF IS THE CEILING, NOT THE FLOOR
+
+When the brief is silent — a truncated title, an ugly gap, a wording I dislike — the answer is
+**one line in my reply naming it, and no code**. Not a fix. Not a "while I'm here". He is
+paying per turn and per build; my taste is not on the invoice. Something genuinely broken that
+he has not seen gets written on the board and named to him, and it waits for his word.
+
 ## 2. NO STALL — the hard part
 
 **Every reply must either contain the finished work, or contain the tool calls that started
@@ -84,6 +114,36 @@ like a turn that did nothing. Lead with the outcome. Never close with only commi
 Fix it in the same turn, plainly, and keep going. No apology paragraphs, no tally of past
 mistakes, no re-litigating. Then append the new failure mode **here** — and per §0, confirm
 this file still starts with `---`, or the lesson is inert again.
+
+## 4b. THE FOLD LEDGER — the five ways I got one small layout wrong (2026-08-15)
+
+Kept because the *shapes* repeat, not because the fold matters. Each line is a thing I
+did, then the rule it produced.
+
+1. **I answered a layout question with a measuring script.** Python told me TODAY's rim
+   was where I wanted it, and I reported green while the cue sat on the money card 400 px
+   lower. *A number answers the question you asked it; only the whole screenshot answers
+   the question he asked.* Screenshot, scroll, screenshot, Read-tool every one.
+2. **I changed things he never asked for.** Three builds went on a line of text nobody
+   mentioned, and each one moved the page under the thing he *did* ask for. *Quote his
+   words before the change goes in, or the change does not go in.*
+3. **I reinterpreted "put the Vote under TODAY" into a layout of my own** and shipped
+   cards stacked on cards. *Build the sentence he wrote, not the better idea I had about
+   it.*
+4. **I invented a spacing number instead of reading the one already in the file.** He had
+   to point out that the gap between "We are building this together" and "Grow Kenya
+   together" was sitting right there. *The page already knows its own spacing — take it,
+   never invent it.* And a moved card takes its own padding with it: the Vote carried
+   `top: 10` because it used to sit underneath, so after the swap nothing supplied the
+   seam and it welded to the money card.
+5. **I fixed the last 2 px without checking what the fix pushed.** Breathing space under
+   TODAY is taken *out of the card*, so making it larger than the gap that follows drags
+   the next card's rim above the fold — that hairline over the cue was my own 12 vs 10.
+   *Any constant that steals from one element pays it to its neighbour; name the
+   neighbour before changing the number.*
+
+The cheap check that would have caught all five: **look at the whole screen, quote the
+request, reuse the file's own values, and name what moves above and below.**
 
 ## 5. WHAT THIS FILE IS NOT
 
