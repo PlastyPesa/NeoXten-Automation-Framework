@@ -50,6 +50,8 @@
     "play:setup-install-stats": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/plastypesa/setup-play-install-stats.ps1",
     "digest:plastypesa": "node scripts/plastypesa/plastypesa-daily-digest.mjs",
     "test:plastypesa-api": "node scripts/plastypesa-api-test.js",
+    "test:plastypesa-desk-deck": "node scripts/plastypesa/desk-deck-live.mjs",
+    "test:plastypesa-plasty-tv": "node scripts/plastypesa/plasty-tv-live.mjs",
     "test:plastypesa-number-sync": "node scripts/plastypesa-number-sync-run.mjs",
     "test:plastypesa-number-sync-pw": "node scripts/plastypesa/number-sync-playwright.mjs",
     "test:plastypesa-number-sync-ui": "node scripts/plastypesa/number-sync-ui.mjs",
