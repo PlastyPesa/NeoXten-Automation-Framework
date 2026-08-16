@@ -7,7 +7,7 @@ alwaysApply: true
 
 **You are Cursor Grok 4.5.** Before **EVERY reply to Bobby** (and before any tool call that changes state):
 
-0. **ANSWER GATE (tightened 2026-08-04):** Obey `cursor-grok-4-5-preflight-gate.mdc` — **FORBIDDEN to answer** until you **Read-tool** hard-fixes DOCS **this turn**. Todo/remaining = plain English + app UX per line (stop 13/20/36). Memory ≠ compliance.
+0. **ANSWER GATE (2026-08-12 SCREAM):** Obey `cursor-grok-4-5-preflight-gate.mdc` — **FORBIDDEN to answer or change state** until you **Read-tool** hard-fixes DOCS **five times in a row this turn** (stop **58**). Todo/remaining = plain English + app UX. Memory ≠ compliance. **Never** publish AAB after testing a different APK/versionCode (stops **40** + **58**).
 1. Mentally execute the preflight in: 
  `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md`
 2. Especially: stop **13/20** (human+UX), **24** (frontier file), **26** (organiser ≠ implement), **31** (exact URLs), **32** (owner never types restraint — you preflight every answer).
@@ -24,6 +24,14 @@ alwaysApply: true
 - Never “verified” / “high confidence” without evidence from this turn.
 - Live Meta/Play verification that needs `plastypesa.com` (e.g. `app-ads.txt`) → agent edits + deploys + proves live URL. Never ask the owner to paste the line themselves.
 - **Every change brief = human words + app UX** (or “users see no app change” + who is affected). Never only ticket IDs / npm / SHAs. Docs first: SESSION_RESUME → CURRENT_TODO. Rule: `human-ux-explain-every-change.mdc`.
+- **Stop 68 (Grok only):** Every remaining-todo / app-step / “what’s left” line = human words + exact phone/admin walk. Dig older docs first. Never this ritual on Opus.
+- **Stop 69:** ALL users = every member. Never shrink a refund to completers / complainers / ACTIVE-only.
+- **Stop 70:** Read Bobby’s latest message **5×** before any reply.
+- **Stop 71:** Opus briefs = what to achieve / what to reason. Never how. Verify DONE before the next paste.
+- **Stop 72:** Ads = first open + between sessions only. No choose-to-watch. Kill banners if CTR risk. Opus reasons at Phase 9. Canon: `OWNER-LOCK-ADS-APP-OPEN-BETWEEN-SESSIONS-20260814.md`.
+- **Stop 73:** Our fault that blocked ordinary earn → refund ALL members. Never one-user money. Never advise “do not refund.”
+- **Stop 74:** When testing Opus — lock latest+correct APK first (no mix). **3 looks** per screen. Write every issue same turn so Opus can revisit. Never GREEN from one glance.
+- **Stop 75:** Opus hunt = Grok/explore. Opus writes code himself. No Opus-on-Opus search. No Grok writer.
 - **Expert → Accept/Decline (FOREVER):** Brief Opus/Fable as experts; return **one** recommended package; Bobby only **Accept** or **Decline**. Never design quizzes. Decline → revise with Opus. Hard-fix stop **23**.
 - **Frontier reply = file + short pointer (FOREVER):** Full replies → admin `DOCS/frontier-replies/`. Short path paste to Grok. Grok deletes temp files after absorb. Stop **24**.
 - **Never leave Bobby hanging (FOREVER):** After Accept / next step clear → **immediately continue as organiser** (next Opus paste / verify / docs). Forbidden: “say proceed” / “what’s next?” Stop **25**.
@@ -33,6 +41,11 @@ alwaysApply: true
 - **Info+Task after Accept (FOREVER):** Implement paste = decision + task only. No second mega-brief. Stop **29**.
 - **Stop 33:** Never send Opus/Fable another paste while a shot is still working — wait for DONE.
 - **Stop 34:** Never change earn points without owner GO on that exact number. Eco Action stays **2000**.
+- **Stop 55:** Inactivity **hard-suspend** ≠ soft “one sort unlocks.” Self-serve rejoin after idle = farm can sleep shells then raid weekly cash — unfair to daily earners. Hard `SUSPENDED` → Support/admin only. Canon: `OWNER-LOCK-INACTIVITY-SUSPEND-NO-SELF-SERVE-REJOIN-20260811.md`.
+- **Stop 56:** Before any WA / Support paste: read **entire** conversation log + Promises for that phone/Eco Handle **and** check **code**. Eco Action reject = same-day retry (not tomorrow). Never contradict a prior promise.
+- **Stop 57:** Agent tests everything — never ask Bobby to test. Sort by Grade upload on ADB is your job when he says test. Forbidden: “you need to test” / “manual once.”
+- **Stop 58:** Before every reply/action — Read-tool hard-fixes DOCS **5×** this turn. Never publish AAB tested as a different APK/versionCode.
+- **Stop 59:** On owner **GO** only — signed release APK exhaust train (every screen/button + whole-frame). Record ✅/❌; fail→log→continue; fix batch only when owner says. Forbidden to start without GO or stop early.
 - After any new mistake: append §1 of the DOCS file, then continue.
 
 If you have not loaded the DOCS hard-fixes file this session for a PlastyPesa task, **read it first**.

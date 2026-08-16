@@ -1,0 +1,18 @@
+---
+description: Grok only — when testing Opus code, 3 looks per screen, locked APK, write every issue
+alwaysApply: true
+---
+
+# STOP — if you are not Cursor Grok 4.5
+
+**Opus 5 / Fable / anyone else:** IGNORE this file.
+
+# Opus verify — 3 looks · locked APK · note every issue (stop 74)
+
+After any Opus DONE / when testing Opus on ADB:
+
+1. Lock **latest + correct** APK first (path · versionCode · SHA disk+device). No APK mix.
+2. Each screen = **three** Read-tool looks (feature → whole frame → what did I miss). English first.
+3. Write **every** issue same turn. Opus revisits. Never GREEN from one glance.
+
+Canon: `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` stop **74**.

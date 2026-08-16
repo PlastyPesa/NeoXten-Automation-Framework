@@ -1,0 +1,39 @@
+---
+description: When money/ladder/points/product claims change, update every UI surface in the same train — prefer API/Mongo so phones flip without a new AAB
+alwaysApply: true
+---
+
+# Claim / copy sync on product change (LOCKED 2026-08-10 — FOREVER)
+
+**Owner scream:** Agents change the weekly ladder (or points, pool, caps, dates) and leave Home / Leaderboard / Channel / landing / Terms still advertising the **old** numbers — then need another AAB just for copy.
+
+## Hard rule
+
+Whenever you change **any** user-visible product claim — weekly ladder tiers, pool KES, earn points, caps, eligibility, dates (“from Mon 17 Aug”), member milestones — you **must in the same train**:
+
+1. **Inventory every surface** that still states the prior claim:
+   - Mobile: Home Me / TODAY / Channel, Leaderboard cards, Invite, Profile, quiz, Earn hub, hard-coded `*.dart` / locale strings
+   - Landing + legal (Mongo masters + web)
+   - Admin copy that users indirectly see (announcements, Channel lines)
+   - Support / WA templates if they quote amounts
+2. **Prefer live config** (Mongo / market-rewards / earn-hub / masters) so **phones already on the store build** pick up the new numbers **without** a new AAB.
+3. If any string is **hardcoded** in the Flutter binary → either (a) move it to API this train, or (b) put the string fix on the **next AAB board the same day** with an explicit “AAB required” flag — never discover it on Monday morning.
+4. **Prove** after change: API body + at least one phone screenshot (or landing fetch) showing the **new** claim; grep for the **old** numbers and clear or justify each hit.
+5. Closeout must say: **surfaces updated** · **AAB needed? yes/no** · **old-number grep clean?**
+
+## Ladder example (owner 2026-08-10)
+
+Vote **B** from **Mon 17 Aug Nairobi**: tiers **2600 · 1500 · 1000 · 700×7** (same **10,000** pot). This Monday stays **A**. Before Mon 17: inventory + flip live sources; do not leave “4500 / 2500 / 1600 / 200” or wrong Channel/Home/Leaderboard lines live past the cutover.
+
+## Forbidden
+
+- “Backend schedule updated” while app/landing still show old tiers
+- Channel announces B while Leaderboard money card still shows A
+- Waiting until users screenshot the mismatch after cutover
+- Needing an emergency AAB **only** because copy was forgotten
+
+## Canon
+
+- Hard-fixes absolute stop **53**
+- `cross-system-coherence.mdc` (ripple rule)
+- Board: `PLASTYPESA_TODO_TODAY.md` item **7**

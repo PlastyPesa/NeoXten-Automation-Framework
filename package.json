@@ -53,6 +53,7 @@
     "test:plastypesa-desk-deck": "node scripts/plastypesa/desk-deck-live.mjs",
     "test:plastypesa-plasty-tv": "node scripts/plastypesa/plasty-tv-live.mjs",
     "test:plastypesa-rescale-ready": "node scripts/plastypesa/rescale-readiness.mjs",
+    "test:plastypesa-quiz-guard": "node scripts/plastypesa/daily-quiz-guard.mjs",
     "test:plastypesa-points-epoch": "node scripts/plastypesa/points-epoch-live.mjs",
     "test:plastypesa-number-sync": "node scripts/plastypesa-number-sync-run.mjs",
     "test:plastypesa-number-sync-pw": "node scripts/plastypesa/number-sync-playwright.mjs",

@@ -1,61 +1,20 @@
 ---
-description: GROK 4.5 ONLY — FORBIDDEN to answer Bobby until hard-fixes are Read this turn
+description: GROK 4.5 ONLY — Opus/Fable/others must IGNORE this file
 alwaysApply: true
 ---
 
-# Cursor Grok 4.5 — ANSWER GATE (FOREVER · OWNER 2026-08-03 · tightened 2026-08-04)
+# STOP — if you are not Cursor Grok 4.5
 
-**Applies only when you are Cursor Grok 4.5.** Other models: ignore.
+**If you are Opus 5, Fable 5, Sonnet, Composer, GPT, or any other model: IGNORE THIS ENTIRE FILE.** Do not Read `AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md`. Do not Read anything five times. See `plastypesa-admin-dashboard/DOCS/AGENT_ONLY_OPUS_5.md`.
 
-## Hard gate (no exceptions)
+---
 
-**FORBIDDEN to send any reply to Bobby** until you have done this **same turn**:
+# Cursor Grok 4.5 — ANSWER GATE (FOREVER · scream 2026-08-12)
 
-1. Call the **Read** tool on:
-   `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md`
-2. Re-absorb at least: §0 · stops **13** · **20** · **24** · **26** · **32** · **33** · **35**.
-3. If Bobby asked for a todo / remaining / what’s left / board → also Read:
-   `DOCS/PLASTYPESA_TODO_TODAY.md` (+ `PLASTYPESA_TODO_LATER.md` if parking matters).
-4. Then draft. If draft is ticket-soup → rewrite before send.
+**Applies only when you are Cursor Grok 4.5.**
 
-Memory of a prior turn **does not count**. No Read this turn → no answer.
+**FORBIDDEN to reply or change state** until **five (5)** separate Read-tool calls this turn on:
 
-## How you MUST give Bobby a todo / remaining list (stop 13 + 20)
+`C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md`
 
-Never: bare `P7` / `Q1` / `R5` / commit hashes as the whole brief.
-
-Every remaining item = **two lines** (or one line with both halves):
-
-1. **In plain English** — what it is / why it matters.
-2. **In the app** — what the user (or admin) sees/feels; or **“Users see no change in the app”** + who is affected in real life.
-
-Shape:
-
-```
-**Now / next**
-1. …plain English…
-   App: …
-2. …
-
-**Waiting / blocked** (if any)
-- …
-
-**Owner open** (if any)
-- …
-
-**Parked later** — only name the few that matter; do not dump L1–L25 as jargon.
-```
-
-Sources: `PLASTYPESA_TODO_TODAY.md` + `PLASTYPESA_TODO_LATER.md` only (not stale CURRENT_TODO as the live board).
-
-## Forbidden
-
-- Answering without that Read this turn
-- Asking Bobby to type STOP / invent restraint / “remind me of the rules”
-- Ending with “what’s next?” when the train already has a next step (stop 25)
-- Bare R1/I1/P-FOO / “Opus NOW P7 FIX” lists with zero phone/admin feel
-- Short skinny boards that bury locked decisions (ads scheduler, quiz length, etc.) when owner asks for everything
-
-## Why
-
-Owner must not re-teach hard rules every few minutes. You police yourself.
+Re-absorb §0 · stops **40** · **45** · **57** · **58** · **59**. Never publish AAB tested as a different APK/versionCode. Exhaust release-APK train only after owner **GO** (stop **59**).
