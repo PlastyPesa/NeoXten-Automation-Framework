@@ -44,7 +44,9 @@ async function main() {
         "max-sort-proofs-per-day": 1,
         "pledge-points": 200,
         "max-pledges-per-day": 3,
-        "referral-points": 500,
+        // Base Master. The earn hub can print more than this while a boost
+        // campaign is live — that is the boost, not a mismatch.
+        "referral-points": 1000,
         "ecosort-points-per-correct": 15,
         "ecosort-daily-cap": 450,
         "signup-bonus-points": 1000,
@@ -73,18 +75,23 @@ async function main() {
         fails.push(`vault defaults drifted: ${vaultPts}/${vaultMax}`);
     }
 
-    // KE market schedule (from code registry — assert file still has 4500 ladder)
+    // KE weekly ladder. Owner cut over to ladder B on Mon 17 Aug Nairobi:
+    // 2600 / 1500 / 1000 / 700x7, same 10 000 pot. Ladder A (4500 / 2500 /
+    // 1600 / 200) is retired and must not still be sitting in the registry.
     const regPath = path.join(
         "C:/Users/Bobby/Documents/plastypesa-backend-api/lib/lambda/backend/services/market_registry.service.js"
     );
     const reg = fs.readFileSync(regPath, "utf8");
-    const keOk =
-        /amount:\s*4500/.test(reg) &&
-        /amount:\s*2500/.test(reg) &&
-        /amount:\s*1600/.test(reg) &&
-        /amount:\s*200/.test(reg);
-    rows.push({ name: "KE market_registry top10 ladder", want: true, got: keOk, ok: keOk });
-    if (!keOk) fails.push("KE reward ladder missing from market_registry.service.js");
+    const ladderB =
+        /amount:\s*2600/.test(reg) &&
+        /amount:\s*1500/.test(reg) &&
+        /amount:\s*1000/.test(reg) &&
+        /amount:\s*700/.test(reg);
+    const ladderAGone = !/amount:\s*4500/.test(reg) && !/amount:\s*2500/.test(reg);
+    rows.push({ name: "KE market_registry ladder B live", want: true, got: ladderB, ok: ladderB });
+    rows.push({ name: "KE market_registry ladder A retired", want: true, got: ladderAGone, ok: ladderAGone });
+    if (!ladderB) fails.push("KE ladder B (2600/1500/1000/700) missing from market_registry.service.js");
+    if (!ladderAGone) fails.push("retired KE ladder A (4500/2500) still present in market_registry.service.js");
 
     console.log(JSON.stringify({ rows, failCount: fails.length, fails }, null, 2));
     await c.close();
