@@ -1,0 +1,155 @@
+{
+  "title": "Caps, cans, and the triangle",
+  "description": "Ten short reads on what belongs with what. Two harder ones at the end.",
+  "questions": [
+    {
+      "question": "These stiff, cloudy bottles sit together. What family are they?",
+      "options": [
+        "HDPE — detergent, dairy, and many kitchen jugs",
+        "PET — the same as clear water bottles",
+        "Glass with a plastic skin",
+        "Film, because they held liquid"
+      ],
+      "answer": "HDPE — detergent, dairy, and many kitchen jugs",
+      "explanation": "Stiff and cloudy is the HDPE look. Clear crackly water bottles are PET. Keep the families apart.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/hdpe-bottles-and-containers.png"
+    },
+    {
+      "question": "Hands are gathering bottle caps in their own pile. Why not leave them on the bottles?",
+      "options": [
+        "The cap is usually a different grade from the bottle",
+        "Caps make the bottle worth more as one piece",
+        "Caps are glass",
+        "Caps dissolve if you leave them on"
+      ],
+      "answer": "The cap is usually a different grade from the bottle",
+      "explanation": "Most drink bottles are PET. Most caps are PP or HDPE. Unscrewing is the sort.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/collecting-plastic-bottle-caps.jpg"
+    },
+    {
+      "question": "This tub flexes and goes pale at the bend. Which quiet grade is that often?",
+      "options": [
+        "PP — many yoghurt cups and kitchen tubs",
+        "PET — it must be a water bottle",
+        "Film — it held food",
+        "Metal — pale means aluminium"
+      ],
+      "answer": "PP — many yoghurt cups and kitchen tubs",
+      "explanation": "PP is the waxed, flex-and-white cup. It is not PET and it is not a bag.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/tupperware-polypropylene-container.jpg"
+    },
+    {
+      "question": "A milk-style bottle, opaque, not see-through. First guess?",
+      "options": [
+        "HDPE, unless the triangle says otherwise",
+        "Always PET, because it held a drink",
+        "Always glass",
+        "Always film"
+      ],
+      "answer": "HDPE, unless the triangle says otherwise",
+      "explanation": "Household milk and many juice jugs are HDPE. Still turn it over if you can.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/plastic-milk-bottle.jpg"
+    },
+    {
+      "question": "Clear, green, and brown bottles share one mesh cage. What makes that cage a product?",
+      "options": [
+        "They are all PET bottles kept as one grade",
+        "Colour mixing means three different grades",
+        "The cage turns them into HDPE",
+        "Mesh means they are residual only"
+      ],
+      "answer": "They are all PET bottles kept as one grade",
+      "explanation": "PET can be several colours and still be PET. Grade first, colour second.",
+      "topic": "plastic-types",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/clear-pet-bottles-recycling-pile.jpg"
+    },
+    {
+      "question": "Thin bags hang in riverside branches. What is the household move?",
+      "options": [
+        "Keep film in a tied sack so wind cannot take it",
+        "Stuff the bags inside PET bottles to hide them",
+        "Burn the bags with the supper fire",
+        "Leave them — film cannot travel"
+      ],
+      "answer": "Keep film in a tied sack so wind cannot take it",
+      "explanation": "Film flies. A tied sack is the sort. Bottles and fire are the wrong rooms.",
+      "topic": "environment",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/environment/plastic-bag-litter-crocodile-river.jpg"
+    },
+    {
+      "question": "Bottles float in a river beside houses. If nobody lifts them, where do they ride?",
+      "options": [
+        "Toward the sea — rivers are the road",
+        "They become soil in a week",
+        "They stay in that bend forever",
+        "Rain dissolves them"
+      ],
+      "answer": "Toward the sea — rivers are the road",
+      "explanation": "Most ocean plastic started inland. Catch it dry at the house.",
+      "topic": "ocean-pollution",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/plastic-bottles-polluting-river.jpg"
+    },
+    {
+      "question": "A yard door is a mixed heap of bags, bottles, and film. Why is that heap expensive?",
+      "options": [
+        "Every grade must be pulled apart again before a sale",
+        "Mixed plastic always sells for more",
+        "It can be melted as one material",
+        "Mixed heaps are burned, so sorting is pointless"
+      ],
+      "answer": "Every grade must be pulled apart again before a sale",
+      "explanation": "A buyer wants one grade. Mixing is unpaid work for the next pair of hands.",
+      "topic": "recycling",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/materials-recovery-facility.jpg"
+    },
+    {
+      "question": "Blue jerry cans are banded in one bale, white in another. Why split colour?",
+      "options": [
+        "Same grade, one colour, a pellet a buyer can trust",
+        "Blue plastic is a different grade from white",
+        "Bands only hold on matching colours",
+        "Colour is just for the photo"
+      ],
+      "answer": "Same grade, one colour, a pellet a buyer can trust",
+      "explanation": "Grade first, colour second. Mixed colours melt muddy.",
+      "topic": "recycling",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/hdpe-jerry-can-bales.jpg"
+    },
+    {
+      "question": "Lentil-sized beads in grass, not broken bottles. What are they?",
+      "options": [
+        "Nurdles — raw pellets spilled before anything was made",
+        "Seeds that only grow near plastic",
+        "Finished household recycled cups",
+        "Bleached sand"
+      ],
+      "answer": "Nurdles — raw pellets spilled before anything was made",
+      "explanation": "Nurdles are plastic at the start of its life. Once loose, they are almost impossible to gather.",
+      "topic": "ocean-pollution",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/nurdles-plastic-pellets.jpg"
+    }
+  ],
+  "quizConfigs": {
+    "difficulty": "medium",
+    "timeLimit": 180,
+    "maxAttempts": 1
+  },
+  "reward": {
+    "name": "Daily quiz",
+    "rewardType": "POINTS"
+  }
+}

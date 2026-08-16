@@ -1,0 +1,225 @@
+{
+  "title": "Fifteen short reads — first longer quiz",
+  "description": "Same reward as a ten-question day. Short stems. Two harder reads near the end.",
+  "questions": [
+    {
+      "question": "Stiff, cloudy kitchen jug. Family?",
+      "options": [
+        "HDPE",
+        "PET",
+        "Film",
+        "Glass"
+      ],
+      "answer": "HDPE",
+      "explanation": "Cloudy and stiff is the HDPE feel.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/hdpe-bottles-and-containers.png"
+    },
+    {
+      "question": "Clear crackly water bottle. Family?",
+      "options": [
+        "PET",
+        "HDPE",
+        "PP only",
+        "Metal"
+      ],
+      "answer": "PET",
+      "explanation": "Clear and crackly is the PET feel.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/clear-pet-bottles-recycling-pile.jpg"
+    },
+    {
+      "question": "Why unscrew the cap?",
+      "options": [
+        "Cap is usually another grade",
+        "Caps raise the bottle grade",
+        "Caps are glass",
+        "Caps must stay on"
+      ],
+      "answer": "Cap is usually another grade",
+      "explanation": "Bottle and cap rarely match.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/collecting-plastic-bottle-caps.jpg"
+    },
+    {
+      "question": "Flex-and-white cup. Often?",
+      "options": [
+        "PP",
+        "PET",
+        "Film",
+        "HDPE can"
+      ],
+      "answer": "PP",
+      "explanation": "Many dairy cups are grade 5 PP.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/tupperware-polypropylene-container.jpg"
+    },
+    {
+      "question": "Opaque milk-style bottle. First pile?",
+      "options": [
+        "HDPE",
+        "PET",
+        "Film",
+        "Residual always"
+      ],
+      "answer": "HDPE",
+      "explanation": "Then confirm with the triangle if you can.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/plastic-milk-bottle.jpg"
+    },
+    {
+      "question": "Thin bags on a balcony. Store how?",
+      "options": [
+        "Tied sack, wind-proof corner",
+        "Loose on the rail",
+        "Inside PET bottles",
+        "On the jiko"
+      ],
+      "answer": "Tied sack, wind-proof corner",
+      "explanation": "Film flies. Tie it.",
+      "topic": "environment",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/environment/plastic-bag-litter-crocodile-river.jpg"
+    },
+    {
+      "question": "Bottles in a river. Road goes?",
+      "options": [
+        "Toward the sea",
+        "Into soil this week",
+        "Nowhere",
+        "Into glass"
+      ],
+      "answer": "Toward the sea",
+      "explanation": "Rivers carry. Houses can stop the ride.",
+      "topic": "ocean-pollution",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/plastic-bottles-polluting-river.jpg"
+    },
+    {
+      "question": "What is a PET bale?",
+      "options": [
+        "Pressed volume of one grade",
+        "Mixed rubbish",
+        "New filled drinks",
+        "Glass"
+      ],
+      "answer": "Pressed volume of one grade",
+      "explanation": "Air out, grade in, ready to travel.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/bales-of-pet-bottles-closeup.jpg"
+    },
+    {
+      "question": "Coloured bins in a row mean?",
+      "options": [
+        "Different homes for different materials",
+        "Pick any bin",
+        "Only film",
+        "Only glass"
+      ],
+      "answer": "Different homes for different materials",
+      "explanation": "The row is the sort.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/recycling-bins-north-west-england.jpg"
+    },
+    {
+      "question": "A marked recycling bin wants?",
+      "options": [
+        "Its stream, clean",
+        "A lucky-dip liner",
+        "Engine oil",
+        "Wet stew pots"
+      ],
+      "answer": "Its stream, clean",
+      "explanation": "The mark is a promise.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/plastic-recycling-bin-reykjavik.jpg"
+    },
+    {
+      "question": "Mixed heap at a yard door. Cost is?",
+      "options": [
+        "Hands pulling grades apart again",
+        "A bonus for mixing",
+        "Zero — melt it all",
+        "Only the photo"
+      ],
+      "answer": "Hands pulling grades apart again",
+      "explanation": "Do that pull at home, earlier.",
+      "topic": "recycling",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/materials-recovery-facility.jpg"
+    },
+    {
+      "question": "Stacked PET bales. Customer wants?",
+      "options": [
+        "PET, not a surprise can",
+        "Any plastic",
+        "Only film",
+        "Only caps"
+      ],
+      "answer": "PET, not a surprise can",
+      "explanation": "The stack is inventory of one thing.",
+      "topic": "recycling",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/bales-of-pet-bottles-stacked.jpg"
+    },
+    {
+      "question": "Beach fragments. Sale is mostly?",
+      "options": [
+        "Already lost — grade is gone",
+        "Higher than whole bottles",
+        "Paid by the tide",
+        "Paid as glass"
+      ],
+      "answer": "Already lost — grade is gone",
+      "explanation": "Sort while it is still a bottle.",
+      "topic": "ocean-pollution",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/beach-pollution-tenerife-plastic-debris.jpg"
+    },
+    {
+      "question": "Blue cans in one bale, white in another. Why?",
+      "options": [
+        "Colour after grade",
+        "They are different polymers",
+        "Bands need matching paint",
+        "For the camera"
+      ],
+      "answer": "Colour after grade",
+      "explanation": "Same HDPE, cleaner pellet when colours stay apart.",
+      "topic": "recycling",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/hdpe-jerry-can-bales.jpg"
+    },
+    {
+      "question": "Beads in grass, not bottle bits. They are?",
+      "options": [
+        "Nurdles — raw pellets",
+        "Seeds",
+        "Washed sand",
+        "Finished cups"
+      ],
+      "answer": "Nurdles — raw pellets",
+      "explanation": "Spilled before a product existed.",
+      "topic": "ocean-pollution",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/nurdles-plastic-pellets.jpg"
+    }
+  ],
+  "quizConfigs": {
+    "difficulty": "medium",
+    "timeLimit": 240,
+    "maxAttempts": 1
+  },
+  "reward": {
+    "name": "Daily quiz",
+    "rewardType": "POINTS"
+  }
+}

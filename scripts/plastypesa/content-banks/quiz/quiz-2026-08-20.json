@@ -1,0 +1,155 @@
+{
+  "title": "Last 10-question night — read the item",
+  "description": "Vote still open. Ten short reads. Tomorrow’s longer quiz stays unstaged until the ballot ends.",
+  "questions": [
+    {
+      "question": "Caps collected by hand. What is the honest household jar?",
+      "options": [
+        "Caps only — a second grade, saved clean",
+        "Caps plus residual food plus foil",
+        "Caps left on every bottle",
+        "Caps thrown in the film sack"
+      ],
+      "answer": "Caps only — a second grade, saved clean",
+      "explanation": "A jar of caps is a sort. A jar of leftovers is a smell.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/collecting-plastic-bottle-caps.jpg"
+    },
+    {
+      "question": "Coloured bins in a line. You have a rinsed PET bottle. Where?",
+      "options": [
+        "The stream that takes plastic bottles — not every bin",
+        "A little into each bin to be fair",
+        "The food bin, because it held a drink",
+        "No bin — PET cannot be collected"
+      ],
+      "answer": "The stream that takes plastic bottles — not every bin",
+      "explanation": "One item, one home. Fairness is not a pinch in every colour.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/recycling-bins-north-west-england.jpg"
+    },
+    {
+      "question": "Bottles gathered, not yet baled. What do you still check?",
+      "options": [
+        "Stranger grades, wet, and leftover food",
+        "Whether the photo is pretty",
+        "Whether every bottle is a different colour",
+        "Whether the bags are from a beach"
+      ],
+      "answer": "Stranger grades, wet, and leftover food",
+      "explanation": "Gathered is a start. Clean same-grade is the product.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/plastic-bottles-gathered-for-recycling.jpg"
+    },
+    {
+      "question": "A mixed waste mountain. What is the first pull?",
+      "options": [
+        "One grade you can name, kept in its own sack",
+        "The shiniest item, any material",
+        "Everything into one liner",
+        "Only the items with labels you like"
+      ],
+      "answer": "One grade you can name, kept in its own sack",
+      "explanation": "Name it, then bag it. A mountain is not a sort.",
+      "topic": "environment",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/environment/plastic-waste-pile-00998.jpg"
+    },
+    {
+      "question": "Stacked PET bales under the sky. What must not be inside?",
+      "options": [
+        "A surprise jerry can, film, or a wet food tub",
+        "Clear PET bottles",
+        "Air that was pressed out",
+        "Bands that hold the bale"
+      ],
+      "answer": "A surprise jerry can, film, or a wet food tub",
+      "explanation": "The stack is a promise of PET. Strangers break the promise.",
+      "topic": "recycling",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/bales-of-pet-bottles-stacked.jpg"
+    },
+    {
+      "question": "Beach fragments, many shapes. Why sort at home instead of waiting for the sand?",
+      "options": [
+        "Whole, dry, named grade still has a buyer",
+        "Sand sorts better than hands",
+        "Fragments are the most valuable form",
+        "The tide returns bottles as new drinks"
+      ],
+      "answer": "Whole, dry, named grade still has a buyer",
+      "explanation": "The beach is late. The kitchen is on time.",
+      "topic": "ocean-pollution",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/beach-pollution-tenerife-plastic-debris.jpg"
+    },
+    {
+      "question": "Marine debris including crates. Is this only a ‘tourist beach’ problem?",
+      "options": [
+        "No — inland drains feed coasts",
+        "Yes — only visitors drop plastic",
+        "Yes — crates cannot come from a house",
+        "No — crates are always local sand"
+      ],
+      "answer": "No — inland drains feed coasts",
+      "explanation": "A highland kitchen and a coast share a road. The drain is the on-ramp.",
+      "topic": "ocean-pollution",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/marine-debris-hawaiian-coast.jpg"
+    },
+    {
+      "question": "A PP tub and a PET bottle on the same table. Two photos or one?",
+      "options": [
+        "Two — they are different grades",
+        "One — both held food or drink",
+        "One — both are ‘plastic’",
+        "None — tubs cannot be photographed"
+      ],
+      "answer": "Two — they are different grades",
+      "explanation": "Same-grade in one frame. Two materials, two frames.",
+      "topic": "plastic-types",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/tupperware-polypropylene-container.jpg"
+    },
+    {
+      "question": "Cloudy HDPE jugs beside a clear PET memory in your head. What do you trust?",
+      "options": [
+        "The wall in your hand, then the triangle",
+        "The memory of a water brand",
+        "The lid colour only",
+        "The shop shelf they sat on"
+      ],
+      "answer": "The wall in your hand, then the triangle",
+      "explanation": "Feel, then read. Brand stories lie more than moulded marks.",
+      "topic": "plastic-types",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/hdpe-bottles-and-containers.png"
+    },
+    {
+      "question": "A river of bottles. Someone says ‘the ocean will handle it.’ What is true?",
+      "options": [
+        "The ocean is downhill of this river, not a bin",
+        "The ocean sorts grades for free",
+        "Bottles become fish food on purpose",
+        "Rivers cannot reach a coast"
+      ],
+      "answer": "The ocean is downhill of this river, not a bin",
+      "explanation": "Downhill is not disposal. Lift it while it is still a bottle.",
+      "topic": "ocean-pollution",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/plastic-bottles-polluting-river.jpg"
+    }
+  ],
+  "quizConfigs": {
+    "difficulty": "medium",
+    "timeLimit": 180,
+    "maxAttempts": 1
+  },
+  "reward": {
+    "name": "Daily quiz",
+    "rewardType": "POINTS"
+  }
+}

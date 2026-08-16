@@ -1,0 +1,155 @@
+{
+  "title": "Rivers, film, and the walk from the market",
+  "description": "Short questions on what flies, what floats, and what stays a product.",
+  "questions": [
+    {
+      "question": "Bags in a river tree. Why does film travel farther than a jerry can?",
+      "options": [
+        "It is light — wind and water both move it",
+        "It is heavier than a can",
+        "It melts in the sun into water",
+        "Collectors fight over it first"
+      ],
+      "answer": "It is light — wind and water both move it",
+      "explanation": "Film leaves a hand and keeps going. Contain it at the house.",
+      "topic": "environment",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/environment/plastic-bag-litter-crocodile-river.jpg"
+    },
+    {
+      "question": "A river full of bottles. What would have stopped this load?",
+      "options": [
+        "A dry PET pile at the door, before the drain",
+        "Waiting for the sea to sort them",
+        "Mixing them with oil cans",
+        "Crushing them into the mud"
+      ],
+      "answer": "A dry PET pile at the door, before the drain",
+      "explanation": "The cheapest cleanup is the one that never enters the water.",
+      "topic": "ocean-pollution",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/plastic-bottles-polluting-river.jpg"
+    },
+    {
+      "question": "PET bottles in a mesh cage, several colours. Is the cage mixed grade?",
+      "options": [
+        "No — colours of PET can share a grade",
+        "Yes — each colour is a new polymer",
+        "Yes — green means glass",
+        "No — mesh turns everything into HDPE"
+      ],
+      "answer": "No — colours of PET can share a grade",
+      "explanation": "Colour is the second sort. The cage is still PET.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/clear-pet-bottles-recycling-pile.jpg"
+    },
+    {
+      "question": "A PP tub. Where does it not belong?",
+      "options": [
+        "Inside a PET bottle sack",
+        "In a small PP pile of cups and tubs",
+        "Rinsed and dry, foil lid off",
+        "Residual, if there is no mark and you will not guess"
+      ],
+      "answer": "Inside a PET bottle sack",
+      "explanation": "PP is not PET. A food pot is not a water bottle.",
+      "topic": "plastic-types",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/tupperware-polypropylene-container.jpg"
+    },
+    {
+      "question": "An opaque milk-style bottle. After you rinse it, which pile?",
+      "options": [
+        "HDPE, with the other kitchen jugs",
+        "PET, because it held a drink",
+        "Film, because it is not clear",
+        "Glass, because milk used to be glass"
+      ],
+      "answer": "HDPE, with the other kitchen jugs",
+      "explanation": "Drink is not a grade. The wall and the triangle are.",
+      "topic": "plastic-types",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/plastic-milk-bottle.jpg"
+    },
+    {
+      "question": "A recycling bin with a mark. What breaks the bin?",
+      "options": [
+        "A mixed liner of bottles, bags, and a charger",
+        "A bag of one clean grade the bin is for",
+        "Rinsed items",
+        "A lid that matches the stream"
+      ],
+      "answer": "A mixed liner of bottles, bags, and a charger",
+      "explanation": "The mark is a stream. A lucky-dip liner is the old bin with a new sticker.",
+      "topic": "recycling",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/plastic-recycling-bin-reykjavik.jpg"
+    },
+    {
+      "question": "Pressed PET, close enough to see bottle necks. Why press?",
+      "options": [
+        "Volume that can travel — air is not a product",
+        "Pressing changes the grade to HDPE",
+        "Pressing cleans food off",
+        "Pressing makes film"
+      ],
+      "answer": "Volume that can travel — air is not a product",
+      "explanation": "A bale is air squeezed out of one grade.",
+      "topic": "recycling",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/bales-of-pet-bottles-closeup.jpg"
+    },
+    {
+      "question": "A facility heap at the door. What should have happened at the house?",
+      "options": [
+        "The same pull-apart, while the plastic was still clean",
+        "Nothing — houses cannot sort",
+        "Burning, so the yard stays empty",
+        "Hiding film inside bottles"
+      ],
+      "answer": "The same pull-apart, while the plastic was still clean",
+      "explanation": "Household sorting is the first station of the same factory.",
+      "topic": "recycling",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/materials-recovery-facility.jpg"
+    },
+    {
+      "question": "Nurdles in grit. Are they household bottles yet?",
+      "options": [
+        "No — they spilled before a bottle existed",
+        "Yes — they are crushed PET",
+        "Yes — they are washed sand",
+        "No — they are seeds"
+      ],
+      "answer": "No — they spilled before a bottle existed",
+      "explanation": "Factory-start plastic, not a kitchen sort. Still a leak the water will take.",
+      "topic": "ocean-pollution",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/nurdles-plastic-pellets.jpg"
+    },
+    {
+      "question": "White and blue HDPE cans, already in separate bales. What skill is that?",
+      "options": [
+        "Colour after grade — same polymer, cleaner pellet",
+        "Two different grades pretending to be one",
+        "A photo trick",
+        "Proof that colour does not matter"
+      ],
+      "answer": "Colour after grade — same polymer, cleaner pellet",
+      "explanation": "The yard is showing the second sort. You can start it on a balcony.",
+      "topic": "recycling",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/hdpe-jerry-can-bales.jpg"
+    }
+  ],
+  "quizConfigs": {
+    "difficulty": "medium",
+    "timeLimit": 180,
+    "maxAttempts": 1
+  },
+  "reward": {
+    "name": "Daily quiz",
+    "rewardType": "POINTS"
+  }
+}

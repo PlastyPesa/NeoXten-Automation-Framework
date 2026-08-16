@@ -1,0 +1,155 @@
+{
+  "title": "Bales, bins, and what a yard buys",
+  "description": "Follow the bottle from a household pile to a pressed bale.",
+  "questions": [
+    {
+      "question": "This close-up is crushed bottles pressed into a block. What is for sale?",
+      "options": [
+        "A volume of one clean grade, ready to travel",
+        "Rubbish the yard pays to remove",
+        "New bottles already filled",
+        "Glass, once labels fall off"
+      ],
+      "answer": "A volume of one clean grade, ready to travel",
+      "explanation": "A bale is the product. One bottle is not a sale. A sorted pile is how a bale begins.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/bales-of-pet-bottles-closeup.jpg"
+    },
+    {
+      "question": "Bottles sit gathered in open bags. What still has to happen before they are a bale?",
+      "options": [
+        "Keep the grade together, dry, and drop the strangers",
+        "Add film so the bags look full",
+        "Hose them until they stay wet",
+        "Mix in jerry cans for weight"
+      ],
+      "answer": "Keep the grade together, dry, and drop the strangers",
+      "explanation": "Gathered is not finished. Grade, dry, no extras.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/plastic-bottles-gathered-for-recycling.jpg"
+    },
+    {
+      "question": "A marked bin stands ready. What is the bin for?",
+      "options": [
+        "One stream — not a second home for mixed leftovers",
+        "Anything plastic, including oil cans and chargers",
+        "Only glass",
+        "Only film"
+      ],
+      "answer": "One stream — not a second home for mixed leftovers",
+      "explanation": "A recycling bin is a promise of a stream. Mixing breaks the promise.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/plastic-recycling-bin-reykjavik.jpg"
+    },
+    {
+      "question": "Coloured bins stand in a row. What is the row teaching?",
+      "options": [
+        "Different materials get different homes",
+        "Colour is decoration",
+        "All bins take the same mixed bag",
+        "The green bin is for garden soil only, always"
+      ],
+      "answer": "Different materials get different homes",
+      "explanation": "The row is a sort you can see. One bag into every bin is the old mistake.",
+      "topic": "recycling",
+      "difficulty": "easy",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/recycling/recycling-bins-north-west-england.jpg"
+    },
+    {
+      "question": "A wall of stacked PET bales sits in a yard. Who is the customer?",
+      "options": [
+        "A reprocessor who buys one grade at a time",
+        "A shopper buying drinks",
+        "A landfill that pays for colour",
+        "A glass factory"
+      ],
+      "answer": "A reprocessor who buys one grade at a time",
+      "explanation": "The stack is inventory. The customer wants PET, not a surprise can.",
+      "topic": "recycling",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/bales-of-pet-bottles-stacked.jpg"
+    },
+    {
+      "question": "A mixed waste pile, no grades visible. What would make it a product?",
+      "options": [
+        "Pulling one grade out and keeping it clean",
+        "Photographing it from farther away",
+        "Adding water",
+        "Tying the whole pile in one liner"
+      ],
+      "answer": "Pulling one grade out and keeping it clean",
+      "explanation": "A pile is not a grade. Hands make the product.",
+      "topic": "environment",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/environment/plastic-waste-pile-00998.jpg"
+    },
+    {
+      "question": "Beach crates and debris, far from a Kenyan kiosk. How did household plastic get this far?",
+      "options": [
+        "Wind and water move what leaves a drain",
+        "Crates grow on beaches",
+        "Only ships drop plastic; houses cannot",
+        "Sand manufactures bottles"
+      ],
+      "answer": "Wind and water move what leaves a drain",
+      "explanation": "A coast is often the last mile of an inland habit.",
+      "topic": "ocean-pollution",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/marine-debris-hawaiian-coast.jpg"
+    },
+    {
+      "question": "A beach of mixed fragments. What is already lost as a sale?",
+      "options": [
+        "Grade identity — broken mixed pieces are hard to buy as one product",
+        "Nothing — fragments sell better than bottles",
+        "Only the sand is lost",
+        "Colour, because the sun bleaches value back"
+      ],
+      "answer": "Grade identity — broken mixed pieces are hard to buy as one product",
+      "explanation": "Catch it whole and dry. Fragments on a beach are usually past the sale.",
+      "topic": "ocean-pollution",
+      "difficulty": "medium",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/ocean-pollution/beach-pollution-tenerife-plastic-debris.jpg"
+    },
+    {
+      "question": "Caps in one pile, bottles somewhere else. If you photograph proof, what is honest?",
+      "options": [
+        "Caps as their own grade, or bottles without caps — not a sealed jumble",
+        "Every bottle still tightly capped to look unused",
+        "Caps hidden under bottles",
+        "One cap and one can and one bag in one frame"
+      ],
+      "answer": "Caps as their own grade, or bottles without caps — not a sealed jumble",
+      "explanation": "The photo is a sample of a product. Show the sort you actually did.",
+      "topic": "plastic-types",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/collecting-plastic-bottle-caps.jpg"
+    },
+    {
+      "question": "HDPE jugs of many household shapes. What do they share?",
+      "options": [
+        "A family — kitchen jugs and cans, not PET water bottles",
+        "They are all grade 1 PET",
+        "They are all film",
+        "They are all glass"
+      ],
+      "answer": "A family — kitchen jugs and cans, not PET water bottles",
+      "explanation": "Shape varies. The family is HDPE. PET crackles; these thud.",
+      "topic": "plastic-types",
+      "difficulty": "hard",
+      "imageUrl": "https://prod-plasty-pesa-user-profile-imgs.s3.eu-west-2.amazonaws.com/quiz-images/quiz-images/verified/plastic-types/hdpe-bottles-and-containers.png"
+    }
+  ],
+  "quizConfigs": {
+    "difficulty": "medium",
+    "timeLimit": 180,
+    "maxAttempts": 1
+  },
+  "reward": {
+    "name": "Daily quiz",
+    "rewardType": "POINTS"
+  }
+}
