@@ -76,6 +76,7 @@
     "test:plastypesa-build-heartbeat": "node scripts/plastypesa/build-heartbeat-live.mjs",
     "test:plastypesa-ui-claim-truth": "node scripts/plastypesa-ui-claim-truth.cjs",
     "test:plastypesa-weekly-challenge": "node scripts/plastypesa/weekly-challenge-admin-smoke.mjs",
+    "plastypesa:larder": "node scripts/plastypesa/content-larder.mjs",
     "test:plastypesa-terms-ladder-truth": "node scripts/plastypesa/terms-ladder-matches-live-market.mjs",
     "test:plastypesa-live-dials-readers": "node scripts/plastypesa/live-dials-keys-have-readers.mjs",
     "test:plastypesa-retired-ladder-gone": "node scripts/plastypesa/retired-ladder-numbers-gone.mjs",
