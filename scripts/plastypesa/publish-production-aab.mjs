@@ -52,36 +52,57 @@ if (!aabPath || !fs.existsSync(aabPath)) {
 
 // Play caps release notes at 500 characters per language; assertReleaseNotes
 // below fails the upload rather than letting the API truncate mid-sentence.
-const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.48 (79)";
+const RELEASE_NAME = process.env.PLASTYPESA_RELEASE_NAME || "PlastyPesa: Recycle & Learn — 1.0.49 (80)";
 
 const RELEASE_NOTES = [
     {
         language: "en-GB",
-        text: "Home Next up, unpaid quiz practice, clearer Sort vs Eco Action coaching, Sort pending honesty, faster photos, and fairer account walls. Weekly rewards stay 10,000 KES with the new ladder from the community vote. Update to keep earning.",
+        text: `Sort photos now use the PlastyPesa camera inside the app — take it, check it, retake if you want, then send. No more photos lost handing off to another camera app. It works for Sort by Grade and for Eco Action.
+Support reads better: the Send button and the privacy note stay clear of your phone's navigation bar, and your message screenshots show properly.
+Home, Leaderboard and Profile are tidier, with more translations.
+Keep sorting, keep learning, keep earning rewards.`,
     },
     {
         language: "it-IT",
-        text: "Novità: suggerimenti Home, quiz di pratica senza punti, coaching Sort vs Eco Action, foto più fluide e schermate account più chiare. Ricompense settimanali 10.000 KES. Aggiorna per continuare a guadagnare.",
+        text: `Le foto di raccolta ora usano la fotocamera PlastyPesa dentro l'app: scatta, controlla, rifai se vuoi, poi invia. Niente più foto perse passando a un'altra app fotocamera. Vale per la raccolta per tipo e per Eco Action.
+L'Assistenza si legge meglio: il pulsante Invia e la nota sulla privacy restano sopra la barra di navigazione e le schermate dei messaggi si vedono bene.
+Home, Classifica e Profilo più ordinati, con più traduzioni.
+Continua a raccogliere, imparare e ottenere ricompense.`,
     },
     {
         language: "es-ES",
-        text: "Novedades: Next up en Inicio, práctica de quiz sin puntos, coach Sort vs Eco Action, fotos más fluidas y muros de cuenta más claros. Recompensas semanales 10.000 KES. Actualiza para seguir ganando.",
+        text: `Las fotos de clasificación ya usan la cámara de PlastyPesa dentro de la app: hazla, revísala, repítela si quieres y envíala. No se pierden fotos al usar otra app. Sirve para clasificar por tipo y para Eco Action.
+Soporte se lee mejor: el botón Enviar y el aviso de privacidad quedan por encima de la barra de navegación, y las capturas de tus mensajes se ven bien.
+Inicio, Clasificación y Perfil más ordenados, con más traducciones.
+Sigue clasificando, aprendiendo y ganando recompensas.`,
     },
     {
         language: "de-DE",
-        text: "Neu: Home-Next-up, Quiz-Übung ohne Punkte, Sort-vs-Eco-Coach, flüssigere Fotos und klarere Kontosperren. Wöchentliche Belohnungen 10.000 KES. Update, um weiter zu verdienen.",
+        text: `Sortier-Fotos nutzen jetzt die PlastyPesa-Kamera in der App: aufnehmen, prüfen, bei Bedarf wiederholen, dann senden. Keine verlorenen Fotos mehr durch andere Kamera-Apps. Gilt für Sortieren und Eco Action.
+Der Support ist klarer: Senden-Button und Datenschutzhinweis bleiben über der Navigationsleiste, und Screenshots deiner Nachrichten werden richtig angezeigt.
+Start, Rangliste und Profil sind aufgeräumter, mit mehr Übersetzungen.
+Weiter sortieren, lernen und Belohnungen verdienen.`,
     },
     {
         language: "fr-FR",
-        text: "Nouveautés : Next up Accueil, quiz d'entraînement sans points, coach Sort vs Eco Action, photos plus fluides et murs compte plus clairs. Récompenses hebdo 10 000 KES. Mettez à jour pour continuer à gagner.",
+        text: `Les photos de tri utilisent l'appareil photo PlastyPesa dans l'app : prends, vérifie, refais si tu veux, puis envoie. Plus de photos perdues via une autre app photo. Valable pour le tri par type et Eco Action.
+Le Support se lit mieux : le bouton Envoyer et la note de confidentialité restent au-dessus de la barre de navigation ; les captures de tes messages s'affichent bien.
+Accueil, Classement et Profil plus nets et mieux traduits.
+Continue à trier, apprendre et gagner des récompenses.`,
     },
     {
         language: "pt-PT",
-        text: "Novidades: Next up no Início, prática de quiz sem pontos, coach Sort vs Eco Action, fotos mais fluidas e muros de conta mais claros. Recompensas semanais 10.000 KES. Atualize para continuar a ganhar.",
+        text: `As fotos de separação passam a usar a câmara PlastyPesa dentro da app: tira, confere, repete se quiseres e envia. Já não se perdem fotos ao passar para outra app de câmara. Serve para separar por tipo e para a Eco Action.
+O Suporte lê-se melhor: o botão Enviar e a nota de privacidade ficam acima da barra de navegação, e as capturas das tuas mensagens aparecem bem.
+Início, Classificação e Perfil mais arrumados, com mais traduções.
+Continua a separar, aprender e ganhar recompensas.`,
     },
     {
         language: "ro",
-        text: "Noutăți: Next up pe Acasă, quiz de practică fără puncte, coach Sort vs Eco Action, poze mai fluide și ecrane de cont mai clare. Recompense săptămânale 10.000 KES. Actualizează ca să continui să câștigi.",
+        text: `Pozele de sortare folosesc acum camera PlastyPesa din aplicație: fotografiază, verifică, reia dacă vrei, apoi trimite. Nu se mai pierd poze la altă aplicație de cameră. Merge pentru sortarea după grad și Eco Action.
+Asistența se citește mai bine: butonul Trimite și nota de confidențialitate rămân deasupra barei de navigare, iar capturile mesajelor tale se văd corect.
+Acasă, Clasament și Profil mai ordonate, cu mai multe traduceri.
+Continuă să sortezi, să înveți și să câștigi recompense.`,
     },
 ];
 
@@ -121,12 +142,31 @@ async function main() {
     const editId = editRes.data.id;
 
     try {
-        console.log("Uploading bundle:", aabPath);
-        const upload = await ap.edits.bundles.upload({
-            packageName: PACKAGE,
-            editId,
-            media: { mimeType: "application/octet-stream", body: fs.createReadStream(aabPath) },
+        const totalBytes = fs.statSync(aabPath).size;
+        console.log(`Uploading bundle: ${aabPath} (${totalBytes} bytes)`);
+
+        // A 100 MB upload on a flaky line once hung for ~53 minutes with no output,
+        // so the stream reports progress: silent bytes mean dead, not slow.
+        const body = fs.createReadStream(aabPath);
+        let sent = 0;
+        let lastLogged = 0;
+        body.on("data", (chunk) => {
+            sent += chunk.length;
+            if (sent - lastLogged >= 10 * 1024 * 1024 || sent === totalBytes) {
+                lastLogged = sent;
+                const pct = ((sent / totalBytes) * 100).toFixed(1);
+                console.log(`  sent ${sent}/${totalBytes} bytes (${pct}%) ${new Date().toISOString()}`);
+            }
         });
+
+        const upload = await ap.edits.bundles.upload(
+            {
+                packageName: PACKAGE,
+                editId,
+                media: { mimeType: "application/octet-stream", body },
+            },
+            { timeout: 30 * 60 * 1000 }
+        );
         const versionCode = String(upload.data.versionCode || versionCodeArg);
         console.log("Uploaded versionCode:", versionCode);
 
