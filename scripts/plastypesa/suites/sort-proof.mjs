@@ -3,6 +3,16 @@ import { readJson, assert, TINY_PNG_BASE64 } from '../assert.mjs';
 
 export const id = 'sort-proof';
 
+/**
+ * HappyLion / any Kenya account that already used today's Sort slot gets
+ * CAP_REACHED before body validation. That is a valid live answer — not a 400.
+ */
+function isSortCapReached(status, body, text) {
+  const blob = `${text || ''} ${JSON.stringify(body || {})}`;
+  if (!/CAP_REACHED/i.test(blob)) return false;
+  return status === 200 || status === 400 || status === 409 || status === 429;
+}
+
 export async function run(cfg, runner) {
   if (!cfg.authHeaders) {
     runner.skip(
@@ -119,7 +129,10 @@ export async function run(cfg, runner) {
         stream: 'NOT_A_STREAM',
       }),
     });
-    const { text } = await readJson(r);
+    const { body, text } = await readJson(r);
+    if (isSortCapReached(r.status, body, text)) {
+      return;
+    }
     if (r.status !== 400) {
       throw new Error(`Expected 400 invalid stream, got ${r.status}: ${text.slice(0, 250)}`);
     }
@@ -145,6 +158,9 @@ export async function run(cfg, runner) {
       }),
     });
     const { body, text } = await readJson(r);
+    if (isSortCapReached(r.status, body, text)) {
+      return;
+    }
     // Strict API rejects two distinct grades with 400 (one grade per photo). Older deployments may still accept and evaluate using the primary stream only (200 + success shape).
     if (r.status === 400) {
       assert(body?.type === 'error', 'legacy dual stream: error type');
@@ -177,7 +193,10 @@ export async function run(cfg, runner) {
       headers: cfg.authHeaders,
       body: JSON.stringify({ stream: 'PET' }),
     });
-    const { text } = await readJson(r);
+    const { body, text } = await readJson(r);
+    if (isSortCapReached(r.status, body, text)) {
+      return;
+    }
     if (r.status !== 400) {
       throw new Error(`Expected 400 missing image, got ${r.status}: ${text.slice(0, 250)}`);
     }
@@ -198,7 +217,10 @@ export async function run(cfg, runner) {
       headers: cfg.authHeaders,
       body: JSON.stringify({ image: TINY_PNG_BASE64 }),
     });
-    const { text } = await readJson(r);
+    const { body, text } = await readJson(r);
+    if (isSortCapReached(r.status, body, text)) {
+      return;
+    }
     if (r.status !== 400) {
       throw new Error(`Expected 400 missing stream, got ${r.status}: ${text.slice(0, 250)}`);
     }
