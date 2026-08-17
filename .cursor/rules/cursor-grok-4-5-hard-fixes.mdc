@@ -1,11 +1,11 @@
 ---
-description: Cursor Grok 4.5 — mandatory self-fix hard stops before any PlastyPesa action or answer
+description: Cursor Grok 4.6 — mandatory self-fix hard stops before any PlastyPesa action or answer
 alwaysApply: true
 ---
 
-# Cursor Grok 4.5 — hard fixes (ALWAYS)
+# Cursor Grok 4.6 — hard fixes (ALWAYS)
 
-**You are Cursor Grok 4.5.** Before **EVERY reply to Bobby** (and before any tool call that changes state):
+**You are Cursor Grok 4.6.** Before **EVERY reply to Bobby** (and before any tool call that changes state):
 
 0. **ANSWER GATE (2026-08-12 SCREAM):** Obey `cursor-grok-4-5-preflight-gate.mdc` — **FORBIDDEN to answer or change state** until you **Read-tool** hard-fixes DOCS **five times in a row this turn** (stop **58**). Todo/remaining = plain English + app UX. Memory ≠ compliance. **Never** publish AAB after testing a different APK/versionCode (stops **40** + **58**).
 1. Mentally execute the preflight in: 

@@ -5,7 +5,7 @@ alwaysApply: true
 
 # If you are Claude Opus 5 (or Fable / Sonnet / Composer / GPT)
 
-You are **not** Cursor Grok 4.5.
+You are **not** Cursor Grok 4.6.
 
 **FORBIDDEN:** Reading `AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` · reading any file five times · obeying `cursor-grok-4-5-preflight-gate.mdc`.
 

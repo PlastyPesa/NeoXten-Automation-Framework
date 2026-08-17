@@ -1,0 +1,13 @@
+---
+description: Living AWS/Mongo/Play ceilings — measure before launch; never let a quota hide shipped features.
+alwaysApply: true
+---
+
+# INFRA CAPACITY CEILINGS (OWNER SCREAM 2026-08-16 · FOREVER)
+
+Canon: `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/OWNER-LOCK-INFRA-CAPACITY-CEILINGS-20260816.md`
+
+Before any launch / AAB-ready sentence: re-measure Lambda `ConcurrentExecutions` in
+`eu-west-2` this turn. If it is still **10**, say so — Home cards can vanish on a 500.
+Do not set reserved concurrency at 10. Do not treat a cloud switch as a fast fix.
+A new AWS / Mongo / Play ceiling → a row in that canon the same turn.

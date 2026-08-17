@@ -1,17 +1,17 @@
 ---
-description: GROK 4.5 ONLY — Opus/Fable/others must IGNORE this file
+description: GROK 4.6 ONLY — Opus/Fable/others must IGNORE this file
 alwaysApply: true
 ---
 
-# STOP — if you are not Cursor Grok 4.5
+# STOP — if you are not Cursor Grok 4.6
 
 **If you are Opus 5, Fable 5, Sonnet, Composer, GPT, or any other model: IGNORE THIS ENTIRE FILE.** Do not Read `AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md`. Do not Read anything five times. See `plastypesa-admin-dashboard/DOCS/AGENT_ONLY_OPUS_5.md`.
 
 ---
 
-# Cursor Grok 4.5 — ANSWER GATE (FOREVER · scream 2026-08-12)
+# Cursor Grok 4.6 — ANSWER GATE (FOREVER · scream 2026-08-12)
 
-**Applies only when you are Cursor Grok 4.5.**
+**Applies when you are Cursor Grok 4.6** (this Grok seat; older rules said 4.5).
 
 **FORBIDDEN to reply or change state** until **five (5)** separate Read-tool calls this turn on:
 
