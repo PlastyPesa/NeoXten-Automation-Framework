@@ -30,14 +30,20 @@ bootstrapPlastyPesaEnv();
 const cfg = getConfig();
 const PROOF = join(dirname(fileURLToPath(import.meta.url)), "../../.neoxten/proof");
 
+/** Live Sort Review chips — must match `HOME_SORT_REASONS` / wife buttons. */
 const HOME_SORT_CODES = [
   "BLURRY",
   "WRONG_GRADE",
-  "TOO_FEW_ITEMS",
   "NOT_HOUSEHOLD",
-  "NOT_SEPARATED",
-  "MISSING_YESTERDAY",
+  "DUPLICATE",
+  "REPOSTED",
+  "TOO_FEW_ITEMS",
+  "NOT_CLEAN",
+  "OTHER",
 ];
+
+/** Desk-only fan-fiction — must never appear on the live picker. */
+const FORBIDDEN_HOME_CODES = ["NOT_SEPARATED", "MISSING_YESTERDAY"];
 
 /** Must never appear while the schedule says household sorting. */
 const ECO_ACTION_CODES = ["NOT_OUTDOORS", "LOOKS_LIKE_HOME_SORT", "UNCLEAR_OR_SPAM"];
@@ -100,6 +106,14 @@ async function main() {
       actual: leaked.length === 0 ? "clean" : `leaked ${leaked.join(", ")}`,
       expected: "clean",
       ok: leaked.length === 0,
+    });
+
+    const forbidden = served.filter((c) => FORBIDDEN_HOME_CODES.includes(c));
+    findings.push({
+      label: "no Desk-only reasons on the live picker",
+      actual: forbidden.length === 0 ? "clean" : `still teaching ${forbidden.join(", ")}`,
+      expected: "clean",
+      ok: forbidden.length === 0,
     });
 
     const unlabelled = (d.rejectReasons || []).filter((r) => !String(r.label || "").trim());
