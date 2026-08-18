@@ -12,7 +12,7 @@ alwaysApply: true
 After any Opus DONE / when testing Opus on ADB:
 
 1. Lock **latest + correct** APK first (path · versionCode · SHA disk+device). No APK mix.
-2. Each screen = **three** Read-tool looks (feature → whole frame → what did I miss). English first.
+2. Each screen = **three** Read-tool looks (feature → whole frame → **every label vs its glass rim**). English first. Stop **76**: check everything on the screen you are on.
 3. Write **every** issue same turn. Opus revisits. Never GREEN from one glance.
 
-Canon: `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` stop **74**.
+Canon: `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` stops **74** + **76**.

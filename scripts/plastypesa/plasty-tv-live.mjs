@@ -1,26 +1,12 @@
 /**
- * P-PLASTY-TV-LIVE — proves the new Plasty TV lane is reachable, DORMANT, and honest.
+ * P-PLASTY-TV-LIVE — proves the Plasty TV lane is reachable and honest.
  *
- * Written the day the lane shipped (2026-08-15). It ships switched off, and "off"
- * has a specific meaning that is easy to get wrong in a way nobody notices until a
- * member sees it:
+ * Owner GO 2026-08-18 turned the lane ON (`plasty-tv-enabled` + air-start).
+ * This script follows the live switch:
  *
- *   - OFF must mean a calm `enabled: false` with a sentence a screen can show.
- *   - OFF must NOT mean 404 (route never mounted) or 500 (service throwing on a
- *     missing Master row). The Home tile reads this endpoint to decide whether to
- *     draw itself at all, so an error here paints a broken card for a feature that
- *     simply is not airing yet.
- *
- * It also proves the money door is shut: a well-formed claim against a dormant lane
- * must award nothing. That is the assertion worth having — a feature that is "off"
- * on the series screen but still pays on a direct POST is not off.
- *
- * What it asserts:
- *   1. /series answers 200 (mounted, not throwing)
- *   2. it reports the lane as not airing, with a message
- *   3. it offers no episodes while off
- *   4. an episode fetch is refused politely, not with an error status
- *   5. a claim against the dormant lane awards zero
+ *   OFF — 200 + enabled:false + TV_OFF + claim awards 0 (never 404/500).
+ *   ON  — 200 + enabled:true + episode 1 available. Does **not** claim
+ *         (that would pay the test account).
  */
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -48,7 +34,11 @@ async function main() {
     console.error("LOGIN_FAILED", login.status, loginBody);
     process.exit(1);
   }
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = {
+    Authorization: `Bearer ${token}`,
+    "X-App-Platform": "android",
+    "X-App-Version-Code": "80",
+  };
   const jsonHeaders = { ...headers, "Content-Type": "application/json" };
 
   const findings = [];
@@ -56,46 +46,66 @@ async function main() {
     findings.push({ label, actual, expected, ok: actual === expected });
   };
 
-  /* 1-3 — the series screen */
   const seriesRes = await fetch(url(cfg, "/plasty-tv/series"), { headers });
   const seriesBody = await seriesRes.json();
   const series = seriesBody?.data ?? {};
 
   check("series status", seriesRes.status, 200);
-  check("lane reports itself off", series.enabled, false);
-  findings.push({
-    label: "off comes with a sentence a screen can show",
-    actual: series.message || "none",
-    expected: "a message",
-    ok: Boolean(String(series.message || "").trim()),
-  });
-  check("no episodes offered while off", (series.episodes || []).length, 0);
 
-  /* 4 — an episode fetch */
   const epRes = await fetch(url(cfg, "/plasty-tv/episode/1"), { headers });
   const epBody = await epRes.json();
   const ep = epBody?.data ?? {};
   check("episode status", epRes.status, 200);
-  check("episode refused", ep.available, false);
-  check("refusal names the reason", ep.code, "TV_OFF");
 
-  /* 5 — the money door */
-  const claimRes = await fetch(url(cfg, "/plasty-tv/claim"), {
-    method: "POST",
-    headers: jsonHeaders,
-    body: JSON.stringify({ episodeNumber: 1 }),
-  });
-  const claimBody = await claimRes.json();
-  const claim = claimBody?.data ?? {};
-  check("claim status", claimRes.status, 200);
-  check("dormant lane awards nothing", claim.awarded, 0);
-  check("claim refusal names the reason", claim.code, "TV_OFF");
+  if (series.enabled === true) {
+    const available = (series.episodes || []).filter((row) => row.available);
+    check("lane reports itself on", series.enabled, true);
+    findings.push({
+      label: "at least one episode on the series",
+      actual: (series.episodes || []).length,
+      expected: ">=1",
+      ok: (series.episodes || []).length >= 1,
+    });
+    check("today has aired through episode 1", series.airedThrough, 1);
+    check("next episode is 1", series.nextEpisodeNumber, 1);
+    check("exactly one available episode", available.length, 1);
+    check("that available episode is 1", available[0]?.episodeNumber, 1);
+    check("episode 1 is open", ep.available, true);
+  } else {
+    check("lane reports itself off", series.enabled, false);
+    findings.push({
+      label: "off comes with a sentence a screen can show",
+      actual: series.message || "none",
+      expected: "a message",
+      ok: Boolean(String(series.message || "").trim()),
+    });
+    check("no episodes offered while off", (series.episodes || []).length, 0);
+    check("episode refused", ep.available, false);
+    check("refusal names the reason", ep.code, "TV_OFF");
+
+    const claimRes = await fetch(url(cfg, "/plasty-tv/claim"), {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ episodeNumber: 1 }),
+    });
+    const claimBody = await claimRes.json();
+    const claim = claimBody?.data ?? {};
+    check("claim status", claimRes.status, 200);
+    check("dormant lane awards nothing", claim.awarded, 0);
+    check("claim refusal names the reason", claim.code, "TV_OFF");
+  }
 
   const ok = findings.every((f) => f.ok);
   const out = {
     ok,
     findings,
-    series: { enabled: series.enabled ?? null, reason: series.reason ?? null },
+    series: {
+      enabled: series.enabled ?? null,
+      reason: series.reason ?? null,
+      airedThrough: series.airedThrough ?? null,
+      nextEpisodeNumber: series.nextEpisodeNumber ?? null,
+      episodeCount: (series.episodes || []).length,
+    },
     at: new Date().toISOString(),
   };
 

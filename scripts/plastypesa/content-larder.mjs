@@ -36,14 +36,17 @@ const master = async (name) => {
 const line = (label, value, note = "") =>
   console.log(`${label.padEnd(36)} ${String(value).padEnd(10)} ${note}`);
 
-console.log("\n=== PLASTY TV (dormant) ===");
+const tvEnabledMeta = await master("plasty-tv-enabled");
+const tvOn = Array.isArray(tvEnabledMeta) && (tvEnabledMeta[0] === true || tvEnabledMeta[0] === "true");
+console.log(tvOn ? "\n=== PLASTY TV (ON) ===" : "\n=== PLASTY TV (dormant) ===");
 const eps = await db.collection("plasty_episodes").find({}).sort({ episodeNumber: 1 }).toArray();
 const activeEps = eps.filter((e) => e.active === true);
 const voiced = eps.filter((e) => (e.scenes || []).some((s) => s?.voice || s?.audio || s?.voiceKey));
 line("episodes authored", eps.length);
 line("episodes marked active", activeEps.length, `→ ${activeEps.length} days if daily`);
 line("episodes with voice clips", voiced.length, voiced.length ? "" : "text-only for now");
-line("switch  plasty-tv-enabled", JSON.stringify(await master("plasty-tv-enabled")), "null = OFF");
+line("switch  plasty-tv-enabled", JSON.stringify(tvEnabledMeta), tvOn ? "ON" : "null = OFF");
+line("air     plasty-tv-air-start", JSON.stringify(await master("plasty-tv-air-start")));
 line("season  plasty-tv-season", JSON.stringify(await master("plasty-tv-season")));
 line("voice   plasty-tv-voice-base", JSON.stringify(await master("plasty-tv-voice-base")));
 line("award   plasty-tv-points", JSON.stringify(await master("plasty-tv-points")));

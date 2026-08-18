@@ -1,0 +1,32 @@
+---
+description: Channel announcements — one live line only; always clear previous before publishing.
+alwaysApply: true
+---
+
+# CHANNEL — ONE ANNOUNCEMENT (OWNER LOCK 2026-08-17 · FOREVER)
+
+**Bobby, verbatim:** when the owner tells you to write an announcement in Channel, **always clear the previous message**. We cannot have two or more messages at the same time in Channel.
+
+Earned 2026-08-17: idle-gt5 fairness line was published while the creator-film line stayed live. Earn-hub then returned **two** admin lines. Home Channel is one strip. Two announcements = two stories. Fail.
+
+## The rule
+
+When Bobby says put / write / publish a **Channel** announcement (Comms line, Important line, Home Channel):
+
+1. **List live lines first** (`GET /api/admin/channel-lines`). Every `active` + not-expired row in that market.
+2. **Pause (deactivate) every other live line** before the new POST. Do not delete — pause so it can come back later if he asks. Market-scope: Kenya `KE` unless he named another market.
+3. **Then** publish the new line (≤140 chars, highlight inside the text, brand-safe, expiry required).
+4. **Prove** from the phone payload: `GET /api/home/earn-hub` `channelLines` length is **1**, and that one text is the new announcement.
+
+## Forbidden
+
+- Stacking a new line next to film / Learn / old fairness / anything else
+- Treating backend `MAX_PUBLIC_LINES = 2` as permission to run two announcements
+- Closing out with “it’s first of two” as if that is OK
+- Leaving a previous line active “so it can expire on its own”
+
+## Proof
+
+Closeout must say: **paused N previous live lines** · **earn-hub channelLines = 1** · quote the one text.
+
+Canon: hard-fixes **stop 77** · `plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md`
