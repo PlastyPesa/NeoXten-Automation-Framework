@@ -26,9 +26,11 @@
  * Fields
  *   adsEnabled              master switch; false = no ads anywhere
  *   appOpenEnabled          AdMob app-open (suspended account — keep false until ~Aug 22)
- *   quizInterstitialEnabled LevelPlay interstitial at the quiz / EcoSort gate
- *   bannerEnabled           LevelPlay banner on allowlisted passive screens
- *   rewardedEnabled         LevelPlay rewarded — Reveal answer only, never points
+ *   quizInterstitialEnabled LevelPlay interstitial at the quiz / EcoSort / Desk inherit
+ *   deskGateEnabled         Sorting Desk full-screen (omit = inherit quiz flag)
+ *   tvGateEnabled           Plasty TV full-screen before an episode (does not inherit quiz)
+ *   bannerEnabled           leftover for old binaries; Play 80 never reads this
+ *   rewardedEnabled         leftover for old binaries; Play 80 never reads this
  *   minAppVersionForAds     builds below this versionCode show nothing (0 = no floor)
  */
 import { resolve } from "node:path";
@@ -46,6 +48,8 @@ const BOOLEAN_FIELDS = [
   "adsEnabled",
   "appOpenEnabled",
   "quizInterstitialEnabled",
+  "deskGateEnabled",
+  "tvGateEnabled",
   "bannerEnabled",
   "rewardedEnabled",
 ];
@@ -110,12 +114,14 @@ if (!panic && Object.keys(overrides).length === 0) {
 
 const next = panic
   ? {
+      ...current,
       adsEnabled: false,
       appOpenEnabled: false,
       quizInterstitialEnabled: false,
+      deskGateEnabled: false,
+      tvGateEnabled: false,
       bannerEnabled: false,
       rewardedEnabled: false,
-      minAppVersionForAds: current.minAppVersionForAds,
     }
   : { ...current, ...overrides };
 
