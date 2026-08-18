@@ -51,6 +51,7 @@
     "digest:plastypesa": "node scripts/plastypesa/plastypesa-daily-digest.mjs",
     "test:plastypesa-api": "node scripts/plastypesa-api-test.js",
     "test:plastypesa-desk-deck": "node scripts/plastypesa/desk-deck-live.mjs",
+    "test:plastypesa-desk-reject-miss": "node scripts/plastypesa/desk-reject-miss-live.mjs",
     "test:plastypesa-plasty-tv": "node scripts/plastypesa/plasty-tv-live.mjs",
     "test:plastypesa-rescale-ready": "node scripts/plastypesa/rescale-readiness.mjs",
     "test:plastypesa-quiz-guard": "node scripts/plastypesa/daily-quiz-guard.mjs",
