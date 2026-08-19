@@ -27,7 +27,7 @@ We chose Kenya first because household grade-sorting is unsolved globally, and K
 
 Weekly M-Pesa rewards are real today (Top 10 every Monday). First Eco Guardian: KES 20,000 for the first person to 125,000 lifetime points and 30 approved sorts — rules are public in the app.
 
-Invite a friend during our launch boost: you both earn 2000 points once their first sorting photo is approved.`,
+Invite a friend during our launch boost: extra invite points shown in Invite friends, paid once their third approved Sort-by-Grade photo is approved.`,
     tips: [
       'Sorting proof counts toward First Eco Guardian — 30 approved sorts required.',
       'One clear photo of two or more clean plastics of the same grade can earn up to 4000 points when approved.',
@@ -65,7 +65,7 @@ Every approved sort earns up to 4000 points and counts toward First Eco Guardian
     missionDay: 3,
     content: `PlastyPesa is a community proof engine. Every verified sort adds to the story that households can sort plastic by grade.
 
-Open Home to see learners in Kenya, verified sorts this week, and progress toward bigger weekly boards. Your invite helps everyone — launch boost still 2000 + 2000 for both of you, paid on their first approved sort.`,
+Open Home to see learners in Kenya, verified sorts this week, and progress toward bigger weekly boards. Your invite helps everyone — extra invite points shown in Invite friends, paid once their third approved Sort-by-Grade photo is approved.`,
     tips: [
       'Pull to refresh Home to see the latest community counters.',
       'Share your eco-handle progress — never share private data.',
@@ -114,12 +114,12 @@ Sorting proof is what makes you a builder in Kenya's founding season. Stack quiz
     _id: 'mission-week1-day6-referral',
     title: 'Invite a friend — both earn',
     description:
-      'Launch boost: 2000 + 2000 points when your friend’s first sorting photo is approved. Help us grow the weekly board for everyone.',
+      'Launch boost: extra invite points shown in Invite friends, paid once your friend’s third approved Sort-by-Grade photo is approved. Help us grow the weekly board for everyone.',
     icon: 'public',
     status: 'ACTIVE',
     missionWeek: 1,
     missionDay: 6,
-    content: `Growth rewards everyone. During our launch boost, you and your friend each earn 2000 points once their first sorting photo is approved — not when they join with your referral link.
+    content: `Growth rewards everyone. Extra invite points are shown in Invite friends, paid once their third approved Sort-by-Grade photo is approved — not when they join with your referral link.
 
 When more people join and sort, PlastyPesa expands weekly rewards — Top 10 today, Top 20 next. Your invite is part of the mission, not a side quest.`,
     tips: [
