@@ -30,7 +30,7 @@ Weekly M-Pesa rewards are real today (Top 10 every Monday). First Eco Guardian: 
 Invite a friend during our launch boost: extra invite points shown in Invite friends, paid once their third approved Sort-by-Grade photo is approved.`,
     tips: [
       'Sorting proof counts toward First Eco Guardian — 30 approved sorts required.',
-      'One clear photo of two or more clean plastics of the same grade can earn up to 4000 points when approved.',
+      'One clear photo of two or more clean plastics of the same grade can earn up to 400 points when approved.',
       'When more learners join, we expand weekly rewards together — Top 10, then Top 20.',
     ],
   },
@@ -47,7 +47,7 @@ Invite a friend during our launch boost: extra invite points shown in Invite fri
 
 Put two or more clean plastics of the same grade in one clear photo. They can sit side by side — a bag is optional. Rinse and dry items first.
 
-Every approved sort earns up to 4000 points and counts toward First Eco Guardian (30 approved sorts). If we ask you to retry, you can submit again the same day with a fresh photo.`,
+Every approved sort earns up to 400 points and counts toward First Eco Guardian (30 approved sorts). If we ask you to retry, you can submit again the same day with a fresh photo.`,
     tips: [
       'PET bottles, HDPE containers, and PP caps are different grades — keep them separate.',
       'Good lighting and focus help our team approve faster.',
@@ -96,12 +96,12 @@ When you cross the line, our team verifies and pays.`,
     _id: 'mission-week1-day5-quiz',
     title: 'Learn daily, sort for proof',
     description:
-      'Daily quiz earns up to 1000 points once per day. Combine learning with sorting proof for the weekly board.',
+      'Daily quiz earns up to 100 points once per day. Combine learning with sorting proof for the weekly board.',
     icon: 'energy_savings_leaf',
     status: 'ACTIVE',
     missionWeek: 1,
     missionDay: 5,
-    content: `Learning and sorting work together. The daily quiz teaches plastic grades and circular-economy rules — one full quiz per day for up to 1000 points.
+    content: `Learning and sorting work together. The daily quiz teaches plastic grades and circular-economy rules — one full quiz per day for up to 100 points.
 
 Sorting proof is what makes you a builder in Kenya's founding season. Stack quiz points with approved sorts to climb the weekly leaderboard and your lifetime Eco Guardian path.`,
     tips: [
