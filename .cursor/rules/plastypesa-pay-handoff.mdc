@@ -1,11 +1,38 @@
-# PlastyPesa — pay handoff format (owner lock 2026-07-27)
+---
+description: Monday/Wise pay paste = three bash blocks per claim. Never a mixed dump.
+alwaysApply: true
+---
 
-When the owner asks for filled claim forms / who to pay:
+# PlastyPesa — pay handoff format (owner lock 2026-07-27 · scream 2026-08-24)
+
+When the owner asks for filled claim forms / who to pay / Monday / Wise:
 
 1. For **each** claimant, state **Payee exists: YES** or **NO**.
-   - YES = a prior `PAID` reward_claim (or ledger row) already used the same M-Pesa number and/or same legal name — owner can reuse the Wise payee.
-   - NO = first payout to that person/number — owner must add a new payee.
-2. Always format M-Pesa / mobile money as **E.164 with a leading `+`** (e.g. `+254712892328`) for one-tap copy-paste. Never bare `254…` without `+`.
+   - YES = a prior `PAID` reward_claim (or ledger row) already used the same M-Pesa number and/or same legal name — reuse the Wise payee.
+   - NO = first payout to that person/number — owner must add a new payee. **Name block is mandatory.**
+2. M-Pesa as **E.164 with a leading `+`**. Never bare `254…`.
 3. Include slot, eco handle, email, legal name, amount, currency, status, claimId.
+4. **Agent owns the name check.** Do not ask Bobby to match M-Pesa.
+5. **Wise paste — three separate `bash` blocks per claim** (label **outside** the fence):
 
-Canon: `plastypesa-admin-dashboard/DOCS/PLASTYPESA_DAILY_CHECK_OPS.md` § Owner pay handoff.
+Phone:
+
+```bash
++2547XXXXXXXX
+```
+
+Amount:
+
+```bash
+700
+```
+
+Account holder name:
+
+```bash
+EXACT LEGAL NAME
+```
+
+**Forbidden:** one fence with every payee. **Forbidden:** a markdown table of phones/amounts as the paste.
+
+Canon: `plastypesa-admin-dashboard/DOCS/PLASTYPESA_DAILY_CHECK_OPS.md` § Owner pay handoff · hard-fixes stop **84**.

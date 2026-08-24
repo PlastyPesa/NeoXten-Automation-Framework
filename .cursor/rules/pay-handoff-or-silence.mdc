@@ -1,0 +1,24 @@
+---
+description: Pay/claims/Wise/Monday = Read pay format first or do not reply.
+alwaysApply: true
+---
+
+# PAY HANDOFF OR SILENCE (OWNER SCREAM 2026-08-24 · FOREVER)
+
+**Bobby, verbatim:** hard rules that you do not Read are useless. We need something that **makes you Read them**.
+
+If the latest message is **pay / claims / Wise / Monday / who to pay / filled claim forms**:
+
+**FORBIDDEN to reply** until you **Read-tool** all of:
+
+1. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_6_TURN_GATE.md`
+2. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/.cursor/rules/plastypesa-pay-handoff.mdc`
+3. `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/PLASTYPESA_DAILY_CHECK_OPS.md` § Owner pay handoff
+
+Then **each** claim = **three** separate `bash` blocks (label outside): **Phone** · **Amount** · **Account holder name**.
+
+One mixed fence / table of all payees = **FAIL**. Rewrite before send.
+
+A 5× Read of hard-fixes that **errors because the file is too large** does not count as reading. Chunk it. Use the turn-gate file (it fits).
+
+Canon: hard-fixes stop **84**.
