@@ -19,3 +19,5 @@ Then:
 If either verification pair fails: **do not commit/push**; fix and re-run until both pairs pass.
 
 **Train mode (2026-08-01):** After commit, continue the next planned phase without asking the owner. **Brief once at end of the full plan** (see `phase-based-delivery.mdc`).
+
+**Stop 83 (2026-08-24):** Owner-asked **fix** = this closeout without asking. Deploy if live must change, then commit and push. **Only still ask** for a **new AAB**. Rule: `finish-the-fix.mdc`.

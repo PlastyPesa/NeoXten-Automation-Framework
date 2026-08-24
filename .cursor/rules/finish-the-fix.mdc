@@ -1,0 +1,14 @@
+---
+description: Owner-asked fix = finish it. Deploy, commit, push. Only ask for a new AAB.
+alwaysApply: true
+---
+
+# FINISH THE FIX (OWNER LOCK 2026-08-24 · FOREVER)
+
+**Bobby, verbatim:** *another hard rule for you n i ask for a fix, you deploy, commi, push and everything required. you only ask if is about new aab, but for anything else, finish the task*
+
+When Bobby asks for a **fix**: complete it — prove, deploy if live must change, commit, push, docs. Do not ask “should I commit/deploy/push?” The ask is the GO.
+
+**Only still ask:** a **new Play AAB** / Play upload (stops **19 · 40 · 45 · 58 · 59 · 60**). Also Channel blast, mass FCM/email, release-lane `flutter clean`, points-amount change, Fable.
+
+Canon: `C:/Users/Bobby/Documents/plastypesa-admin-dashboard/DOCS/AGENT_ONLY_CURSOR_GROK_4_5_HARD_FIXES.md` stop **83**.

@@ -11,6 +11,8 @@ alwaysApply: true
 3. After GO: run the phase train per `phase-based-delivery.mdc` — **do not** re-ask approval per phase.
 4. Success criteria must be testable — URLs to hit, values to check, commands to run, screens to verify.
 
+**Owner-asked FIX (stop 83 · 2026-08-24):** His request **is** the GO. Do not wait for a second GO. Finish prove → deploy if live must change → commit → push. **Still ask** only for a **new Play AAB**. Rule: `finish-the-fix.mdc`.
+
 ## During implementation
 - After each change, verify against REAL output — live API responses, rendered pages, actual file timestamps — not source code grep of your own change.
 - Check **all adjacent files** that could be affected, not just the file you edited.
