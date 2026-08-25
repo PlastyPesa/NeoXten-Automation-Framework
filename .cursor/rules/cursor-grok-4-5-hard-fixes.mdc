@@ -71,3 +71,6 @@ Canon: `plastypesa-admin-dashboard/DOCS/PLASTYPESA_OWNER_AGENT_COPILOT_OPS.md` (
 - **Stop 81:** Never speak a live fact from memory. Check this turn first. Cannot check → unproven. Rule: `never-speak-from-memory.mdc`.
 - **Stop 82:** Never CDK HEAD over a live earn path in stash/index. Eco Action Play 82 = two photos. Live empty POST = `BOTH_PHOTOS_REQUIRED`, never `IMAGE_KEY_REQUIRED`. Rule: `never-cdk-head-over-live-earn.mdc`.
 - **Stop 83:** Owner-asked **fix** = finish it (prove, deploy if live must change, commit, push, docs). **Only still ask** for a **new AAB**. Rule: `finish-the-fix.mdc`.
+- **Stop 84:** Pay/claims/Wise/Monday → Read pay-handoff + Daily Check § Owner pay **before reply**. Three `bash` blocks per claim. Mixed dump = fail. Rule: `pay-handoff-or-silence.mdc`.
+- **Stop 85:** Proof that does not look right (Facebook name ≠ M-Pesa) → **tell the member**. Eco Handle only. Do not silently GREEN a 300. Canon: `OWNER-LOCK-TELL-USERS-WHEN-PROOF-LOOKS-WRONG-20260825.md`.
+- **Stop 86:** M-Pesa SMS can be forwarded. Match this WhatsApp to this Eco Handle’s PAID amount. Wrong Ksh / not Top 10 / already paid 300 → tell them. Canon: `OWNER-LOCK-MPESA-SMS-MATCHES-THIS-USERS-PAID-AMOUNT-20260825.md`.
